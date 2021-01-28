@@ -80,7 +80,7 @@
 
 float3 rgb_i=mul(inv_s_mat,XYZ);
 
-float3 RGB;
+float3 RGB=rgb_i;
 
 [branch]if(lin==0){
 if ((mode==0)||(mode==6)){ //sRGB transfer
@@ -101,7 +101,7 @@ if ((mode==0)||(mode==6)){ //sRGB transfer
 
 	float3 rgb2XYZ(float3 rgb,int mode, int lin){
 
-	  float3 rgbLin;
+	  float3 rgbLin=rgb;
 	  
 [branch]if(lin==0){
 if ((mode==0)||(mode==6)){ //sRGB transfer
