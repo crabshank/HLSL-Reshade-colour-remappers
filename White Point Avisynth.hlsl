@@ -102,7 +102,7 @@ return outp;
 
 float2x3 rgb2XYZ(float3 rgb,int mode, int grey, int lin){
 
-	  float3 rgbLin;
+	  float3 rgbLin=rgb;
 	  
 [branch]if(lin==0){
 if ((mode==0)||(mode==6)){ //sRGB transfer
@@ -359,7 +359,7 @@ float3 v3=float3(0,0,0);
 
 float3 rgb_i=float3(dot(v1, XYZ),dot(v2, XYZ),dot(v3, XYZ));
 
-float3 RGB;
+float3 RGB=rgb_i;
 
 [branch]if(lin==0){
 if ((mode==0)||(mode==6)){ //sRGB transfer
@@ -412,7 +412,7 @@ int bdt=round(p4.x);
 
 int dst=round(p5.z);
 
-int lnr=round(p5.w);
+int lnr=1;
 
 [branch]if (bdt==1){
 
@@ -423,7 +423,7 @@ float2x3 WPg= rgb2XYZ(float3(p3.xyz*rcptwoFiveFive),mde, 1,lnr);
 	Customxy.xy=XYZ2xyY(WPconv2Grey(WPgf,WPgt)).xy;
 	
 }else{				
-	Customxy=float2(p2.x,p2.y);
+	Customxy=float2(0.4,0.25);
 } 
 
 float3 CustomXYZ=xy2XYZ(Customxy);
