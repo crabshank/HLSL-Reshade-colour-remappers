@@ -9,7 +9,7 @@ float4 p1 :  register(c1);
 #define one_over_width  (p1[0])
 #define one_over_height (p1[1])
 
-#define debugColor 1 //0-1 ONLY
+#define Amplification 1.25
 
 #define split 0
 #define flip_split 0
@@ -20,15 +20,22 @@ float4 main(float2 tex : TEXCOORD0) : COLOR {
 float Split=split;
 float Split_position=split_position;
 float Flip_split=flip_split;
+float amp=Amplification;
 
 float4 c0 = tex2D(s0, tex);
 float4 c1 = c0;
 	
-c1.r=(c0.r==max(max(c0.r,c0.g),c0.b))?c1.r+debugColor:c1.r;
+float mx=max(max(c0.r,c0.g),c0.b);
 
-c1.g=(c0.g==max(max(c0.r,c0.g),c0.b))?c1.g+debugColor:c1.g;
+float sat=(mx==0)?0:(mx-min(min(c0.r,c0.g),c0.b))/mx;
 
-c1.b=(c0.b==max(max(c0.r,c0.g),c0.b))?c1.b+debugColor:c1.b;
+float dbOut=pow(sat,amp);
+
+c1.r=(c0.r==mx)?dbOut:0;
+
+c1.g=(c0.g==mx)?dbOut:0;
+
+c1.b=(c0.b==mx)?dbOut:0;
 
 float4 c2=(tex.x>=Split_position*Split)?c1:c0;
 float4 c3=(tex.x<=Split_position*Split)?c1:c0;
