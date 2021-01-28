@@ -412,7 +412,7 @@ int bdt=round(p4.x);
 
 int dst=round(p5.z);
 
-int lnr=1;
+int lnr=round(p5.w);
 
 [branch]if (bdt==1){
 
@@ -423,7 +423,7 @@ float2x3 WPg= rgb2XYZ(float3(p3.xyz*rcptwoFiveFive),mde, 1,lnr);
 	Customxy.xy=XYZ2xyY(WPconv2Grey(WPgf,WPgt)).xy;
 	
 }else{				
-	Customxy=float2(0.4,0.25);
+	Customxy=float2(p2.x, p2.y);
 } 
 
 float3 CustomXYZ=xy2XYZ(Customxy);
