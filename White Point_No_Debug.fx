@@ -165,7 +165,7 @@ float3 v3=float3(0,0,0);
 	
 float3 rgb_i=float3(dot(v1, XYZ),dot(v2, XYZ),dot(v3, XYZ));
 
-float3 RGB;
+float3 RGB=rgb_i;
 
 [branch]if(lin==0){
 if ((mode==0)||(mode==6)){ //sRGB transfer
@@ -185,7 +185,7 @@ return RGB;
 
 float3 rgb2XYZ(float3 rgb,int mode, int lin){
 
-	  float3 rgbLin;
+	  float3 rgbLin=rgb;
 	  
 [branch]if(lin==0){
 if ((mode==0)||(mode==6)){ //sRGB transfer
