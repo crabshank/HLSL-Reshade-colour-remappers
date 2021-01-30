@@ -1,0 +1,307 @@
+<html>
+<head>
+<script src="jquery-3.4.1.min.js"></script>
+
+</head>
+<body>
+
+<h1>Image statistics page 0-1/(0-255; 0-100 sat)</h1>
+
+<div id="stats"></div><br>
+<input type="file" id="input"></input>
+
+<canvas id="canvas"></canvas>
+<br>
+<script>
+var color_data = null;
+var filtered_data = null;
+var original_data = null;
+var index = 0;
+var wdt=null; 
+var hgt=null;
+var size=null;
+var mn_cnt_R=0;
+var mn_cnt_G=0;
+var mn_cnt_B=0;
+var mx_cnt_R=0;
+var mx_cnt_G=0;
+var mx_cnt_B=0;
+var n_r=[]; 
+var n_g=[]; 
+var n_b=[];
+var m_r=[]; 
+var m_g=[]; 
+var m_b=[]; 
+var ds_dr=0;
+var ds_dg=0;
+var ds_db=0;
+var root_sat=0;
+var root_sat_r=0;
+var root_sat_g=0;
+var root_sat_b=0;
+var dnm_dr=0;
+var dnm_dg=0;
+var dnm_db=0;
+var st_av=0;
+var cnt=0;
+
+
+
+	function average(data){ 
+	var s=0;
+	for(let i=0;i<data.length;i++){
+	s+=data[i];
+	}
+	return s/data.length;
+	}
+	
+	function minMaxAvg(data,count){ 
+	var s=0;
+	for(let i=0;i<data.length;i++){
+	s+=data[i];
+	}
+	return s/count;
+	}
+	
+function standardDeviation(data){ 
+var s=0;
+var a=average(data);
+	for(let i=0;i<data.length;i++){
+	s+=Math.pow(data[i]-a,2);
+	}
+
+ return Math.sqrt((1/data.length)*s);
+ }
+ 
+ /*	function rgbToHsv(r, g, b) {
+  r /= 255, g /= 255, b /= 255;
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s, v = max;
+  var d = max - min;
+  s = max == 0 ? 0 : d / max;
+  if (max == min) {
+    h = 0; // achromatic
+  } else {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return [ h, s, v ];
+}
+*/
+	
+
+	function satValChr(r, g, b) {
+  r /= 255; 
+  g /= 255; 
+  b /= 255;
+  var max = Math.max(r, g, b);
+  var min = Math.min(r, g, b);
+  var v = max;
+  var d = max - min;
+  var s = max == 0 ? 0 : d / max;
+  return [ s, v, d, min ];
+}	
+
+
+	var URL = window.webkitURL || window.URL;
+	var ctx = document.getElementById('canvas').getContext('2d');
+
+
+	var ref_hist=[];
+
+window.onload = function() {
+    var input = document.getElementById('input');
+    input.addEventListener('change', function(){handleFiles(ctx)}, false);
+
+}
+
+function handleFiles(ctx) {
+	var mp_ct=0;
+	var mp_ct_s=0;
+	var url = URL.createObjectURL(ctx.canvas.previousElementSibling.files[0]);
+	var img = new Image();
+	img.onload = function() {
+	ctx.canvas.width = img.width;
+	ctx.canvas.height = img.height;
+	ctx.drawImage(img, 0, 0,img.width,img.height);
+
+	var frame_data0 = 
+	ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+
+switch (ctx.canvas.id){
+	
+	case 'canvas':
+	color_data=frame_data0.data;
+	original_data=frame_data0.data;		
+
+	wdt=ctx.canvas.width;
+	hgt=ctx.canvas.height;
+	size=wdt*hgt;
+	calc();
+
+	break;
+
+}
+	}
+ 
+  img.src = url;
+
+}
+
+
+function calc(){
+
+var colour_data=ctx.getImageData(0, 0, wdt, hgt).data;
+var r=[0];
+var g=[0];
+var b=[0]; 
+var m=[0]; 
+var n=[0]; 
+var info=[0,0,0,0];
+
+for (let p = 0, len=Math.round(4* ctx.canvas.height*ctx.canvas.width) ; p <len ;p+=4){
+r[p/4]= colour_data[p]/255;
+g[p/4]= colour_data[p+1]/255;
+b[p/4] = colour_data[p+2]/255;
+
+info=satValChr(colour_data[p],colour_data[p+1],colour_data[p+2]); 
+
+let min=info[3];
+let max=info[1];
+n[p/4] = min;
+m[p/4] = max;
+
+let diff=info[2];
+
+/*
+let red_lrp_min=(diff==0)?1:1-(r[p/4]-min)/(diff);
+let green_lrp_min=(diff==0)?1:1-(g[p/4]-min)/(diff);
+let blue_lrp_min=(diff==0)?1:1-(b[p/4]-min)/(diff);
+
+let red_lrp_max=(diff==0)?1:(r[p/4]-min)/(diff);
+let green_lrp_max=(diff==0)?1:(g[p/4]-min)/(diff);
+let blue_lrp_max=(diff==0)?1:(b[p/4]-min)/(diff);
+
+let rnl=red_lrp_min*min;
+n_r.push(rnl);
+mn_cnt_R+=red_lrp_min;
+
+let gnl=green_lrp_min*min;
+n_g.push(gnl);
+mn_cnt_G+=green_lrp_min;
+
+let bnl=blue_lrp_min*min;
+n_b.push(bnl);
+mn_cnt_B+=blue_lrp_min;
+
+let rml=red_lrp_max*max;
+m_r.push(rml);
+mx_cnt_R+=red_lrp_max;
+
+let gml=green_lrp_max*max;
+m_g.push(gml);
+mx_cnt_G+=green_lrp_max;
+
+let bml=blue_lrp_max*max;
+m_b.push(bml);
+mx_cnt_B+=blue_lrp_max;
+*/
+
+st_av+=info[0];
+cnt+=1;
+root_sat+=Math.sqrt(	(r[p/4]-g[p/4])*(r[p/4]-g[p/4]) 	+ (r[p/4]-b[p/4])*(r[p/4]-b[p/4]) +(g[p/4]-b[p/4])*(g[p/4]-b[p/4])					)/Math.sqrt(3);
+root_sat_r+=Math.sqrt(	(g[p/4]-b[p/4])*(g[p/4]-b[p/4])					)/Math.sqrt(3);
+root_sat_g+=Math.sqrt(	 (r[p/4]-b[p/4])*(r[p/4]-b[p/4]) )/Math.sqrt(3);
+root_sat_b+=Math.sqrt(	(r[p/4]-g[p/4])*(r[p/4]-g[p/4]) 				)/Math.sqrt(3);
+ds_dr+=satValChr(Math.min(colour_data[p]+0.5,255),colour_data[p+1],colour_data[p+2])[0]-satValChr(Math.max(colour_data[p]-0.5,0),colour_data[p+1],colour_data[p+2])[0];
+ds_dg+=satValChr(colour_data[p],Math.min(colour_data[p+1]+0.5,255),colour_data[p+2])[0]-satValChr(colour_data[p],Math.max(colour_data[p+1]-0.5,0),colour_data[p+2])[0];
+ds_db+=satValChr(colour_data[p],colour_data[p+1],Math.min(colour_data[p+2]+0.5,255))[0]-satValChr(colour_data[p],colour_data[p+1],Math.max(colour_data[p+2]-0.5,0))[0];
+	 
+}
+
+
+var meanR=average(r);
+var meanG=average(g);
+var meanB=average(b);
+var meanN=average(n);
+var meanM=average(m);
+var meanN=average(n);
+var meanRGB=(meanR+meanG+meanB)/3;
+var meanMinMaxRGB=(meanM+meanN)/2;
+
+/*
+var meanM_R=(mx_cnt_R==0)?0:minMaxAvg(m_r,mx_cnt_R);
+var meanN_R=(mn_cnt_R==0)?0:minMaxAvg(n_r,mn_cnt_R);
+var meanM_G=(mx_cnt_G==0)?0:minMaxAvg(m_g,mx_cnt_G);
+var meanN_G=(mn_cnt_G==0)?0:minMaxAvg(n_g,mn_cnt_G);
+var meanM_B=(mx_cnt_B==0)?0:minMaxAvg(m_b,mx_cnt_B);
+var meanN_B=(mn_cnt_B==0)?0:minMaxAvg(n_b,mn_cnt_B);
+*/
+var mean_sat=(cnt==0)?0:st_av/cnt;
+var mean_ds_dr=(cnt==0)?0:ds_dr/cnt;
+var mean_ds_dg=(cnt==0)?0:ds_dg/cnt;
+var mean_ds_db=(cnt==0)?0:ds_db/cnt;
+var mean_root_sat=(cnt==0)?0:root_sat/cnt;
+var mean_root_sat_r=(cnt==0)?0:root_sat_r/cnt;
+var mean_root_sat_g=(cnt==0)?0:root_sat_g/cnt;
+var mean_root_sat_b=(cnt==0)?0:root_sat_b/cnt;
+var stdevR=standardDeviation(r);
+var stdevG=standardDeviation(g);
+var stdevB=standardDeviation(b);
+var stdevN=standardDeviation(n);
+var stdevM=standardDeviation(m);
+
+document.getElementById("stats").innerText=
+ 'Averages:\n Red: '+meanR.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(meanR*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Green: '+meanG.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(meanG*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Blue: '+meanB.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(meanB*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
+
++'\n\n\ Min RGB: '+meanN.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(meanN*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Max RGB: '+meanM.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(meanM*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
+
+/*
++'\n Min R avg: '+meanN_R
++'\n Max R avg: '+meanM_R
++'\n Min G avg: '+meanN_G
++'\n Max G avg: '+meanM_G
++'\n Min B avg: '+meanN_B
++'\n Max B avg: '+meanM_B
+
++'\n\n\ Red min/max avg: '+(meanM_R+meanN_R)/2
++'\n Green min/max avg: '+(meanM_G+meanN_G)/2
++'\n Blue min/max avg: '+(meanM_B+meanN_B)/2*/
++'\n Min/Max avg: '+meanMinMaxRGB.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(meanMinMaxRGB*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n\n Root satuation avg: '+mean_root_sat.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(mean_root_sat*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Root satuation (red contribution) avg: '+mean_root_sat_r.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(mean_root_sat_r*100).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Root satuation (green contribution) avg: '+mean_root_sat_g.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(mean_root_sat_g*100).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Root satuation (blue contribution) avg: '+mean_root_sat_b.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(mean_root_sat_b*100).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
+
+
++'\n\n RGB avg: '+meanRGB.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(meanRGB*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
+
++'\n\n Saturation avg: '+mean_sat.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(mean_sat*100).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
+
++'\n\n\ Central difference red/saturation avg: '+mean_ds_dr.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(mean_ds_dr*100).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Central difference green/saturation avg: '+mean_ds_dg.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(mean_ds_dg*100).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Central difference blue/saturation avg: '+mean_ds_db.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(mean_ds_db*100).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
+
++'\n\n Standard deviations:\n Red: '+stdevR.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(stdevR*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Green: '+stdevG.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(stdevG*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Blue: '+stdevB.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(stdevB*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
+
++'\n\n Min RGB: '+stdevN.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(stdevN*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')'
++'\n Max RGB: '+stdevM.toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+' ('+(stdevM*255).toLocaleString('en-GB',{minimumFractionDigits: 0,maximumFractionDigits: 7})+')';
+
+}
+
+		
+</script>
+
+
+</body>
+</html>

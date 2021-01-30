@@ -1,0 +1,261 @@
+<html>
+<head>
+<script src="jquery-3.4.1.min.js"></script>
+<script src="synaptic.js"></script>
+<!-- Credit to cazala: https://github.com/cazala/synaptic -->
+<script src="neataptic_mod.js"></script>
+<!-- Credit to wagenaartje: https://github.com/wagenaartje/neataptic -->
+</head>
+<body>
+
+<h1>Image filter neural network page</h1><br>
+
+<button id="starter" onclick="train()">Start!</button><br>
+<input type="file" id="input"> Image to adjust</input>
+
+<canvas id="canvas"></canvas>
+<br><br>
+
+<input type="file" id="input2"> Reference image</input>
+<canvas id="canvas2"></canvas><br>
+
+<div id="iterations"></div><br>
+Preview<canvas id="canvas3"></canvas><br>
+
+<br><div id="fullRemap"></div>
+
+<script>
+	var color_data = null;
+	var filtered_data = null;
+	var original_data = null;
+		var index = 0;
+	var wdt=null; 
+var hgt=null;
+var size=null;
+var trial=null;
+var stop_learn=0;
+var URL = window.webkitURL || window.URL;
+    var ctx = document.getElementById('canvas').getContext('2d');
+	    var ctx2 = document.getElementById('canvas2').getContext('2d');
+				var ctx3 = document.getElementById('canvas3').getContext('2d');
+var ref_chn =null;
+var ref_hist=[];
+var adj_chn=null;
+var adj_hist=[];		
+		
+		
+		var surr=1; //No. of adjacent pixels in all directions
+			
+			var totErr=0;
+			var oldErr=null;
+		
+window.onload = function() {
+    var input = document.getElementById('input');
+    input.addEventListener('change', function(){handleFiles(ctx)}, false);
+	    var input2 = document.getElementById('input2');
+    input2.addEventListener('change', function(){handleFiles(ctx2)}, false);
+}
+function handleFiles(ctx) {
+	var mp_ct=0;
+	var mp_ct_s=0;
+    var url = URL.createObjectURL(ctx.canvas.previousElementSibling.files[0]);
+    var img = new Image();
+    img.onload = function() {
+         ctx.canvas.width = img.width;
+  ctx.canvas.height = img.height;
+  ctx.drawImage(img, 0, 0,img.width,img.height);
+	
+	 var frame_data0 = 
+	ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+	
+/*	function rgbToHsv(r, g, b) {
+  r /= 255, g /= 255, b /= 255;
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s, v = max;
+  var d = max - min;
+  s = max == 0 ? 0 : d / max;
+  if (max == min) {
+    h = 0; // achromatic
+  } else {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return [ h, s, v ];
+}
+*/
+	
+	
+
+switch (ctx.canvas.id){
+	
+	case 'canvas':
+	color_data=frame_data0.data;
+			original_data=frame_data0.data;		
+			ctx3.canvas.width =   img.width;
+  ctx3.canvas.height =  img.height;
+			ctx3.drawImage(img, 0, 0,img.width,img.height);
+			wdt=ctx.canvas.width;
+			hgt=ctx.canvas.height;
+			size=wdt*hgt;
+
+			
+	break;
+	case 'canvas2':
+		filtered_data=frame_data0.data;
+	break;
+}
+	}
+ 
+  img.src = url;
+}
+
+
+
+		 function surrPixel (data, dxy){
+		var grid=[];
+		
+		for (let x=-dxy; x<=dxy;x++){
+		for (let y=-dxy; y<=dxy;y++){
+		if (x==-0){x=0};
+		if (y==-0){y=0};
+		var xp = index%wdt | 0;
+		var yp = Math.floor(index / wdt)|0;
+		
+				if (((x + xp) >= 0 )&& ((x +xp) < wdt)){
+			xp+=x;
+			}
+		if (((y + yp) >= 0 )&& ((y + yp) < hgt)){
+			yp+=y
+			}
+		
+				var red = data[(xp+wdt*yp) * 4];
+        var green = data[(xp+wdt*yp) * 4 + 1];
+        var blue = data[(xp+wdt*yp) * 4 + 2];
+		grid.push(red / 255, green / 255, blue / 255)
+		
+		
+		
+		}
+		}
+		//if(grid.join('')!==[data[index * 4]/255,data[index * 4 + 1]/255 ,data[index * 4 + 2]/255].join('')){console.log('false')}
+		return grid;
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+ 
+
+	function train(){
+if(trial==null&&stop_learn==0){
+	stop_learn=0;
+		trial = 0;
+ document.getElementById('starter').innerText="Pause!";
+
+
+perceptron = new neataptic.architect.Perceptron(Math.pow(2*surr+1,2)*3,5, 3);
+
+			iteration();
+}else if(trial!==null&&stop_learn==1){
+	stop_learn=0;
+	 document.getElementById('starter').innerText="Pause!";
+	iteration();
+		//trial = 0;
+ //document.getElementById('starter').innerText="Pause!";
+		//perceptron = new Architect.Perceptron(27,8,3);
+		
+}
+else{
+	stop_learn=1;
+	 document.getElementById('starter').innerText="Continue!";
+	//trial=null;
+	
+}
+	}
+	
+	
+		var iteration = function(){
+		trial++;
+		 index=0;
+		 		 		var filtered_data = ctx2.getImageData(0, 0, wdt, hgt).data;
+				var color_data=ctx.getImageData(0, 0, wdt, hgt).data;
+				var imageData=ctx.getImageData(0, 0, wdt, hgt);
+		while (stop_learn==0 && index<size){
+					document.getElementById('iterations').innerText=trial+' iterations' ;
+		var	px = surrPixel(color_data, surr);
+
+			//console.log(px);
+			perceptron.activate(px);
+			
+			var rte=(oldErr != null ? 4*oldErr/totErr : 0.4);
+			
+			
+			perceptron.propagate(rte, 0,true, [filtered_data[index * 4] /255,filtered_data[index * 4+1] /255,filtered_data[index * 4+2] /255]);
+
+			//console.log(pixel(filtered_data,0,0));
+			index++;
+		
+	}
+
+
+
+		index=0;
+		while (stop_learn==0 && index<size){
+		//for (index = 0; index < size; index++)
+		//{
+
+			var	px = surrPixel(original_data, surr);
+
+			var rgb = perceptron.activate(px);
+			/*var err={};
+			
+			err.input=px;
+			err.ouptut=rgb;
+			
+			console.log(perceptron.test(err));
+*/
+			imageData.data[index * 4] = (rgb[0] )* 255;
+			imageData.data[index * 4 + 1] = (rgb[1] ) * 255;
+			imageData.data[index * 4 + 2] = (rgb[2] ) * 255;
+			
+			index++;
+		}
+		//if(oldErr=totErr;
+		var rErr=0;
+		var gErr=0;
+		var bErr=0;
+		for (let i=0; i<size; i++){
+		
+		rErr+=Math.pow(filtered_data[i*4]-imageData.data[i * 4],2);
+		gErr+=Math.pow(filtered_data[i*4+1]-imageData.data[i * 4+1],2);
+		bErr+=Math.pow(filtered_data[i*4+2]-imageData.data[i * 4+2],2);
+		
+		}
+		 totErr=Math.sqrt(rErr+gErr+bErr);
+
+		
+					console.log('Iteration: '+trial+', Error: ' +totErr) ;
+						 if (totErr<oldErr || oldErr==null){oldErr=totErr; console.log(perceptron.standalone());}
+					document.getElementById('iterations').innerText=trial+' iterations; error: ' + totErr+'; Learning rate = '+rte;
+	//}
+			if (stop_learn==0){
+		ctx3.putImageData(imageData,0,0);
+
+			setTimeout(iteration, 30);
+			}
+		}
+		
+</script>
+
+
+</body>
+</html>

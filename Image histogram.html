@@ -1,0 +1,998 @@
+<html>
+<head>
+<script src="jquery-3.4.1.min.js"></script>
+<style>
+input[type="file" i]::-webkit-file-upload-button{
+	background-color: buttonface;
+}
+select{
+background-color: buttonface;
+}
+</style>
+</head>
+<body>
+
+<h1>Image remapping page (See console log for more detailed info)</h1><br>
+
+Output: <select id="output">
+<option id="comma">value,new value,</option>
+<option id="float">float2(value,new value),</option>
+<option id="arrow">value -> new value</option>
+</select>
+
+<div id="recommended"></div>
+
+<select id="Channel">
+<option id="wBal">White balance</option>
+<option id="Sim">Similarity scores</option>
+<option id="Hue">Hue (0°-360°)</option>
+<option id="Sat">Saturation (0-100)</option>
+<option id="SatExt">Saturation (0-255)</option>
+<option id="Val">Value (0-100)</option>
+<option id="ValExt">Value (0-255)</option>
+<option id="Y">Y (0-100) (sRGB)</option>
+<option id="Red">Red (0-255)</option>
+<option id="Green">Green (0-255)</option>
+<option id="Blue">Blue (0-255)</option>
+</select>
+<input type="file" id="input"> Image to adjust: </input>
+
+<canvas id="canvas" style="display: block"></canvas>
+<br><br>
+
+<select id="Channel2" style="display: none">
+<option id="Sim">Similarity scores</option>
+<option id="Hue">Hue (0°-360°)</option>
+<option id="Sat">Saturation (0-100)</option>
+<option id="SatExt">Saturation (0-255)</option>
+<option id="Val">Value (0-100)</option>
+<option id="ValExt">Value (0-255)</option>
+<option id="Y">Y (0-100) (sRGB)</option>
+<option id="Red">Red (0-255)</option>
+<option id="Green">Green (0-255)</option>
+<option id="Blue">Blue (0-255)</option>
+</select>
+<input type="file" id="input2" style="display: none"></input><div id='referImg' style="display: none"> Reference image: </div>
+<canvas id="canvas2" style="display: none"></canvas><br>
+
+<br><div id="fullRemap"></div>
+
+<script>
+var URL = window.webkitURL || window.URL;
+    var ctx = document.getElementById('canvas').getContext('2d');
+	    var ctx2 = document.getElementById('canvas2').getContext('2d');
+var ref_chn =null;
+var ref_hist=[];
+var adj_chn=null;
+var adj_hist=[];	
+var RGBsimArrs=[];
+function removeEls(d, array)
+{
+	var newArray = [];
+	for (let i = 0; i < array.length; i++)
+	{
+		if (array[i] != d)
+		{
+			newArray.push(array[i]);
+		}
+	}
+	return newArray;
+}	
+
+
+
+		
+window.onload = function() {
+    var input = document.getElementById('input');
+    input.addEventListener('input', function(){handleFiles(ctx)}, false);
+	    var input2 = document.getElementById('input2');
+
+    input2.addEventListener('input', function(){handleFiles(ctx2)}, false);
+	var select1=document.getElementById('Channel');
+	var select2=document.getElementById('Channel2');
+
+var ogSel1=select1.innerHTML;
+var ogSel2=select2.innerHTML;
+
+
+	select1.addEventListener('change', selChg);
+	function selChg(){
+	if(select1.value!=='White balance') {
+		select2.style.display="initial";
+			input2.style.display="initial";
+					document.getElementById('referImg').style.display="initial";
+		document.getElementById('canvas2').style.display="block";
+;
+	}else{
+		select2.style.display="none";
+			input2.style.display="none";
+					document.getElementById('referImg').style.display="none";
+		document.getElementById('canvas2').style.display="none";
+
+	}
+	
+	if (select1.value=='Similarity scores'){
+
+	select2.innerHTML=ogSel2;
+	$("#Channel2 option[id='Hue']").remove();
+	$("#Channel2 option[id='Sat']").remove();
+	$("#Channel2 option[id='SatExt']").remove();
+	$("#Channel2 option[id='Val']").remove();
+	$("#Channel2 option[id='ValExt']").remove();
+	$("#Channel2 option[id='Red']").remove();
+	$("#Channel2 option[id='Green']").remove();
+	$("#Channel2 option[id='Blue']").remove();
+	$("#Channel2 option[id='Y']").remove();
+
+	}else if(select1.value!=='Similarity scores'){
+	var slctd=select1.value;
+	select1.innerHTML=ogSel1;
+		select1.value=slctd;
+	select2.innerHTML=ogSel2;
+	$("#Channel2 option[id='Sim']").remove();
+
+	}
+	
+	
+	}
+	
+	
+}
+
+function handleFiles(ctx) {
+let cvsid=ctx.canvas.id;
+	var mp_ct=0;
+	var mp_ct_s=0;
+	if(cvsid=="canvas2"){
+	 var url = URL.createObjectURL(ctx.canvas.previousElementSibling.previousElementSibling.files[0]);
+	}else{
+    var url = URL.createObjectURL(ctx.canvas.previousElementSibling.files[0]);
+	}
+    var img = new Image();
+    img.onload = function() {
+         ctx.canvas.width = img.width;
+  ctx.canvas.height = img.height;
+  ctx.drawImage(img, 0, 0,img.width,img.height);
+
+	
+	 var frame_data0 = 
+	ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+	
+	function rgbToHsv(r, g, b) {
+  r /= 255, g /= 255, b /= 255;
+
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s, v = max;
+
+  var d = max - min;
+  s = max == 0 ? 0 : d / max;
+
+  if (max == min) {
+    h = 0; // achromatic
+  } else {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+
+    h /= 6;
+  }
+
+  return [ h, s, v ];
+}
+
+function rgbToY(r,g,b){
+
+  r /= 255, g /= 255, b /= 255;
+
+	r=(r > 0.0404482362771082)?Math.pow(Math.abs((r+0.055)/1.055),2.4):r/12.92;
+	g=(g > 0.0404482362771082)?Math.pow(Math.abs((g+0.055)/1.055),2.4):g/12.92;
+	b=(b > 0.0404482362771082)?Math.pow(Math.abs((b+0.055)/1.055),2.4):b/12.92;
+
+		return 0.2126729*r+0.7151522*g+0.072175*b;
+
+}
+
+var wbRemaps=[];	
+
+var RGBsims=[];	
+
+var r=[0];
+var g=[0];
+var b=[0]; 
+var a=[0];
+var h=[0];
+var s=[0];
+var sExt=[0];
+var v=[0];
+var vExt=[0];
+var Y=[0];
+	  for (let p = 0, len=4* ctx.canvas.height*ctx.canvas.width ; p <len ;p+=4){
+   r[p/4]= frame_data0.data[p];
+     g[p/4]= frame_data0.data[p+1];
+     b[p/4] = frame_data0.data[p+2];
+ a[p/4]=frame_data0.data[p+3];
+ h[p/4]=Math.round(rgbToHsv( r[p/4],  g[p/4], b[p/4])[0]*360);
+  s[p/4]=Math.round(rgbToHsv( r[p/4],  g[p/4], b[p/4])[1]*100);  
+  sExt[p/4]=Math.round(rgbToHsv( r[p/4],  g[p/4], b[p/4])[1]*255);
+   v[p/4]=Math.round(rgbToHsv( r[p/4],  g[p/4], b[p/4])[2]*100);   
+   vExt[p/4]=Math.round(rgbToHsv( r[p/4],  g[p/4], b[p/4])[2]*255);
+   Y[p/4]=Math.round(rgbToY( r[p/4],  g[p/4], b[p/4])*100);
+}
+
+		
+r_h=[[]];
+g_h=[[]];
+b_h=[[]];		
+h_h=[[]];
+s_h=[[]];
+v_h=[[]];
+vExt_h=[[]];
+Y_h=[[]];
+sExt_h=[[]];
+
+
+
+for (let i=0; i<256;i++){
+r_h[i]=[];
+g_h[i]=[];
+b_h[i]=[];
+vExt_h[i]=[];
+sExt_h[i]=[];
+
+r_h[i][0]=0;
+g_h[i][0]=0;
+b_h[i][0]=0;
+vExt_h[i][0]=0;
+sExt_h[i][0]=0;
+
+r_h[i][1]=0;
+g_h[i][1]=0;
+b_h[i][1]=0;
+vExt_h[i][1]=0;
+sExt_h[i][1]=0;
+}
+
+
+
+
+for (let i=0; i<361;i++){
+h_h[i]=[];
+}
+
+
+for (let i=0; i<101;i++){
+s_h[i]=[];
+v_h[i]=[];
+Y_h[i]=[];
+
+}
+
+
+		function outputRecs(similarity,recRemaps,adj_chn){
+	
+
+	switch(document.getElementById('output').value) {
+	case "float2(value,new value),":
+	document.getElementById('recommended').innerHTML+='<br>Similarity score (0 is the most different, 1 is identical) = '+similarity.toLocaleString('en-GB',
+				{
+					minimumFractionDigits: 0,
+					maximumFractionDigits: 7
+				}) +'<br><br>Recommended remappings'+' (' +adj_chn+ ' -> New '+adj_chn+'): <br>'+ recRemaps.length+' remapping points:<br>';
+	for (let i=0;i<recRemaps.length;i++){
+	if (i<recRemaps.length-1){
+	document.getElementById('recommended').innerHTML+='float2('+recRemaps[i][0]+','+ recRemaps[i][1]+'),<br>';
+	}else{
+	document.getElementById('recommended').innerHTML+='float2('+recRemaps[i][0]+','+ recRemaps[i][1]+')<br>';
+	}
+	}
+	break;
+	
+		case "value,new value,":
+	
+		document.getElementById('recommended').innerHTML+='<br>Similarity score (0 is the most different, 1 is identical) = '+similarity.toLocaleString('en-GB',
+				{
+					minimumFractionDigits: 0,
+					maximumFractionDigits: 7
+				}) +'<br><br>Recommended remappings'+' (' +adj_chn+ ' -> New '+adj_chn+'): <br>'+ recRemaps.length+' remapping points:<br>';
+	for (let i=0;i<recRemaps.length;i++){
+	if (i<recRemaps.length-1){
+	document.getElementById('recommended').innerHTML+=+recRemaps[i][0]+','+ recRemaps[i][1]+',<br>';
+	}else{
+	document.getElementById('recommended').innerHTML+=recRemaps[i][0]+','+ recRemaps[i][1]+'<br>';
+	}
+	}
+	break;
+	
+	case "value -> new value":
+		document.getElementById('recommended').innerHTML+='<br>Similarity score (0 is the most different, 1 is identical) = '+similarity.toLocaleString('en-GB',
+				{
+					minimumFractionDigits: 0,
+					maximumFractionDigits: 7
+				}) +'<br><br>Recommended remappings'+' (' +adj_chn+ ' -> New '+adj_chn+'): <br>'
+	for (let i=0;i<recRemaps.length;i++){
+	document.getElementById('recommended').innerHTML+=recRemaps[i][0]+' -> '+ recRemaps[i][1]+'<br>';
+	}
+	break;
+	}
+	
+	}
+
+
+
+
+function remap(c,c_h,count,chn,cvs){					
+
+var similarity=0;
+
+if (cvs.constructor === Array){
+
+for (let i=0; i<count+1;i++){
+c_h[i]=[];
+
+c_h[i][0]=0;
+
+c_h[i][1]=0;
+
+}
+
+for (let i=0; i<c.length;i++){
+
+var rgb=c[i];
+
+if((rgb<=count) && (rgb >=0)){
+c_h[rgb][0]+=1;
+}
+
+
+}
+
+var ideal=c.length/count;
+c_h[0][1]=c_h[0][0]-ideal;	
+
+
+for (let i=1; i<c_h.length;i++){
+c_h[i][1]=c_h[i][0]-ideal;	
+	}
+	
+for (let i=0; i<count+1;i++){
+cvs[1][i]=[];
+
+cvs[1][i][0]=0;
+
+cvs[1][i][1]=0;
+
+}
+
+for (let i=0; i<cvs[0].length;i++){
+
+var rgb=cvs[0][i];
+
+if((rgb<=count) && (rgb >=0)){
+cvs[1][rgb][0]+=1;
+}
+
+
+}
+
+var ideal=cvs[0].length/count;
+cvs[1][0][1]=cvs[1][0][0]-ideal;	
+
+
+for (let i=1; i<cvs[1].length;i++){
+cvs[1][i][1]=cvs[1][i][0]-ideal;	
+	}
+
+
+
+
+		//console.log(cvs[1]);
+
+	//console.log(c);
+
+}else{
+
+for (let i=0; i<count+1;i++){
+c_h[i]=[];
+
+c_h[i][0]=0;
+
+c_h[i][1]=0;
+
+}
+
+for (let i=0; i<c.length;i++){
+
+var rgb=c[i];
+
+if((rgb<=count) && (rgb >=0)){
+c_h[rgb][0]+=1;
+}
+
+
+}
+
+var ideal=c.length/count;
+c_h[0][1]=c_h[0][0]-ideal;	
+
+
+for (let i=1; i<c_h.length;i++){
+c_h[i][1]=c_h[i][0]-ideal;	
+	}
+	
+
+		console.log(c_h);
+
+	console.log(c);
+	
+	}
+	
+	if (cvs=="canvas2"){
+	
+	ref_chn=chn;
+	ref_hist=c_h; 
+	}else if (cvs=="canvas"){
+		adj_chn=chn;
+	adj_hist=c_h;
+	}else if(cvs.constructor === Array){
+	ref_hist=cvs[1];
+	adj_hist=c_h;
+	}
+	
+	
+
+	
+	if((ref_hist.length==adj_hist.length)&&(ref_hist!==null)&&(adj_hist!==null)){
+	var ref_sum=0;
+	var adj_sum=0;
+	
+			for (let i=0; i<adj_hist.length;i++){
+	adj_sum+=adj_hist[i][0];
+}
+
+		for (let i=0; i<ref_hist.length;i++){
+ref_sum+=ref_hist[i][0];
+}
+
+			for (let i=1; i<adj_hist.length;i++){
+	adj_hist[i][0]+=adj_hist[i-1][0];
+}
+			for (let i=1; i<ref_hist.length;i++){
+	ref_hist[i][0]+=ref_hist[i-1][0];
+}
+
+	
+	//console.log(ref_sum);
+	
+		for (let i=0; i<adj_hist.length;i++){
+	adj_hist[i][1]=adj_hist[i][0]/adj_sum;
+}
+
+		for (let i=0; i<ref_hist.length;i++){
+ref_hist[i][1]=ref_hist[i][0]/ref_sum;
+}
+	
+	
+	var closest_mxBias = function(number, array) {
+
+
+
+		var output=0;
+				        var diff = Math.abs(number - array[1][1]);
+        for (let i=2;i<array.length;i++){
+
+            var newDiff = Math.abs(number - array[i][1]);
+            if (newDiff < diff) {
+                diff = newDiff;
+                output=i; //array[index][0];
+            }
+
+        }
+        return output;
+    };
+	
+	var mapArr=[[]];
+	
+	for (let i=0; i<adj_hist.length;i++){
+mapArr[i]=[];
+}
+
+mapArr[0][0]=0;
+mapArr[0][1]=0;
+mapArr[adj_hist.length-1][0]=adj_hist.length-1;
+mapArr[adj_hist.length-1][1]=adj_hist.length-1;
+
+var refCum=0;
+var adjCum=0;
+
+for (let r=0; r<adj_hist.length-2; r++){
+refCum+=ref_hist[r][1]+0.5*Math.abs(ref_hist[r+1][1]-ref_hist[r][1]);
+adjCum+=adj_hist[r][1]+0.5*Math.abs(adj_hist[r+1][1]-adj_hist[r][1]);
+}
+
+let mnDivMx=Math.min(refCum,adjCum)/Math.max(refCum,adjCum);
+similarity=(mnDivMx-(0.5/(adj_hist.length-1)))/(1-(0.5/(adj_hist.length-1)));
+
+	if(cvs.constructor !== Array){
+console.log('Similarity score = '+similarity.toLocaleString('en-GB',
+				{
+					minimumFractionDigits: 0,
+					maximumFractionDigits: 7
+				}) );
+				}
+
+	for (let l=1; l<adj_hist.length-1;l++){
+mapArr[l][0]=l;
+mapArr[l][1]=closest_mxBias(adj_hist[l][1],ref_hist);
+}
+
+
+
+		for(let i=mapArr.length-2;i>=1;i--){
+		if(mapArr[i][1]==mapArr[i-1][1]){
+mapArr=removeEls(mapArr[i],mapArr);
+		}
+		}
+		var reduArr=[[]];
+reduArr[0]=mapArr[0];
+for (let i=1;i<mapArr.length;i++){
+reduArr.push(mapArr[i]);
+}
+mapArr=[[]];
+mapArr[0][0]=0;
+mapArr[0][1]=0;
+
+
+	function chnn_int(chnn){
+	var c_x_b=[0,count];
+var c_y_b=[0,count];
+
+var exact=0;
+for(let i=0;i<reduArr.length-1;i++){
+
+	if(reduArr[i][0]==chnn) {
+	chnn=reduArr[i][1];
+	exact=1;
+	i=reduArr.length-1;
+	}else{
+	if((reduArr[i][0]<chnn)&&(reduArr[i][0]>=c_x_b[0])){
+	
+	c_x_b[0]=reduArr[i][0];
+	c_y_b[0]=reduArr[i][1];
+	
+	} 
+	
+	if((reduArr[i][0]<=c_x_b[1]) && (chnn<reduArr[i][0])){
+	c_x_b[1]=reduArr[i][0];c_y_b[1]=reduArr[i][1];
+	
+	}
+	
+	}
+	
+	} 
+	
+	if(exact==0){chnn=c_y_b[0]+(chnn-c_x_b[0])*((c_y_b[1]-c_y_b[0])/(c_x_b[1]-c_x_b[0])); chnn=Math.floor(chnn)}return chnn;
+	
+	} 	
+	
+	for (let k=1; k<adj_hist.length; k++){
+	mapArr.push([k,chnn_int(k)]);
+	}
+
+	if(cvs.constructor !== Array && chn!=='Red (similarity)' && chn!=='Green (similarity)' && chn!=='Blue (similarity)' && chn!=='Y (similarity)'){
+
+console.log(mapArr);
+	
+	document.getElementById('fullRemap').innerHTML="Full list of remappings (from to):<br>";
+	for (let i=0;i<mapArr.length;i++){
+		document.getElementById('fullRemap').innerHTML+=mapArr[i][0]+'	'+ mapArr[i][1]+'<br>';
+	}
+	}
+	
+	function sumSqErrs(pOne, pTwo, y) {
+
+	
+    var predicted = [];
+
+    var SSerr = 0;
+
+    
+        for (let n=0;n<y.length;n++) { 
+         
+        predicted.push(y[n][0]*((pTwo[1]-pOne[1])/(pTwo[0]-pOne[0]))+((pTwo[0]*pOne[1]-pOne[0]*pTwo[1])/(pTwo[0]-pOne[0])));
+       
+        SSerr += Math.pow(y[n][1]-predicted[n], 2);
+		}
+	
+return (SSerr/y.length)*(Math.max(Math.abs(pTwo[0]-pOne[0]),Math.abs(pTwo[1]-pOne[1]))/Math.min(Math.abs(pTwo[0]-pOne[0]),Math.abs(pTwo[1]-pOne[1])));
+
+}
+	
+	var recRemaps=[[]];
+	recRemaps[0][0]=0;
+	recRemaps[0][1]=0;
+
+	while (recRemaps[recRemaps.length-1][0]<mapArr.length-1){
+	var best=null;
+		var mapTo=[];
+
+/*		
+	if((recRemaps[recRemaps.length-1].join()==[0,0])&&(mapArr[1][1]==0)&&(mapArr[2][1]!==0)){
+	mapTo=[mapArr[1][0],mapArr[1][0]];
+	
+	}else{
+	*/
+		
+	for(let i=recRemaps[recRemaps.length-1][0]+2;i<mapArr.length;i++){
+	
+	var y=[];
+	//y[0]=recRemaps[recRemaps.length-1];
+	for(let m=recRemaps[recRemaps.length-1][0]+1;m<i;m++){
+	y.push(mapArr[m]);
+	}
+	
+	var currSSE=sumSqErrs(recRemaps[recRemaps.length-1],mapArr[i],y);
+
+	//console.log(currSSE+' ('+recRemaps[recRemaps.length-1].join()+') ('+mapArr[i].join()+')');
+		if(mapArr[i][1]==0){
+	mapTo=mapArr[i];
+	}else if((currSSE<=best||!best)&&(mapArr[i][1]>recRemaps[recRemaps.length-1][1])&&(recRemaps[recRemaps.length-1].join()!==mapArr[mapArr[i][1]].join())&&(mapTo[1]!==0)){
+	best=currSSE;
+//console.log('Best so far: '+best);
+//console.log(mapArr[i]);
+if(mapArr[mapArr[i][1]][1]==mapArr[i][1]){
+	mapTo=mapArr[mapArr[i][1]];
+	
+	}else{
+	mapTo=mapArr[i];
+	}
+	}
+	
+
+	
+	
+	
+	}
+	
+	//}
+	
+
+	
+	if(!mapTo.length){
+	recRemaps.push([mapArr.length-1,mapArr.length-1]);
+	//console.log(recRemaps.join());
+//console.log('Best so far: '+best);
+	}else{
+	
+	if(mapTo[1]==0){
+	recRemaps.push([mapTo[0],mapTo[0]]);
+	//console.log(recRemaps.join());
+//console.log('Best so far: '+best);
+	}else{
+	recRemaps.push(mapTo);
+	//console.log(recRemaps.join());
+//console.log('Best so far: '+best);
+	}
+
+	
+	}
+	
+	
+	
+
+	
+	
+	}
+	
+	var rms=0;
+	//console.log(recRemaps);
+	while (rms<recRemaps.length-1){
+	
+	if(recRemaps[rms]&&recRemaps[rms+1]&&recRemaps[rms+2]){
+	
+	if([(recRemaps[rms+1][1]-recRemaps[rms][1])/(recRemaps[rms+1][0]-recRemaps[rms][0]),(recRemaps[rms+1][0]*recRemaps[rms][1]-recRemaps[rms][0]*recRemaps[rms+1][1])/(recRemaps[rms+1][0]-recRemaps[rms][0])].join()==[(recRemaps[rms+2][1]-recRemaps[rms][1])/(recRemaps[rms+2][0]-recRemaps[rms][0]),(recRemaps[rms+2][0]*recRemaps[rms][1]-recRemaps[rms][0]*recRemaps[rms+2][1])/(recRemaps[rms+2][0]-recRemaps[rms][0])].join()){
+	 recRemaps.splice( rms+1, 1 );
+	rms=0;
+	}else{
+	rms++;
+	}
+	
+	}else{
+	rms=recRemaps.length-1;
+	}
+	
+	}
+	
+	if(cvs.constructor !== Array){
+	console.log(recRemaps);
+	}
+	
+	if(cvs.constructor !== Array){
+	if (chn!=='Red (similarity)' && chn!=='Green (similarity)' && chn!=='Blue (similarity)' && chn!=='Y (similarity)'){
+	document.getElementById('recommended').innerHTML='';
+	outputRecs(similarity,recRemaps,adj_chn);
+	}else{
+	outputRecs(similarity,recRemaps,chn);
+	RGBsims.push(similarity);
+	}
+	
+	
+	}else{
+	wbRemaps.push([chn,mapArr,recRemaps,similarity]);
+	}
+	
+	}else if((ref_hist.length!=adj_hist.length)&&(ref_hist.length!==0)&&(adj_hist.length!==0)){
+	document.getElementById('recommended').innerHTML='Channels are not in the same range, refresh and match channels that are.';
+	}
+	
+}
+
+	if(cvsid=="canvas2"){
+	 var wchSel = ctx.canvas.previousElementSibling.previousElementSibling.previousElementSibling.value;
+	}else{
+    var wchSel = ctx.canvas.previousElementSibling.previousElementSibling.value;
+	}
+	
+
+switch(wchSel) {
+  case "White balance":
+//document.getElementById('input2');
+  //document.getElementById('canvas2');
+    remap(r,r_h,255,'Red -> Value (0-255) (White balance)',[vExt,vExt_h]);    
+    remap(g,g_h,255,'Green -> Value (0-255) (White balance)',[vExt,vExt_h]);	
+    remap(b,b_h,255,'Blue -> Value (0-255) (White balance)',[vExt,vExt_h]);
+  	remap(g,g_h,255,'Green -> Red (White balance)',[r,r_h]);
+  	remap(b,b_h,255,'Blue -> Red (White balance)',[r,r_h]);
+    remap(r,r_h,255,'Red -> Green (White balance)',[g,g_h]);
+	remap(b,b_h,255,'Blue -> Green (White balance)',[g,g_h]);
+    remap(r,r_h,255,'Red -> Blue (White balance)',[b,b_h]);
+	remap(g,g_h,255,'Green -> Blue (White balance)',[b,b_h]);
+
+console.log(wbRemaps);
+
+var wbOrder=[];
+
+var wbRpl=[];
+
+for (let i=0; i<9;i++){
+if(wbRemaps[i][2].length<=2){
+wbRpl[i]=0;
+}else{
+wbRpl[i]=wbRemaps[i][2].length;
+}
+}
+
+wbOrder.push(["To Value (0-255)",Math.max(wbRpl[0],wbRpl[1],wbRpl[2]),wbRpl[0]+wbRpl[1]+wbRpl[2]],["To Red",Math.max(wbRpl[3],wbRpl[4]),wbRpl[3]+wbRpl[4]],["To Green",Math.max(wbRpl[5],wbRpl[6]),wbRpl[5]+wbRpl[6]],["To Blue",Math.max(wbRpl[7],wbRpl[8]),wbRpl[7]+wbRpl[8]]);
+
+
+
+
+var wbBtn1=document.createElement('button');
+document.getElementById('recommended').insertAdjacentElement('beforebegin', wbBtn1);
+var wbBtn2=document.createElement('button');
+document.getElementById('recommended').insertAdjacentElement('beforebegin', wbBtn2);
+var wbBtn3=document.createElement('button');
+document.getElementById('recommended').insertAdjacentElement('beforebegin', wbBtn3);
+var wbBtn4=document.createElement('button');
+document.getElementById('recommended').insertAdjacentElement('beforebegin', wbBtn4);
+/*
+wbBtn1.innerHTML=wbOrder[0][0]+' '+wbOrder[0][2]+' points total (' +wbOrder[0][1]+' max for one channel)';
+wbBtn2.innerHTML=wbOrder[1][0]+' '+wbOrder[1][2]+' points total (' +wbOrder[1][1]+' max for one channel)';
+wbBtn3.innerHTML=wbOrder[2][0]+' '+wbOrder[2][2]+' points total (' +wbOrder[2][1]+' max for one channel)';
+wbBtn4.innerHTML=wbOrder[3][0]+' '+wbOrder[3][2]+' points total (' +wbOrder[3][1]+' max for one channel)';
+*/
+
+var wbButtons=[wbBtn1,wbBtn2,wbBtn3,wbBtn4];
+var workingOrder=wbOrder;
+for (let i=0; i<wbOrder.length;i++){
+
+
+
+
+var currLowest=workingOrder[0][1];
+var lowestIdx=0;
+for (let i=1; i<workingOrder.length;i++){
+if(workingOrder[i][1]<currLowest){
+currLowest=workingOrder[i][1];
+lowestIdx=i;
+}else if(workingOrder[i][1]==currLowest){
+
+if(workingOrder[i][2]<workingOrder[lowestIdx][2]){
+currLowest=workingOrder[i][1];
+lowestIdx=i;
+}
+
+}
+}
+
+var lowest= lowestIdx;
+
+
+wbButtons[i].innerHTML=workingOrder[lowest][0]+', '+workingOrder[lowest][2]+' points total (' +workingOrder[lowest][1]+' max for one channel)';
+
+switch (workingOrder[lowest][0]){
+case 'To Value (0-255)':
+
+wbButtons[i].onclick=function(){
+document.getElementById('recommended').innerHTML='Remapping to Value (0-255):<br>';
+outputRecs(wbRemaps[0][3],wbRemaps[0][2],'Red (to value (0 - 255); white balance)');
+outputRecs(wbRemaps[1][3],wbRemaps[1][2],'Green (to value (0 - 255); white balance)');
+outputRecs(wbRemaps[2][3],wbRemaps[2][2],'Blue (to value (0 - 255); white balance)');
+}
+
+break;
+
+case 'To Red':
+
+wbButtons[i].onclick=function(){
+document.getElementById('recommended').innerHTML='Remapping to Red:<br>';
+outputRecs(wbRemaps[3][3],wbRemaps[3][2],'Green (white balance)');
+outputRecs(wbRemaps[4][3],wbRemaps[4][2],'Blue (white balance)');
+}
+break;
+
+case 'To Green':
+
+wbButtons[i].onclick=function(){
+document.getElementById('recommended').innerHTML='Remapping to Green:<br>';
+outputRecs(wbRemaps[5][3],wbRemaps[5][2],'Red (white balance)');
+outputRecs(wbRemaps[6][3],wbRemaps[6][2],'Blue (white balance)');
+}
+break;
+
+case 'To Blue':
+
+wbButtons[i].onclick=function(){
+document.getElementById('recommended').innerHTML='Remapping to Blue:<br>';
+outputRecs(wbRemaps[7][3],wbRemaps[7][2],'Red (white balance)');
+outputRecs(wbRemaps[8][3],wbRemaps[8][2],'Green (white balance)');
+}
+break;
+
+
+}
+
+
+workingOrder= removeEls(workingOrder[lowest], workingOrder);
+}
+break;
+
+
+
+
+
+case 'Similarity scores':
+RGBsimArrs.push([r,r_h,g,g_h,b,b_h,Y,Y_h,cvsid])
+
+if (RGBsimArrs.length >2){
+let dupes1=[];
+let dupes2=[];
+
+for (let i=0; i<RGBsimArrs.length; i++){
+
+if(RGBsimArrs[i][8]=="canvas"){
+dupes1.push(i);
+}else if(RGBsimArrs[i][8]=="canvas2"){
+dupes2.push(i);
+}
+
+}
+
+if(dupes1.length>1){
+
+for (let i=0; i<dupes1.length-1;i++){
+RGBsimArrs= removeEls(RGBsimArrs[dupes1[i]], RGBsimArrs);
+}
+document.getElementById('recommended').innerHTML='';
+}
+
+if(dupes2.length>1){
+
+for (let i=0; i<dupes2.length-1;i++){
+RGBsimArrs= removeEls(RGBsimArrs[dupes2[i]], RGBsimArrs);
+}
+document.getElementById('recommended').innerHTML='';
+}
+
+}
+
+if (RGBsimArrs.length ==2){
+	remap(RGBsimArrs[0][0],RGBsimArrs[0][1],255,'Red (similarity)',RGBsimArrs[0][8]);
+	remap(RGBsimArrs[1][0],RGBsimArrs[1][1],255,'Red (similarity)',RGBsimArrs[1][8]);
+			ref_chn='';
+			ref_hist=[]; 
+			adj_chn='';
+			adj_hist=[];
+	remap(RGBsimArrs[0][2],RGBsimArrs[0][3],255,'Green (similarity)',RGBsimArrs[0][8]);
+	remap(RGBsimArrs[1][2],RGBsimArrs[1][3],255,'Green (similarity)',RGBsimArrs[1][8]);
+			ref_chn='';
+			ref_hist=[]; 
+			adj_chn='';
+			adj_hist=[];
+	remap(RGBsimArrs[0][4],RGBsimArrs[0][5],255,'Blue (similarity)',RGBsimArrs[0][8]);
+	remap(RGBsimArrs[1][4],RGBsimArrs[1][5],255,'Blue (similarity)',RGBsimArrs[1][8]);
+			ref_chn='';
+			ref_hist=[]; 
+			adj_chn='';
+			adj_hist=[];
+	remap(RGBsimArrs[0][6],RGBsimArrs[0][7],100,'Y (similarity)',RGBsimArrs[0][8]);
+	remap(RGBsimArrs[1][6],RGBsimArrs[1][7],100,'Y (similarity)',RGBsimArrs[1][8]);
+			ref_chn='';
+			ref_hist=[]; 
+			adj_chn='';
+			adj_hist=[];
+	
+var RGBsimAvg=0;
+if(RGBsims.length==4){
+
+RGBsimAvg=(RGBsims[0]+RGBsims[1]+RGBsims[2])/3;
+
+
+document.getElementById('recommended').innerHTML='Average RGB Similarity score: ' + RGBsimAvg.toLocaleString('en-GB',
+				{
+					minimumFractionDigits: 0,
+					maximumFractionDigits: 7
+				})+'<br>'+
+				'Y (sRGB) Similarity score: ' + RGBsims[3].toLocaleString('en-GB',
+				{
+					minimumFractionDigits: 0,
+					maximumFractionDigits: 7
+				})
+				+'<br>'+document.getElementById('recommended').innerHTML;
+				}
+}
+break;
+
+
+  case "Hue (0°-360°)":
+    remap(h,h_h,360,'hue',cvsid);
+    break;
+	
+	  case "Saturation (0-100)":
+    remap(s,s_h,100,'saturation',cvsid);
+    break;
+	
+	  case "Saturation (0-255)":
+    remap(sExt,sExt_h,255,'saturation',cvsid);
+    break;
+	
+	  case "Value (0-100)":
+    remap(v,v_h,100,'value',cvsid);
+    break;	  
+	
+	case "Value (0-255)":
+    remap(vExt,vExt_h,255,'value',cvsid);
+    break;
+		case "Y (0-100) (sRGB)":
+    remap(Y,Y_h,100,'Y',cvsid);
+    break;
+	
+	  case "Red (0-255)":
+    remap(r,r_h,255,'red',cvsid);
+    break;
+	
+	  case "Green (0-255)":
+    remap(g,g_h,255,'green',cvsid);
+    break;
+	
+	  case "Blue (0-255)":
+    remap(b,b_h,255,'blue',cvsid);
+    break;
+
+}
+
+
+
+	}
+
+ 
+  img.src = url;
+}
+
+
+</script>
+
+
+</body>
+</html>
