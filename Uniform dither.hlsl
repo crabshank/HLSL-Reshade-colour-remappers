@@ -196,7 +196,7 @@ const float2 r = float2(
 23.1406926327792690,  // e^pi (Gelfond's constant)
  2.6651441426902251); // 2^sqrt(2) (Gelfond-Schneider constant)
 
-float t=frac(acos(p.x/p.y)+sin(p.x)*r.y+cos(p.y)*r.x+p.x*p.y*r.y);
+float t=frac(acos(min(p.x,p.y)/max(p.x,p.y))+sin(p.x)*r.y+cos(p.y)*r.x+p.x*p.y*r.y);
 
 t= frac((800*cos(t/20)+1400)*t);  
 t= frac(pow( frac((0.01*t+sin(500*t*t))+tan(t*500)*500),2));
@@ -237,8 +237,6 @@ return color;
 
 #define greyDither_Sdv 4.3 //Change standard deviation by specified amount
 
-#define blend 0.5 //0 (no randomness) to 1 (fully random)
-
 #define darkDither 0.15 // 0 (dither all brightnesses equally), as increases: favour dithering dark areas
  
 #define MODE 1 // 0 - sRGB | 1 - Rec 601 NTSC | 2 - Rec. 601 PAL | 3 - Rec. 709 | 4 - Rec.2020 | 5 - DCI-P3 | 6 - Display P3 | 7 - Orginal NTSC (47 CFR ยง 73.682 - TV transmission standards) | 8 - Rec. 601 D93 | 9 - Rec. 709 D93 | 10 - DCI-P3 (D60/ACES)
@@ -257,15 +255,12 @@ float4 main(float2 tex : TEXCOORD0) : COLOR
 	float greyDitherSdv=greyDither_Sdv;
 	float greyDitherAmnt=greyDither_Amnt;
 	float drk=darkDither;
-	float blnd=blend;
 
 c1.rgb =saturate(grey_dither(c0Max,tex,greyDitherAmnt,greyDitherSdv)*(c1.rgb/c0Max));
 
 float3 XYZ=LinRGB2XYZ(c1.rgb,mode);
 
 c1.rgb =(drk>0)?lerp(c1.rgb,c0OG_lin,1-pow(XYZ.y,drk)):c1.rgb;
-
-c1.rgb =(blnd>0)?lerp(c0OG_lin,c1.rgb,blnd):c1.rgb;
 
 c1.rgb=linRGB2rgb(c1.rgb,mode);
 
