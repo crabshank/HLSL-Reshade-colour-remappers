@@ -20,7 +20,9 @@ float4 p1 :  register(c1);
 
 #define Linear 0 // 0-1 Take linear RGB as input and output linear RGB
 
-#define avoid_grey 0
+#define avoid_grey 1
+
+#define avoid_light 0
 
 //Apply redDeltaAmnt/greenDeltaAmnt/blueDeltaAmnt to these colours
 #define Red 1
@@ -540,13 +542,19 @@ c0Lin.g=(greenDeltaAmnt==0)?c0Lin.g:delta(c0Lin.g,greenDeltaAmnt);
 
 c0Lin.b=(blueDeltaAmnt==0)?c0Lin.b:delta(c0Lin.b,blueDeltaAmnt);
 
-c0Lin.rgb=(avoid_grey==true)?lerp(c0_og_Lin.rgb, c0Lin.rgb,hue_sat.y):c0Lin.rgb;
+int Avoid_grey=avoid_grey;
+
+c0Lin.rgb=(Avoid_grey==1)?lerp(c0_og_Lin.rgb, c0Lin.rgb,hue_sat.y):c0Lin.rgb;
 
 }
 
 }
 
 float3 og_XYZ=LinRGB2XYZ(c0_og_Lin,Mode);
+
+int Avoid_light=avoid_light;
+
+c0Lin.rgb=(Avoid_light==1)?lerp(c0Lin.rgb,c0_og_Lin.rgb,og_XYZ.y):c0Lin.rgb;
 
 float nw_Y=(Y_DeltaAmnt==0)?og_XYZ.y:delta(og_XYZ.y,Y_DeltaAmnt);
 
@@ -570,7 +578,7 @@ float3 c0_hsv=rgb2hsv(c0.rgb);
 float Split=split;
 float Split_position=split_position;
 float Flip_split=flip_split;
-int Avoid_grey=avoid_grey;
+
 int Mode=MODE;
 int linr=Linear;
 

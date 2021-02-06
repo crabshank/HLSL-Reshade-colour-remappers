@@ -35,6 +35,8 @@ uniform float Y_DeltaAmnt < __UNIFORM_DRAG_FLOAT1
 	
 uniform bool avoid_grey <> = true;
 
+uniform bool avoid_light <> = false;
+
 uniform bool Red <ui_category="Select_color";> = true;
 uniform bool Orange__Brown <ui_category="Select_color";> = true;
 uniform bool Yellow <ui_category="Select_color";> = true;
@@ -543,6 +545,8 @@ c0Lin.rgb=(avoid_grey==true)?lerp(c0_og_Lin.rgb, c0Lin.rgb,hue_sat.y):c0Lin.rgb;
 }
 
 float3 og_XYZ=LinRGB2XYZ(c0_og_Lin,Mode);
+
+c0Lin.rgb=(avoid_light==true)?lerp(c0Lin.rgb,c0_og_Lin.rgb,og_XYZ.y):c0Lin.rgb;
 
 float nw_Y=(Y_DeltaAmnt==0)?og_XYZ.y:delta(og_XYZ.y,Y_DeltaAmnt);
 
