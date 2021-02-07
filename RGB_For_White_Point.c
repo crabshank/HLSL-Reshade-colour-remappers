@@ -223,14 +223,29 @@ col_int=0;
 }
 
 
-if (colours_cnt[0][0]==0){
-    colours_hues[col_int]=hue_d;
-    //colours_sc[col_int]=sc;
+if (grey==1){
+double mx=MAX(red,MAX(green,blue));
+    if(mx>colours_sats[col_int] || colours_sats[0]==0){
+        colours_hues[col_int]=0;
+        colours_sats[col_int]=mx;
+            colours_R[col_int]=Rd;
+    colours_B[col_int]=Bl;
+    colours_G[col_int]=Gr;
+    }
+
+}else{
+    if((sat<colours_sats[col_int]) || (colours_cnt[0][col_int]==1)){
     colours_sats[col_int]=sat;
-    colours_R[col_int]=Rd;
+        colours_hues[col_int]=hue_d;
+            colours_R[col_int]=Rd;
     colours_G[col_int]=Gr;
     colours_B[col_int]=Bl;
-}else if(sat<colours_sats[col_int]){
+    }
+}
+
+/*
+
+if (colours_cnt[0][0]==0 || (sat<colours_sats[col_int])){
     colours_hues[col_int]=hue_d;
     //colours_sc[col_int]=sc;
     colours_sats[col_int]=sat;
@@ -238,6 +253,7 @@ if (colours_cnt[0][0]==0){
     colours_G[col_int]=Gr;
     colours_B[col_int]=Bl;
 }
+*/
 
 
  }
@@ -251,36 +267,21 @@ twoD_sort_asc(2,13,colours_cnt,0); //Sort by frequency of colours
 
 int col_range=0;
 
-int out_col=0;
-//double sc_max=0;
-double sat_min=1;
+int out_col;
 
-    //sc_max=colours_sc[colours_cnt[1][0]];
-    sat_min=colours_sats[colours_cnt[1][0]];
-    out_col=colours_cnt[1][0];
-
-    for (int tk=1; tk<13; tk++){
-        if (colours_cnt[0][tk]<colours_cnt[0][0]){
-            col_range=tk-1;
-            break;
-        }
+    if(colours_cnt[1][0]==0){
+        out_col=(colours_cnt[0][1]==0)?0:colours_cnt[1][1];
+    }else{
+        out_col=colours_cnt[1][0];
     }
 
-    for (int tj=col_range; tj>=0; tj--){
-        if (colours_sats[colours_cnt[1][tj]]<sat_min){
-            //sc_max=colours_sc[colours_cnt[1][tj]];
-            sat_min=colours_sats[colours_cnt[1][tj]];
-            out_col=colours_cnt[1][tj];
-        }
-    }
-
-    sat_out=colours_sats[out_col];
+   sat_out=colours_sats[out_col];
     Ro=colours_R[out_col];
     Go=colours_G[out_col];
     Bo=colours_B[out_col];
 
 if ((out_col==0)||(sat_out==0)){
-_snprintf(str_out3, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",sat_out*100);
+_snprintf(str_out3, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",0);
 }else{
         hue_out=colours_hues[out_col];
 
