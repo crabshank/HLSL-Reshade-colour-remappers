@@ -70,8 +70,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_PAINT:
         {
  RECT  xy_txt = {0,smp,0, 0};
+ int ctK=0;
+ int altK=0;
 
-   if(GetAsyncKeyState(VK_SHIFT)){
+
+
+   if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
 if(GetAsyncKeyState(0x41)){
     smp=(smp>=2)?smp-1:smp;
 	smp2=smp+smp4;
@@ -332,7 +336,7 @@ _snprintf(str_out3, MAX_PATH-1,"\nSaturation: %.1f; %s (%.1f°)",sat_out*100,nom
 
 _snprintf(str_out2, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 
-   if(GetAsyncKeyState(VK_SHIFT)){
+   if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
 
 _snprintf(str_out, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
 
