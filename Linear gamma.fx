@@ -1,11 +1,11 @@
 #include "ReShadeUI.fxh"
 
 uniform int Gamma_type < __UNIFORM_COMBO_INT1
-    ui_items = "sRGB -> linear RGB\0linear RGB -> sRGB\0Rec.(2020/601/709) RGB -> linear RGB\0linear RGB -> Rec.(2020/601/709) RGB\0gamma=2.2 -> linear RGB\0linear RGB -> gamma=2.2\0gamma=2.6 -> linear RGB\0linear RGB -> gamma=2.6\0";
+    ui_items = "sRGB -> linear RGB\0linear RGB -> sRGB\0Rec.(2020/601/709) RGB -> linear RGB\0linear RGB -> Rec.(2020/601/709) RGB\0gamma=2.2 -> linear RGB\0linear RGB -> gamma=2.2\0gamma=2.6 -> linear RGB\0linear RGB -> gamma=2.6\0gamma=2.4 -> linear RGB\0linear RGB -> gamma=2.4\0";
 > = 0;
 
 uniform int Gamma_type_2 < __UNIFORM_COMBO_INT1
-    ui_items = "sRGB -> linear RGB\0linear RGB -> sRGB\0Rec.(2020/601/709) RGB -> linear RGB\0linear RGB -> Rec.(2020/601/709) RGB\0gamma=2.2 -> linear RGB\0linear RGB -> gamma=2.2\0gamma=2.6 -> linear RGB\0linear RGB -> gamma=2.6\0";
+    ui_items = "sRGB -> linear RGB\0linear RGB -> sRGB\0Rec.(2020/601/709) RGB -> linear RGB\0linear RGB -> Rec.(2020/601/709) RGB\0gamma=2.2 -> linear RGB\0linear RGB -> gamma=2.2\0gamma=2.6 -> linear RGB\0linear RGB -> gamma=2.6\0gamma=2.4 -> linear RGB\0linear RGB -> gamma=2.4\0";
 	ui_tooltip = "Transfer function for the second instance of the shader, if enabled.";
 > = 1;
 
@@ -35,6 +35,10 @@ float3 c1=c0;
     c1.rgb=(c0.rgb> 0.00313066844250063)?1.055 * pow(c0.rgb,rcpTwoFour) - 0.055:12.92 *c0.rgb;
 }else if(mode==7){
     c1.rgb=pow(c0.rgb,invTwoSix);
+}else if(mode==8){
+    c1.rgb=pow(c0.rgb,2.4);
+}else if(mode==9){
+    c1.rgb=pow(c0.rgb,rcpTwoFour);
 }else if (mode==5){
     c1.rgb=pow(c0.rgb,invTwoTwo);
 }else if(mode==3){
