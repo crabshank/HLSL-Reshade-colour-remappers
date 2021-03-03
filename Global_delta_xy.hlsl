@@ -483,7 +483,7 @@ int reddish_pink=Reddish_pink;
 	
 float3 c0Lin=c0.rgb;
 	
-[branch]if (Linear==false){
+[branch]if (lin!=1){
 c0Lin=rgb2LinRGB(c0.rgb, Mode);
 }
 
@@ -508,29 +508,29 @@ int grey=(((c0.r==c0.g)&&(c0.g==c0.b))||(hue_sat.y==0))?1:0;
 
 int act=0;
 
-if(((hue>=3525)||(((hue>=0) && (hue<75))&&(grey==0)))&&(red==true)){
+if(((hue>=3525)||(((hue>=0) && (hue<75))&&(grey==0)))&&(red==1)){
 act=1;
-}else if(((hue>=75) && (hue<375))&&(orange__Brown==true)){
+}else if(((hue>=75) && (hue<375))&&(orange__Brown==1)){
 act=1;
-}else if(((hue>=375) && (hue<675))&&(yellow==true)){
+}else if(((hue>=375) && (hue<675))&&(yellow==1)){
 act=1;
-}else if(((hue>=675) && (hue<975))&&(chartreuse_Lime==true)){
+}else if(((hue>=675) && (hue<975))&&(chartreuse_Lime==1)){
 act=1;
-}else if(((hue>=975) && (hue<1275))&&(green==true)){
+}else if(((hue>=975) && (hue<1275))&&(green==1)){
 act=1;
-}else if(((hue>=1275) && (hue<1575))&&(spring_green==true)){
+}else if(((hue>=1275) && (hue<1575))&&(spring_green==1)){
 act=1;
-}else if(((hue>=1575) && (hue<1875))&&(cyan==true)){
+}else if(((hue>=1575) && (hue<1875))&&(cyan==1)){
 act=1;
-}else if(((hue>=1875) && (hue<2175))&&(azure__Sky_blue==true)){
+}else if(((hue>=1875) && (hue<2175))&&(azure__Sky_blue==1)){
 act=1;
-}else if(((hue>=2175) && (hue<2475))&&(blue==true)){
+}else if(((hue>=2175) && (hue<2475))&&(blue==1)){
 act=1;
-}else if(((hue>=2475) && (hue<3075))&&(violet__Purple==true)){
+}else if(((hue>=2475) && (hue<3075))&&(violet__Purple==1)){
 act=1;
-}else if(((hue>=3075) && (hue<3375))&&(magenta__Pink==true)){
+}else if(((hue>=3075) && (hue<3375))&&(magenta__Pink==1)){
 act=1;
-}else if(((hue>=3375) && (hue<3525))&&(reddish_pink==true)){
+}else if(((hue>=3375) && (hue<3525))&&(reddish_pink==1)){
 act=1;
 }
 
@@ -560,7 +560,7 @@ float nw_Y=(Y_DeltaAmnt==0)?og_XYZ.y:delta(og_XYZ.y,Y_DeltaAmnt);
 
 float3 nw_xyY= XYZ2xyY(LinRGB2XYZ(c0Lin.rgb,Mode));
 
-[branch]if (Linear==true){
+[branch]if (lin==1){
 c0.rgb=XYZ2LinRGB(xyY2XYZ(float3(nw_xyY.xy,nw_Y)),Mode);
 }else{
 c0.rgb=XYZ2rgb(xyY2XYZ(float3(nw_xyY.xy,nw_Y)),Mode);
