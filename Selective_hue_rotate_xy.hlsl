@@ -587,18 +587,18 @@ int violet__Purple=Violet__Purple;
 int magenta__Pink=Magenta__Pink;
 int reddish_pink=Reddish_pink;
 
-int red_rotate=Red_Rotate;
-int orange__Brown_rotate=Orange__Brown_Rotate;
-int yellow_rotate=Yellow_Rotate;
-int chartreuse_Lime_rotate=Chartreuse_Lime_Rotate;
-int green_rotate=Green_Rotate;
-int spring_green_rotate=Spring_green_Rotate;
-int cyan_rotate=Cyan_Rotate;
-int azure__Sky_blue_rotate=Azure__Sky_blue_Rotate;
-int blue_rotate=Blue_Rotate;
-int violet__Purple_rotate=Violet__Purple_Rotate;
-int magenta__Pink_rotate=Magenta__Pink_Rotate;
-int reddish_pink_rotate=Reddish_pink_Rotate;
+float red_rotate=Red_Rotate;
+float orange__Brown_rotate=Orange__Brown_Rotate;
+float yellow_rotate=Yellow_Rotate;
+float chartreuse_Lime_rotate=Chartreuse_Lime_Rotate;
+float green_rotate=Green_Rotate;
+float spring_green_rotate=Spring_green_Rotate;
+float cyan_rotate=Cyan_Rotate;
+float azure__Sky_blue_rotate=Azure__Sky_blue_Rotate;
+float blue_rotate=Blue_Rotate;
+float violet__Purple_rotate=Violet__Purple_Rotate;
+float magenta__Pink_rotate=Magenta__Pink_Rotate;
+float reddish_pink_rotate=Reddish_pink_Rotate;
 
 float Y_og;
 
