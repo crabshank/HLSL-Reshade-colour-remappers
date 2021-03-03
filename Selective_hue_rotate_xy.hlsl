@@ -614,29 +614,29 @@ int grey=((c0.r==c0.g)&&(c0.g==c0.b))?1:0;
 float new_hue=0;
 
 [flatten]if((hue>=3525)||(((hue>=0) && (hue<75))&&(grey==0))){
-new_hue=((red==true)&&(red_rotate!=0))?hue_rotate(c0_hsv.x,red_rotate):c0_hsv.x;
+new_hue=((red==1)&&(red_rotate!=0))?hue_rotate(c0_hsv.x,red_rotate):c0_hsv.x;
 }else if((hue>=75) && (hue<375)){
-new_hue=((orange__Brown==true)&&(orange__Brown_rotate!=0))?hue_rotate(c0_hsv.x,orange__Brown_rotate):c0_hsv.x;
+new_hue=((orange__Brown==1)&&(orange__Brown_rotate!=0))?hue_rotate(c0_hsv.x,orange__Brown_rotate):c0_hsv.x;
 }else if((hue>=375) && (hue<675)){
-new_hue=((yellow==true)&&(yellow_rotate!=0))?hue_rotate(c0_hsv.x,yellow_rotate):c0_hsv.x;
+new_hue=((yellow==1)&&(yellow_rotate!=0))?hue_rotate(c0_hsv.x,yellow_rotate):c0_hsv.x;
 }else if((hue>=675) && (hue<975)){
-new_hue=((chartreuse_Lime==true)&&(chartreuse_Lime_rotate!=0))?hue_rotate(c0_hsv.x,chartreuse_Lime_rotate):c0_hsv.x;
+new_hue=((chartreuse_Lime==1)&&(chartreuse_Lime_rotate!=0))?hue_rotate(c0_hsv.x,chartreuse_Lime_rotate):c0_hsv.x;
 }else if((hue>=975) && (hue<1275)){
-new_hue=((green==true)&&(green_rotate!=0))?hue_rotate(c0_hsv.x,green_rotate):c0_hsv.x;
+new_hue=((green==1)&&(green_rotate!=0))?hue_rotate(c0_hsv.x,green_rotate):c0_hsv.x;
 }else if((hue>=1275) && (hue<1575)){
-new_hue=((spring_green==true)&&(spring_green_rotate!=0))?hue_rotate(c0_hsv.x,spring_green_rotate):c0_hsv.x;
+new_hue=((spring_green==1)&&(spring_green_rotate!=0))?hue_rotate(c0_hsv.x,spring_green_rotate):c0_hsv.x;
 }else if((hue>=1575) && (hue<1875)){
-new_hue=((cyan==true)&&(cyan_rotate!=0))?hue_rotate(c0_hsv.x,cyan_rotate):c0_hsv.x;
+new_hue=((cyan==1)&&(cyan_rotate!=0))?hue_rotate(c0_hsv.x,cyan_rotate):c0_hsv.x;
 }else if((hue>=1875) && (hue<2175)){
-new_hue=((azure__Sky_blue==true)&&(azure__Sky_blue_rotate!=0))?hue_rotate(c0_hsv.x,azure__Sky_blue_rotate):c0_hsv.x;
+new_hue=((azure__Sky_blue==1)&&(azure__Sky_blue_rotate!=0))?hue_rotate(c0_hsv.x,azure__Sky_blue_rotate):c0_hsv.x;
 }else if((hue>=2175) && (hue<2475)){
-new_hue=((blue==true)&&(blue_rotate!=0))?hue_rotate(c0_hsv.x,blue_rotate):c0_hsv.x;
+new_hue=((blue==1)&&(blue_rotate!=0))?hue_rotate(c0_hsv.x,blue_rotate):c0_hsv.x;
 }else if((hue>=2475) && (hue<3075)){
-new_hue=((violet__Purple==true)&&(violet__Purple_rotate!=0))?hue_rotate(c0_hsv.x,violet__Purple_rotate):c0_hsv.x;
+new_hue=((violet__Purple==1)&&(violet__Purple_rotate!=0))?hue_rotate(c0_hsv.x,violet__Purple_rotate):c0_hsv.x;
 }else if((hue>=3075) && (hue<3375)){
-new_hue=((magenta__Pink==true)&&(magenta__Pink_rotate!=0))?hue_rotate(c0_hsv.x,magenta__Pink_rotate):c0_hsv.x;
+new_hue=((magenta__Pink==1)&&(magenta__Pink_rotate!=0))?hue_rotate(c0_hsv.x,magenta__Pink_rotate):c0_hsv.x;
 }else if((hue>=3375) && (hue<3525)){
-new_hue=((reddish_pink==true)&&(reddish_pink_rotate!=0))?hue_rotate(c0_hsv.x,reddish_pink_rotate):c0_hsv.x;
+new_hue=((reddish_pink==1)&&(reddish_pink_rotate!=0))?hue_rotate(c0_hsv.x,reddish_pink_rotate):c0_hsv.x;
 }
 
 
