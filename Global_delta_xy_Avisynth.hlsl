@@ -596,6 +596,13 @@ float4 c1=change(c0,c0_hsv.xy,Mode,linr);
 		float sat=(mx==0)?0:(mx-mn)/mx; 
 		float typ=(dbg_t==1)?1:0;
 		c1.rgb=(sat<dbg_v)?typ:c1.rgb;
+	}else if(dbg==2){
+		float mx=max(c1.r,max(c1.g,c1.b));
+		float mn=min(c1.r,min(c1.g,c1.b));
+		float chr=mx-mn; 
+		float sat=(mx==0)?0:chr/mx; 
+		float typ=(dbg_t==1)?1:0;
+		c1.rgb=(min(chr,sat)<dbg_v)?typ:c1.rgb;
 	}
 
 return c1;
