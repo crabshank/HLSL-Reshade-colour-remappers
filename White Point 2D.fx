@@ -23,16 +23,19 @@ uniform float Two_dimensional_input_Range < __UNIFORM_SLIDER_FLOAT1
 	ui_min = 2.0; ui_max = 0.0;
 > = 2.0;
 
-
 uniform int Debug <__UNIFORM_COMBO_INT1
     ui_items = "Disabled\0Blacken sat <= Debug_thresh\0Saturation change map\0";
     ui_tooltip = "Saturation change map: Sat unchanged => Green; Sat decreased => Cyan to Blue; Sat increased => Magenta to Orange";
 	> = 0;
 
-
 uniform float Debug_thresh < __UNIFORM_DRAG_FLOAT1
 	ui_min = 0; ui_max =1;
 > = 0.015;
+
+uniform int Two_dimensional_output_text <__UNIFORM_COMBO_INT1
+    ui_items = "xy\0RGB\0";
+    ui_tooltip = "Print xy or RGB (0-255) to the screen in 2D input mode";
+> = 0;
 
 uniform int Decimals < __UNIFORM_SLIDER_INT1
 	ui_min = 1; ui_max =4;
@@ -559,7 +562,7 @@ float4 WhitePointPass2D(float4 vpos : SV_Position, float2 texcoord : TexCoord) :
 {
 
 float4 c0=tex2D(ReShade::BackBuffer, texcoord);
-
+float4 p0=float4(1,1,1,1);
 int linr=(Linear==true)?1:0;
 
 float2 Customxy=Custom_xy;
@@ -581,7 +584,7 @@ Customxy.y= (buttondown==0)?mousepoint.y*ReShade::PixelSize.y*((Customxy.y+0.5*y
 
 yCoord_Pos=(buttondown==1)?(Customxy.y-(Customxy.y-0.5*y_Range))/((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range)):mousepoint.y*ReShade::PixelSize.y;
 
-float4 p0=tex2D(ReShade::BackBuffer, mousepoint*ReShade::PixelSize);
+p0=tex2D(ReShade::BackBuffer, mousepoint*ReShade::PixelSize);
 
 float3 WPgf= rgb2XYZ(float3(p0.rgb*rcptwoFiveFive),mode,linr);
 float3 WPgt= rgb2XYZ_grey(float3(p0.rgb*rcptwoFiveFive),mode,linr);
@@ -639,12 +642,66 @@ c3.rgb =(abs(texcoord.x-xCoord_Pos)<3*BUFFER_RCP_WIDTH && abs(texcoord.y-yCoord_
 float4 res =float4(c1.rgb,0);
 
 float textSize=25;
+int decR=Decimals;
+int decG=Decimals;
+int decB=Decimals;
+if(Two_dimensional_output_text==1){
+	float rd=round(p0.r*255);
+	[flatten]if(rd>=100){
+		rd=rd*0.001;
+		decR=3;
+	}else if(rd>=10){
+		rd=rd*0.01;
+		decR=2;
+	}else{
+		rd=rd*0.1;
+		decR=1;
+	}	
+	
+	float gr=round(p0.g*255);
+	[flatten]if(gr>=100){
+		gr=gr*0.001;
+		decG=3;
+	}else if(gr>=10){
+		gr=gr*0.01;
+		decG=2;
+	}else{
+		gr=gr*0.1;
+		decG=1;
+	}	
+	
+	float bl=round(p0.b*255);
+	
+	[flatten]if(bl>=100){
+		bl=bl*0.001;
+		decB=3;
+	}else if(bl>=10){
+		bl=bl*0.01;
+		decB=2;
+	}else{
+		bl=bl*0.1;
+		decB=1;
+	}
+	
 
+DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-15, 0), textSize, 1), int2(8, 0), textSize, 1) , 
+textSize, 1, texcoord,  -decR, rd, res,1);
+
+DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-10, 0), textSize, 1), int2(8, 0), textSize, 1) , 
+textSize, 1, texcoord,  -decG, gr, res,1);
+
+DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-5, 0), textSize, 1), int2(8, 0), textSize, 1) , 
+textSize, 1, texcoord,  -decB, bl, res,1);
+
+}else{
+	
 DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-14, 0), textSize, 1), int2(8, 0), textSize, 1) , 
 textSize, 1, texcoord,  Decimals, Customxy.x, res,1);
 
 DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-5, 0), textSize, 1), int2(8, 0), textSize, 1) , 
 textSize, 1, texcoord,  Decimals,  Customxy.y, res,1);
+
+}
 
 c1.rgb=res.rgb;
 }

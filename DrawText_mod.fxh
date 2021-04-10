@@ -216,6 +216,8 @@ return sign*(mulTenIntPow(float(round(integer)),-places));
 
 
 void DrawText_Digit( float2 pos, float size, float ratio, float2 tex, int digit, float data, inout float4 res,float textGrey) {
+// if digit <=0, outputs fractional part of float as int with 'digit' number of digits
+
     int digits[13] = {
         __0, __1, __2, __3, __4, __5, __6, __7, __8, __9, __Minus, __Space, __Dot
     };
@@ -223,7 +225,8 @@ void DrawText_Digit( float2 pos, float size, float ratio, float2 tex, int digit,
     float2 uv = (tex * float2(BUFFER_WIDTH, BUFFER_HEIGHT) - pos) / size;
     uv.y      = saturate(uv.y);
     uv.x     *= ratio * 2.0;
-
+int OG_digit=digit;
+digit=abs(digit);
 data=rounder(digit,data);
     float  t  = abs(data);
     int numDigits = max(ceil(log2(t)/3.32192809),1);
@@ -241,7 +244,9 @@ index=round(trunc(frac(trunc(mulTenIntPow(t,uv.x))/10)*10));
 index=round(frac(trunc(mulTenIntPow(t,int(uv.x)))/10)*10);
 }
 
-index=(int(uv.x)==0&&int(ceil(uv.x))==1)?12:index;
+index=(int(uv.x)==0 && int(ceil(uv.x))==1)?12:index;
+index=(OG_digit<=0 && index==12)?11:index;
+index=(OG_digit<0 && int(ceil(uv.x))<1 && index==0)?11:index;
 
 [flatten]if(int(uv.x)==-numDigits){
 if(data>=0){
