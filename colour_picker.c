@@ -77,7 +77,7 @@ _snprintf(str_out, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
 strcpy(str_out4, str_out);
 strcat(str_out4, str_out3);
 }
-}else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel               if(
+}else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel               if(
                     b= GetCursorPos(&p);
                         p_fixed.x=p.x;
                         p_fixed.y=p.y;
@@ -255,7 +255,7 @@ SetClipboardData(CF_TEXT, hGloblal);
 CloseClipboard();
   DrawText(hdc,str_out5, -1, &xy_txt, DT_NOCLIP);
 
-   }else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel               if(
+   }else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel               if(
                     b= GetCursorPos(&p);
                         p_fixed.x=p.x;
                         p_fixed.y=p.y;
