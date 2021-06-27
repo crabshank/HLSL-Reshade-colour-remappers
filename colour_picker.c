@@ -35,19 +35,20 @@ PAINTSTRUCT ps;
 int Rd,Gr,Bl,grey;
 
 HDC hdc;
-HDC hdc2;
 COLORREF color;
 HGDIOBJ oldObject;
-
+HBITMAP hbCapture;
+HDC hDest;
+HDC hdcCaptureBmp;
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
     switch(message)
     {
         case WM_PAINT:
-        {
+    {
 
-   if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
+  if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
 if(GetAsyncKeyState(0x41)){
     smp=(smp>=2)?smp-1:smp;
 	smp2=smp+smp4;
@@ -95,35 +96,36 @@ _snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
 	}
 
  hdc = GetDC(NULL);
- hdc2 = GetDC(NULL);
 
-HDC hDest2 = CreateCompatibleDC(hdc2);
-HDC hDest = CreateCompatibleDC(hdc);
+hDest = CreateCompatibleDC(hdc);
 
-HBITMAP hbCapture=  CreateCompatibleBitmap(hdc2, 1,1);
-SelectObject(hDest2, hbCapture);
+hbCapture=  CreateCompatibleBitmap(hdc, 1,1);
+SelectObject(hDest, hbCapture);
 
-BitBlt(hDest2, 0,0, 1, 1, hdc2,p_fixed.x,p_fixed.y, SRCCOPY);
+BitBlt(hDest, 0,0, 1, 1, hdc,p_fixed.x,p_fixed.y, SRCCOPY);
 
-            ReleaseDC(NULL, hdc2);
+            ReleaseDC(NULL, hdc);
             DeleteDC(hDest);
 
             hdc = BeginPaint(hwnd, &ps);
 
-            color = GetPixel(hdc2,0,0);
+            color = GetPixel(hdc,0,0);
             Rd=GetRValue(color);
             Gr=GetGValue(color);
             Bl=GetBValue(color);
             hBrush = CreateSolidBrush(RGB(Rd,Gr,Bl));
             FillRect(hdc, &ps.rcPaint, hBrush);
             DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
-            HDC hdcCaptureBmp = CreateCompatibleDC(hdc);
+            hdcCaptureBmp = CreateCompatibleDC(hdc);
             oldObject = SelectObject(hdcCaptureBmp, hbCapture);
 
             BitBlt(hdc, 0, 0, 1,1, hdcCaptureBmp, 0,0, SRCCOPY);
 
             SelectObject(hdcCaptureBmp, oldObject);
-
+            DeleteObject(oldObject);
+            DeleteObject(hbCapture);
+ ReleaseDC(NULL, hdcCaptureBmp);
+ DeleteDC(hdcCaptureBmp);
 double red, green, blue;
 
 double mn,mx,diff,hue_d;
@@ -285,6 +287,7 @@ _snprintf(str_top, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,
    }
 
       EndPaint(hwnd, &ps);
+
 
         }
 
