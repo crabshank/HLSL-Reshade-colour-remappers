@@ -563,6 +563,7 @@ float4 WhitePointPass2D(float4 vpos : SV_Position, float2 texcoord : TexCoord) :
 
 float4 c0=tex2D(ReShade::BackBuffer, texcoord);
 float4 p0=float4(1,1,1,1);
+float4 p0_rnd=float4(255,255,255,255);
 int linr=(Linear==true)?1:0;
 
 float2 Customxy=Custom_xy;
@@ -585,6 +586,8 @@ Customxy.y= (buttondown==0)?mousepoint.y*ReShade::PixelSize.y*((Customxy.y+0.5*y
 yCoord_Pos=(buttondown==1)?(Customxy.y-(Customxy.y-0.5*y_Range))/((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range)):mousepoint.y*ReShade::PixelSize.y;
 
 p0=tex2D(ReShade::BackBuffer, mousepoint*ReShade::PixelSize);
+
+p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
 
 float3 WPgf= rgb2XYZ(float3(p0.rgb*rcptwoFiveFive),mode,linr);
 float3 WPgt= rgb2XYZ_grey(float3(p0.rgb*rcptwoFiveFive),mode,linr);
@@ -646,7 +649,7 @@ int decR=Decimals;
 int decG=Decimals;
 int decB=Decimals;
 if(Two_dimensional_output_text==1 || Two_dimensional_output_text==2){
-	float rd=round(p0.r*255);
+	float rd=p0_rnd.r;
 	[flatten]if(rd>=100){
 		rd=rd*0.001;
 		decR=3;
@@ -658,7 +661,7 @@ if(Two_dimensional_output_text==1 || Two_dimensional_output_text==2){
 		decR=1;
 	}	
 	
-	float gr=round(p0.g*255);
+	float gr=p0_rnd.g;
 	[flatten]if(gr>=100){
 		gr=gr*0.001;
 		decG=3;
@@ -670,7 +673,7 @@ if(Two_dimensional_output_text==1 || Two_dimensional_output_text==2){
 		decG=1;
 	}	
 	
-	float bl=round(p0.b*255);
+	float bl=p0_rnd.b;
 	
 	[flatten]if(bl>=100){
 		bl=bl*0.001;
@@ -682,7 +685,7 @@ if(Two_dimensional_output_text==1 || Two_dimensional_output_text==2){
 		bl=bl*0.1;
 		decB=1;
 	}
-	
+
 
 DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-15, 0), textSize, 1), int2(8, 0), textSize, 1) , 
 textSize, 1, texcoord,  -decR, rd, res,1);
@@ -706,7 +709,7 @@ textSize, 1, texcoord,  Decimals,  Customxy.y, res,1);
 c1.rgb=res.rgb;
 }
 
-
+p0.rgb=float3(p0_rnd.r*rcptwoFiveFive,p0_rnd.g*rcptwoFiveFive,p0_rnd.b*rcptwoFiveFive);
 c1.rgb=(Two_dimensional_input==true && Two_dimensional_output_text==2 && ((texcoord.x>=0.551 && texcoord.x<=0.611) && (texcoord.y<=0.023) ))?p0.rgb:c1.rgb;
 
 return c1;
