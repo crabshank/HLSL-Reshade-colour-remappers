@@ -89,6 +89,7 @@ _snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
     strcat(str_both, str_bottom);
 }
 
+
 if(mode!=1){
 b= GetCursorPos(&p);
 p_fixed.x=p.x;
@@ -102,9 +103,8 @@ HBITMAP hbCapture=  CreateCompatibleBitmap(hdc, smp, smp);
 SelectObject(hDest, hbCapture);
 
 BitBlt(hDest, 0,0, 1, 1, hdc, p_fixed.x,p_fixed.y, SRCCOPY);
-
-ReleaseDC(NULL, hdc);
-DeleteDC(hDest);
+            ReleaseDC(NULL, hdc);
+            DeleteDC(hDest);
 int Rd,Gr,Bl,grey;
 
             hdc = BeginPaint(hwnd, &ps);
@@ -112,6 +112,7 @@ int Rd,Gr,Bl,grey;
             Rd=GetRValue(color);
             Gr=GetGValue(color);
             Bl=GetBValue(color);
+
             hBrush = CreateSolidBrush(RGB(Rd,Gr,Bl));
             FillRect(hdc, &ps.rcPaint, hBrush);
             DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
@@ -121,9 +122,10 @@ int Rd,Gr,Bl,grey;
             BitBlt(hdc, 0, 0,1, 1, hdcCaptureBmp, 0,0, SRCCOPY);
 
             SelectObject(hdcCaptureBmp, oldObject);
-DeleteObject(hbCapture);
-DeleteObject(oldObject);
-DeleteDC(hdcCaptureBmp);
+
+            DeleteObject(hbCapture);
+            DeleteObject(oldObject);
+            DeleteDC(hdcCaptureBmp);
 
 double red, green, blue;
 
@@ -190,7 +192,7 @@ out_col=12;
 
 
 
-if ((out_col==0)||(sat_out==0)){
+if (grey==1){
 _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 _snprintf(str_bottom, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",0);
     strcpy(str_both, str_top);
