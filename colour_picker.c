@@ -10,11 +10,11 @@ HWND hwnd;
 POINT p;
 POINT p_fixed;
 BOOL b;
-char str_out[MAX_PATH]={0};
-char str_out2[MAX_PATH]={0};
-char str_out3[MAX_PATH]={0};
-char str_out4[MAX_PATH]={0};
-char str_out5[MAX_PATH]={0};
+char str_top[MAX_PATH]={0};
+char str_bottom[MAX_PATH]={0};
+char str_both[MAX_PATH]={0};
+char str_paste[MAX_PATH]={0};
+
 
 int smp = 10;
 int smp2 = 0;
@@ -56,10 +56,10 @@ if(GetAsyncKeyState(0x41)){
 	smp3=smp+smp5;
     SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
     //xy_txt = {0,smp,0, 0};
-    _snprintf(str_out2, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+    _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 
-    strcpy(str_out4, str_out2);
-    strcat(str_out4, str_out3);
+    strcpy(str_both, str_top);
+    strcat(str_both, str_bottom);
 
 }else if(GetAsyncKeyState(0x53)){
     smp+=1;
@@ -67,25 +67,26 @@ if(GetAsyncKeyState(0x41)){
 	smp3=smp+smp5;
     SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
    // xy_txt = {0,smp,0, 0};
-    _snprintf(str_out2, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+    _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 
-    strcpy(str_out4, str_out2);
-    strcat(str_out4, str_out3);
+    strcpy(str_both, str_top);
+    strcat(str_both, str_bottom);
 
 }else{
-_snprintf(str_out, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
-strcpy(str_out4, str_out);
-strcat(str_out4, str_out3);
+_snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
+    strcpy(str_both, str_top);
+    strcat(str_both, str_bottom);
+
 }
 }else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel               if(
                     b= GetCursorPos(&p);
                         p_fixed.x=p.x;
                         p_fixed.y=p.y;
 }else{
-    _snprintf(str_out2, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+    _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 
-    strcpy(str_out4, str_out2);
-    strcat(str_out4, str_out3);
+    strcpy(str_both, str_top);
+    strcat(str_both, str_bottom);
 }
 
 if(mode!=1){
@@ -113,13 +114,16 @@ int Rd,Gr,Bl,grey;
             Bl=GetBValue(color);
             hBrush = CreateSolidBrush(RGB(Rd,Gr,Bl));
             FillRect(hdc, &ps.rcPaint, hBrush);
-            DrawText(hdc,str_out4, -1, &xy_txt,DT_NOCLIP);
+            DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
             HDC hdcCaptureBmp = CreateCompatibleDC(hdc);
             oldObject = SelectObject(hdcCaptureBmp, hbCapture);
 
             BitBlt(hdc, 0, 0,1, 1, hdcCaptureBmp, 0,0, SRCCOPY);
 
             SelectObject(hdcCaptureBmp, oldObject);
+DeleteObject(hbCapture);
+DeleteObject(oldObject);
+DeleteDC(hdcCaptureBmp);
 
 double red, green, blue;
 
@@ -182,14 +186,12 @@ out_col=12;
 
 }
 
-DeleteObject(hbCapture);
-DeleteObject(oldObject);
-DeleteDC(hdcCaptureBmp);
+
 
 
 
 if ((out_col==0)||(sat_out==0)){
-_snprintf(str_out3, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",0);
+_snprintf(str_bottom, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",0);
 }else{
 
     switch(out_col)
@@ -234,26 +236,27 @@ _snprintf(str_out3, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",0);
             ;
     }
 
-_snprintf(str_out3, MAX_PATH-1,"\nSaturation: %.1f; %s (%.1f°)",sat_out*100,nomin_hue,hue_out);
+_snprintf(str_bottom, MAX_PATH-1,"\nSaturation: %.1f; %s (%.1f°)",sat_out*100,nomin_hue,hue_out);
 }
 
-_snprintf(str_out2, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+_snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 
    if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
 
-_snprintf(str_out, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
+_snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+_snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
 
-strcpy(str_out5, str_out);
-strcat(str_out5, str_out3);
-const size_t len = strlen(str_out2) + 1;
+    strcpy(str_both, str_top);
+    strcat(str_both, str_bottom);
+const size_t len = strlen(str_paste) + 1;
 HGLOBAL hGloblal =  GlobalAlloc(GMEM_MOVEABLE, len);
-memcpy(GlobalLock(hGloblal), str_out2, len);
+memcpy(GlobalLock(hGloblal), str_paste, len);
 GlobalUnlock(hGloblal);
 OpenClipboard(hwnd);
 EmptyClipboard();
 SetClipboardData(CF_TEXT, hGloblal);
 CloseClipboard();
-  DrawText(hdc,str_out5, -1, &xy_txt, DT_NOCLIP);
+  DrawText(hdc,str_both, -1, &xy_txt, DT_NOCLIP);
 
    }else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel               if(
                     b= GetCursorPos(&p);
@@ -261,21 +264,21 @@ CloseClipboard();
                         p_fixed.y=p.y;
 
 
-_snprintf(str_out, MAX_PATH-1,"Setting fixed cursor position: %d, %d",p_fixed.x,p_fixed.y);
-strcpy(str_out4, str_out);
-strcat(str_out4, str_out3);
-       DrawText(hdc,str_out4, -1, &xy_txt,DT_NOCLIP);
+_snprintf(str_top, MAX_PATH-1,"Setting fixed cursor position: %d, %d",p_fixed.x,p_fixed.y);
+    strcpy(str_both, str_top);
+    strcat(str_both, str_bottom);
+       DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
 }else if(mode==1){
-_snprintf(str_out, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,p_fixed.y,Ro,Go,Bo);
+_snprintf(str_top, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,p_fixed.y,Ro,Go,Bo);
 
-strcpy(str_out5, str_out);
-strcat(str_out5, str_out3);
-  DrawText(hdc,str_out5, -1, &xy_txt, DT_NOCLIP);
+    strcpy(str_both, str_top);
+    strcat(str_both, str_bottom);
+  DrawText(hdc,str_both, -1, &xy_txt, DT_NOCLIP);
 
 }else{
-       strcpy(str_out4, str_out2);
-strcat(str_out4, str_out3);
-       DrawText(hdc,str_out4, -1, &xy_txt,DT_NOCLIP);
+    strcpy(str_both, str_top);
+    strcat(str_both, str_bottom);
+       DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
 
    }
 
