@@ -307,13 +307,14 @@ _snprintf(str_top, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,
         }
         break;
         case WM_TIMER:
-            InvalidateRect(hwnd, nullptr, false);
+           InvalidateRect(hwnd, nullptr, false);
             break;
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
         default:
             return DefWindowProc(hwnd, message, wParam, lParam);
+           break;
     }
     return 0;
 }
