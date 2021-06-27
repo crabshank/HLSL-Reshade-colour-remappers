@@ -191,7 +191,10 @@ out_col=12;
 
 
 if ((out_col==0)||(sat_out==0)){
+_snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 _snprintf(str_bottom, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",0);
+    strcpy(str_both, str_top);
+    strcat(str_both, str_bottom);
 }else{
 
     switch(out_col)
@@ -349,10 +352,10 @@ RECT sz = {0, 0, smp3+smp+273, smp2+smp+13};
         CW_USEDEFAULT, CW_USEDEFAULT, sz.right - sz.left, sz.bottom - sz.top,
         NULL, NULL, hInstance, NULL);
 
-/*if(!hwnd)
+if(!hwnd)
     {
         return FALSE;
-    }*/
+    }
 
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
