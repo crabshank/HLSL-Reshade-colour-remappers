@@ -1,0 +1,386 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <windows.h>
+#include <math.h>
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
+HINSTANCE hInst;
+HWND hwnd;
+POINT p;
+POINT p_fixed;
+BOOL b;
+char str_out[MAX_PATH]={0};
+char str_out2[MAX_PATH]={0};
+char str_out3[MAX_PATH]={0};
+char str_out4[MAX_PATH]={0};
+char str_out5[MAX_PATH]={0};
+
+int smp = 10;
+int smp2 = 0;
+int smp3 = 0;
+int smp4 = 72;
+int smp5 = 297;
+int Ro=0;
+int Go=0;
+int Bo=0;
+int mode=0; //0: normal, 1: fixed cursor
+char* nomin_hue="";
+double sat_out=0;
+double hue_out=0;
+int out_col=0;
+
+HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
+PAINTSTRUCT ps;
+
+HDC hdc;
+COLORREF color;
+HGDIOBJ oldObject;
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+
+    switch(message)
+    {
+        case WM_PAINT:
+        {
+             RECT  xy_txt = {0,smp,0, 0};
+
+
+
+
+   if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
+if(GetAsyncKeyState(0x41)){
+    smp=(smp>=2)?smp-1:smp;
+	smp2=smp+smp4;
+	smp3=smp+smp5;
+    SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
+    //xy_txt = {0,smp,0, 0};
+    _snprintf(str_out2, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+
+    strcpy(str_out4, str_out2);
+    strcat(str_out4, str_out3);
+
+}else if(GetAsyncKeyState(0x53)){
+    smp+=1;
+	smp2=smp+smp4;
+	smp3=smp+smp5;
+    SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
+   // xy_txt = {0,smp,0, 0};
+    _snprintf(str_out2, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+
+    strcpy(str_out4, str_out2);
+    strcat(str_out4, str_out3);
+
+}else{
+_snprintf(str_out, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
+strcpy(str_out4, str_out);
+strcat(str_out4, str_out3);
+}
+}else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel               if(
+                    b= GetCursorPos(&p);
+                        p_fixed.x=p.x;
+                        p_fixed.y=p.y;
+}else{
+    _snprintf(str_out2, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+
+    strcpy(str_out4, str_out2);
+    strcat(str_out4, str_out3);
+}
+
+if(mode!=1){
+b= GetCursorPos(&p);
+p_fixed.x=p.x;
+p_fixed.y=p.y;
+}
+ hdc = GetDC(NULL);
+
+HDC hDest = CreateCompatibleDC(hdc);
+
+HBITMAP hbCapture=  CreateCompatibleBitmap(hdc, smp, smp);
+SelectObject(hDest, hbCapture);
+
+BitBlt(hDest, 0,0, 1, 1, hdc, p_fixed.x,p_fixed.y, SRCCOPY);
+
+ReleaseDC(NULL, hdc);
+DeleteDC(hDest);
+int Rd,Gr,Bl,grey;
+
+            hdc = BeginPaint(hwnd, &ps);
+            color = GetPixel(hdc,0,0);
+            Rd=GetRValue(color);
+            Gr=GetGValue(color);
+            Bl=GetBValue(color);
+            hBrush = CreateSolidBrush(RGB(Rd,Gr,Bl));
+            FillRect(hdc, &ps.rcPaint, hBrush);
+            DrawText(hdc,str_out4, -1, &xy_txt,DT_NOCLIP);
+            HDC hdcCaptureBmp = CreateCompatibleDC(hdc);
+            oldObject = SelectObject(hdcCaptureBmp, hbCapture);
+
+            BitBlt(hdc, 0, 0,1, 1, hdcCaptureBmp, 0,0, SRCCOPY);
+
+            SelectObject(hdcCaptureBmp, oldObject);
+
+double red, green, blue;
+
+double mn,mx,diff,hue_d;
+
+ Ro=Rd;
+ Go=Gr;
+ Bo=Bl;
+
+            red= (double)(Rd)/255.0;
+            green= (double)(Gr)/255.0;
+            blue= (double)(Bl)/255.0;
+
+  grey=((Rd==Gr)&&(Gr==Bl))?1:0;
+  mn=MIN(red,MIN(green,blue));
+  mx=MAX(red,MAX(green,blue));
+  diff=mx-mn;
+  sat_out=(mx==0)?0:diff/mx;
+
+if (grey==0){
+
+if ((Rd>Gr)&&(Rd>Bl)){
+    hue_d =(green - blue) / diff;
+}else if ((Gr>Rd)&&(Gr>Bl)){
+    hue_d = 2.0 + (blue - red) / diff;
+}else{
+    hue_d = 4.0 + (red - green) / diff;
+}
+    hue_d*=60;
+    hue_d =(hue_d < 0)?hue_d + 360:hue_d;
+    hue_out=hue_d;
+    int hue=floor(hue_d*10);
+
+
+if((hue>=3525)||(((hue>=0) && (hue<75)))){
+out_col=1;
+}else if((hue>=75) && (hue<375)){
+out_col=2;
+}else if((hue>=375) && (hue<675)){
+out_col=3;
+}else if((hue>=675) && (hue<975)){
+out_col=4;
+}else if((hue>=975) && (hue<1275)){
+out_col=5;
+}else if((hue>=1275) && (hue<1575)){
+out_col=6;
+}else if((hue>=1575) && (hue<1875)){
+out_col=7;
+}else if((hue>=1875) && (hue<2175)){
+out_col=8;
+}else if((hue>=2175) && (hue<2475)){
+out_col=9;
+}else if((hue>=2475) && (hue<3075)){
+out_col=10;
+}else if((hue>=3075) && (hue<3375)){
+out_col=11;
+}else if((hue>=3375) && (hue<3525)){
+out_col=12;
+}
+
+}
+
+DeleteObject(hbCapture);
+DeleteObject(oldObject);
+DeleteDC(hdcCaptureBmp);
+
+
+
+if ((out_col==0)||(sat_out==0)){
+_snprintf(str_out3, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",0);
+}else{
+
+    switch(out_col)
+    {
+        case 1:
+        nomin_hue="Red";
+        break;
+        case 2:
+        nomin_hue="Orange/Brown";
+        break;
+        case 3:
+        nomin_hue="Yellow";
+        break;
+        case 4:
+        nomin_hue="Chartreuse/Lime";
+        break;
+        case 5:
+        nomin_hue="Green";
+        break;
+        case 6:
+        nomin_hue="Spring Green";
+        break;
+        case 7:
+        nomin_hue="Cyan";
+        break;
+        case 8:
+        nomin_hue="Azure/Sky blue";
+        break;
+        case 9:
+        nomin_hue="Blue";
+        break;
+        case 10:
+        nomin_hue="Violet/Purple";
+        break;
+        case 11:
+        nomin_hue="Magenta/Pink";
+        break;
+        case 12:
+        nomin_hue="Reddish Pink";
+        break;
+        default:
+            ;
+    }
+
+_snprintf(str_out3, MAX_PATH-1,"\nSaturation: %.1f; %s (%.1f°)",sat_out*100,nomin_hue,hue_out);
+}
+
+_snprintf(str_out2, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+
+   if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
+
+_snprintf(str_out, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
+
+strcpy(str_out5, str_out);
+strcat(str_out5, str_out3);
+const size_t len = strlen(str_out2) + 1;
+HGLOBAL hGloblal =  GlobalAlloc(GMEM_MOVEABLE, len);
+memcpy(GlobalLock(hGloblal), str_out2, len);
+GlobalUnlock(hGloblal);
+OpenClipboard(hwnd);
+EmptyClipboard();
+SetClipboardData(CF_TEXT, hGloblal);
+CloseClipboard();
+  DrawText(hdc,str_out5, -1, &xy_txt, DT_NOCLIP);
+
+   }else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel               if(
+                    b= GetCursorPos(&p);
+                        p_fixed.x=p.x;
+                        p_fixed.y=p.y;
+
+
+_snprintf(str_out, MAX_PATH-1,"Setting fixed cursor position: %d, %d",p_fixed.x,p_fixed.y);
+strcpy(str_out4, str_out);
+strcat(str_out4, str_out3);
+       DrawText(hdc,str_out4, -1, &xy_txt,DT_NOCLIP);
+}else if(mode==1){
+_snprintf(str_out, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,p_fixed.y,Ro,Go,Bo);
+
+strcpy(str_out5, str_out);
+strcat(str_out5, str_out3);
+  DrawText(hdc,str_out5, -1, &xy_txt, DT_NOCLIP);
+
+}else{
+       strcpy(str_out4, str_out2);
+strcat(str_out4, str_out3);
+       DrawText(hdc,str_out4, -1, &xy_txt,DT_NOCLIP);
+
+   }
+
+      EndPaint(hwnd, &ps);
+
+        }
+
+        break;
+        case WM_MOUSEWHEEL :{
+        	if (GET_WHEEL_DELTA_WPARAM(wParam) > 0)
+		{
+			smp+=1;
+			if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
+                mode=(mode+1>1)?0:mode+1;
+			}
+
+		} else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
+			smp=(smp>=2)?smp-1:smp;
+			if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
+                mode=(mode-1<0)?1:mode-1;
+			}
+		}
+        smp2=smp+smp4;
+        smp3=smp+smp5;
+		SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
+        }
+        break;
+        case WM_TIMER:
+            InvalidateRect(hwnd, nullptr, false);
+            break;
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
+        default:
+            return DefWindowProc(hwnd, message, wParam, lParam);
+    }
+    return 0;
+}
+
+ATOM MyRegisterClass(HINSTANCE hInstance)
+{
+    WNDCLASSEX wcex;
+    wcex.cbSize = sizeof(WNDCLASSEX);
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground = hBrush;
+    wcex.lpszMenuName = NULL;
+    wcex.lpszClassName = "rgbClass";
+    wcex.hIconSm = NULL;
+    return RegisterClassEx(&wcex);
+}
+
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+{
+
+RECT sz = {0, 0, smp3+smp+273, smp2+smp+13};
+        /*{x-coordinate of the upper-left corner of the rectangle, y-coordinate of the upper-left corner of the rectangle,
+    x-coordinate of the lower-right corner of the rectangle, y-coordinate of the lower-right corner of the rectangle}
+    */
+    AdjustWindowRect(&sz, WS_OVERLAPPEDWINDOW, TRUE);
+    hwnd = CreateWindow("rgbClass", "Colour picker", WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, sz.right - sz.left, sz.bottom - sz.top,
+        NULL, NULL, hInstance, NULL);
+
+    if(!hwnd)
+    {
+        return FALSE;
+    }
+
+    ShowWindow(hwnd, nCmdShow);
+    UpdateWindow(hwnd);
+    return TRUE;
+}
+
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+    UNREFERENCED_PARAMETER(hPrevInstance);
+    UNREFERENCED_PARAMETER(lpCmdLine);
+
+    MyRegisterClass(hInstance);
+    if(!InitInstance(hInstance, nCmdShow))
+    {
+        return FALSE;
+    }
+
+   SetTimer(hwnd, 1, USER_TIMER_MINIMUM, nullptr);
+
+                  if(IsWindowVisible(hwnd)==true){
+            SetWindowPos(
+  hwnd,
+  (HWND) HWND_TOPMOST,
+  0, 0, 0, 0,
+  SWP_NOMOVE | SWP_NOSIZE );
+               }
+
+    MSG msg;
+    while(GetMessage(&msg, NULL, 0, 0))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    return (int)msg.wParam;
+}
