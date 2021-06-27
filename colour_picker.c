@@ -313,7 +313,7 @@ _snprintf(str_top, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,
             PostQuitMessage(0);
             break;
         default:
-            return DefWindowProc(hwnd, message, wParam, lParam);
+          return DefWindowProc(hwnd, message, wParam, lParam);
            break;
     }
     return 0;
@@ -349,10 +349,10 @@ RECT sz = {0, 0, smp3+smp+273, smp2+smp+13};
         CW_USEDEFAULT, CW_USEDEFAULT, sz.right - sz.left, sz.bottom - sz.top,
         NULL, NULL, hInstance, NULL);
 
-    if(!hwnd)
+/*if(!hwnd)
     {
         return FALSE;
-    }
+    }*/
 
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
