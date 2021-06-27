@@ -33,8 +33,8 @@ uniform float Debug_thresh < __UNIFORM_DRAG_FLOAT1
 > = 0.015;
 
 uniform int Two_dimensional_output_text <__UNIFORM_COMBO_INT1
-    ui_items = "xy\0RGB\0";
-    ui_tooltip = "Print xy or RGB (0-255) to the screen in 2D input mode";
+    ui_items = "xy\0RGB\0RGB + patch\0";
+    ui_tooltip = "Print xy or RGB (0-255) to the screen in 2D input mode or RGB with a patch of that colour at the top";
 > = 0;
 
 uniform int Decimals < __UNIFORM_SLIDER_INT1
@@ -645,7 +645,7 @@ float textSize=25;
 int decR=Decimals;
 int decG=Decimals;
 int decB=Decimals;
-if(Two_dimensional_output_text==1){
+if(Two_dimensional_output_text==1 || Two_dimensional_output_text==2){
 	float rd=round(p0.r*255);
 	[flatten]if(rd>=100){
 		rd=rd*0.001;
@@ -705,6 +705,9 @@ textSize, 1, texcoord,  Decimals,  Customxy.y, res,1);
 
 c1.rgb=res.rgb;
 }
+
+
+c1.rgb=(Two_dimensional_input==true && Two_dimensional_output_text==2 && ((texcoord.x>=0.551 && texcoord.x<=0.611) && (texcoord.y<=0.023) ))?p0.rgb:c1.rgb;
 
 return c1;
 
