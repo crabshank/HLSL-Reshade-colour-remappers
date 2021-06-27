@@ -32,6 +32,7 @@ int out_col=0;
 RECT  xy_txt = {0,smp,0, 0};
 HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
 PAINTSTRUCT ps;
+int Rd,Gr,Bl,grey;
 
 HDC hdc;
 COLORREF color;
@@ -74,7 +75,7 @@ _snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
     strcat(str_both, str_bottom);
 
 }
-}else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel               if(
+}else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel
                     b= GetCursorPos(&p);
                         p_fixed.x=p.x;
                         p_fixed.y=p.y;
@@ -86,42 +87,39 @@ _snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
 }
 
 
-if(mode!=1){
-b= GetCursorPos(&p);
-p_fixed.x=p.x;
-p_fixed.y=p.y;
-}
+	if(mode!=1){
+	b= GetCursorPos(&p);
+	p_fixed.x=p.x;
+	p_fixed.y=p.y;
+	}
+
  hdc = GetDC(NULL);
 
 HDC hDest = CreateCompatibleDC(hdc);
 
-HBITMAP hbCapture=  CreateCompatibleBitmap(hdc, smp, smp);
+HBITMAP hbCapture=  CreateCompatibleBitmap(hdc, 1,1);
 SelectObject(hDest, hbCapture);
 
-BitBlt(hDest, 0,0, 1, 1, hdc, p_fixed.x,p_fixed.y, SRCCOPY);
+BitBlt(hDest, 0,0, 1, 1, hdc,p_fixed.x,p_fixed.y, SRCCOPY);
+
             ReleaseDC(NULL, hdc);
             DeleteDC(hDest);
-int Rd,Gr,Bl,grey;
 
             hdc = BeginPaint(hwnd, &ps);
+
             color = GetPixel(hdc,0,0);
             Rd=GetRValue(color);
             Gr=GetGValue(color);
             Bl=GetBValue(color);
-
             hBrush = CreateSolidBrush(RGB(Rd,Gr,Bl));
             FillRect(hdc, &ps.rcPaint, hBrush);
             DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
             HDC hdcCaptureBmp = CreateCompatibleDC(hdc);
             oldObject = SelectObject(hdcCaptureBmp, hbCapture);
 
-            BitBlt(hdc, 0, 0,1, 1, hdcCaptureBmp, 0,0, SRCCOPY);
+            BitBlt(hdc, 0, 0, 1,1, hdcCaptureBmp, 0,0, SRCCOPY);
 
             SelectObject(hdcCaptureBmp, oldObject);
-
-            DeleteObject(hbCapture);
-            DeleteObject(oldObject);
-            DeleteDC(hdcCaptureBmp);
 
 double red, green, blue;
 
@@ -259,7 +257,7 @@ SetClipboardData(CF_TEXT, hGloblal);
 CloseClipboard();
   DrawText(hdc,str_both, -1, &xy_txt, DT_NOCLIP);
 
-   }else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel               if(
+   }else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel
                     b= GetCursorPos(&p);
                         p_fixed.x=p.x;
                         p_fixed.y=p.y;
