@@ -375,7 +375,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         return FALSE;
     }
 
-   SetTimer(hwnd, 1, USER_TIMER_MINIMUM, nullptr);
+   SetTimer(hwnd, 1, 16, nullptr);
 
                   if(IsWindowVisible(hwnd)==true){
             SetWindowPos(
