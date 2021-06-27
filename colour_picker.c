@@ -29,7 +29,7 @@ char* nomin_hue="";
 double sat_out=0;
 double hue_out=0;
 int out_col=0;
-
+RECT  xy_txt = {0,smp,0, 0};
 HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
 PAINTSTRUCT ps;
 
@@ -44,10 +44,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         case WM_PAINT:
         {
-             RECT  xy_txt = {0,smp,0, 0};
-
-
-
 
    if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
 if(GetAsyncKeyState(0x41)){
@@ -55,7 +51,7 @@ if(GetAsyncKeyState(0x41)){
 	smp2=smp+smp4;
 	smp3=smp+smp5;
     SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
-    //xy_txt = {0,smp,0, 0};
+    xy_txt = {0,smp,0, 0};
     _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 
     strcpy(str_both, str_top);
@@ -66,7 +62,7 @@ if(GetAsyncKeyState(0x41)){
 	smp2=smp+smp4;
 	smp3=smp+smp5;
     SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
-   // xy_txt = {0,smp,0, 0};
+    xy_txt = {0,smp,0, 0};
     _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 
     strcpy(str_both, str_top);
@@ -296,12 +292,14 @@ _snprintf(str_top, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,
         	if (GET_WHEEL_DELTA_WPARAM(wParam) > 0)
 		{
 			smp+=1;
+			xy_txt = {0,smp,0, 0};
 			if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
                 mode=(mode+1>1)?0:mode+1;
 			}
 
 		} else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
 			smp=(smp>=2)?smp-1:smp;
+			xy_txt = {0,smp,0, 0};
 			if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
                 mode=(mode-1<0)?1:mode-1;
 			}
