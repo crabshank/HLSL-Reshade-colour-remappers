@@ -29,25 +29,16 @@ int mode=0; //0: normal, 1: fixed cursor
 RECT  xy_txt = {0,smp,0, 0};
 HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
 
-    switch(message)
-    {
 
-            case WM_CREATE:
-        SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
-        break;
-        case WM_PAINT:
-    {
-int Rd,Gr,Bl,grey;
+
+void render(HWND hwnd, HDC hdc,PAINTSTRUCT ps){
+    int Rd,Gr,Bl,grey;
 
 char* nomin_hue="";
 double sat_out=0;
 double hue_out=0;
 int out_col=0;
-PAINTSTRUCT ps;
-HDC hdc;
 COLORREF color;
 HGDIOBJ oldObject;
 HBITMAP hbCapture;
@@ -94,10 +85,7 @@ _snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
     strcat(str_both, str_bottom);
 }
 
-
-
-
-	if(mode!=1){
+if(mode!=1){
 	b= GetCursorPos(&p);
 	p_fixed.x=p.x;
 	p_fixed.y=p.y;
@@ -136,9 +124,7 @@ BitBlt(hDest, 0,0, 1, 1, hdc,p_fixed.x,p_fixed.y, SRCCOPY);
  ReleaseDC(NULL, hdcCaptureBmp);
  DeleteDC(hdcCaptureBmp);
 
-
-
-double red, green, blue;
+ double red, green, blue;
 
 double mn,mx,diff,hue_d;
 
@@ -299,21 +285,39 @@ _snprintf(str_top, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,
    }
  ReleaseDC(NULL, hdc);
  DeleteDC(hdc);
-      EndPaint(hwnd, &ps);
 
 
+ ReleaseDC(NULL, hdc);
+ DeleteDC(hdc);
+}
+
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+
+    switch(message)
+    {
+
+            case WM_CREATE:
+        SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
+        break;
+        case WM_PAINT:
+        {
+            PAINTSTRUCT ps;
+            HDC hdc;
+            render(hwnd, hdc,ps);
+            EndPaint(hwnd, &ps);
         }
 
         break;
-        case WM_MOUSEWHEEL :{
-        	if (GET_WHEEL_DELTA_WPARAM(wParam) > 0)
-		{
-			smp+=1;
-			xy_txt = {0,smp,0, 0};
-			if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
-                mode=(mode+1>1)?0:mode+1;
-			}
-
+        case WM_MOUSEWHEEL :
+            {
+        	if (GET_WHEEL_DELTA_WPARAM(wParam) > 0){
+                smp+=1;
+                xy_txt = {0,smp,0, 0};
+                if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
+                    mode=(mode+1>1)?0:mode+1;
+                }
 		} else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
 			smp=(smp>=2)?smp-1:smp;
 			xy_txt = {0,smp,0, 0};
