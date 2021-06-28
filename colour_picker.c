@@ -335,11 +335,11 @@ _snprintf(str_top, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,
     return 0;
 }
 
-ATOM MyRegisterClass(HINSTANCE hInstance)
+MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEX wcex;
     wcex.cbSize = sizeof(WNDCLASSEX);
-    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.style = CS_HREDRAW | CS_VREDRAW | CS_SAVEBITS;
     wcex.lpfnWndProc = WndProc;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
