@@ -10,36 +10,25 @@ HWND hwnd;
 POINT p;
 POINT p_fixed;
 BOOL b;
-char str_top[MAX_PATH]={0};
+    char str_top[MAX_PATH]={0};
 char str_bottom[MAX_PATH]={0};
 char str_both[MAX_PATH]={0};
 char str_paste[MAX_PATH]={0};
 
-
+int Ro=0;
+int Go=0;
+int Bo=0;
 int smp = 10;
 int smp2 = 0;
 int smp3 = 0;
 int smp4 = 72;
 int smp5 = 297;
-int Ro=0;
-int Go=0;
-int Bo=0;
+
 int mode=0; //0: normal, 1: fixed cursor
-char* nomin_hue="";
-double sat_out=0;
-double hue_out=0;
-int out_col=0;
+
 RECT  xy_txt = {0,smp,0, 0};
 HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
-PAINTSTRUCT ps;
-int Rd,Gr,Bl,grey;
 
-HDC hdc;
-COLORREF color;
-HGDIOBJ oldObject;
-HBITMAP hbCapture;
-HDC hDest;
-HDC hdcCaptureBmp;
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
@@ -47,6 +36,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         case WM_PAINT:
     {
+int Rd,Gr,Bl,grey;
+
+char* nomin_hue="";
+double sat_out=0;
+double hue_out=0;
+int out_col=0;
+PAINTSTRUCT ps;
+HDC hdc;
+COLORREF color;
+HGDIOBJ oldObject;
+HBITMAP hbCapture;
+HDC hDest;
+HDC hdcCaptureBmp;
 
   if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
 if(GetAsyncKeyState(0x41)){
@@ -89,6 +91,8 @@ _snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
 }
 
 
+
+
 	if(mode!=1){
 	b= GetCursorPos(&p);
 	p_fixed.x=p.x;
@@ -100,6 +104,7 @@ _snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
 hDest = CreateCompatibleDC(hdc);
 
 hbCapture=  CreateCompatibleBitmap(hdc, 1,1);
+
 SelectObject(hDest, hbCapture);
 
 BitBlt(hDest, 0,0, 1, 1, hdc,p_fixed.x,p_fixed.y, SRCCOPY);
@@ -118,14 +123,18 @@ BitBlt(hDest, 0,0, 1, 1, hdc,p_fixed.x,p_fixed.y, SRCCOPY);
             DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
             hdcCaptureBmp = CreateCompatibleDC(hdc);
             oldObject = SelectObject(hdcCaptureBmp, hbCapture);
-
+        DeleteObject(hbCapture);
             BitBlt(hdc, 0, 0, 1,1, hdcCaptureBmp, 0,0, SRCCOPY);
 
             SelectObject(hdcCaptureBmp, oldObject);
             DeleteObject(oldObject);
-            DeleteObject(hbCapture);
+
  ReleaseDC(NULL, hdcCaptureBmp);
  DeleteDC(hdcCaptureBmp);
+ ReleaseDC(NULL, hdc);
+ DeleteDC(hdc);
+
+
 double red, green, blue;
 
 double mn,mx,diff,hue_d;
