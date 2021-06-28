@@ -131,8 +131,7 @@ BitBlt(hDest, 0,0, 1, 1, hdc,p_fixed.x,p_fixed.y, SRCCOPY);
 
  ReleaseDC(NULL, hdcCaptureBmp);
  DeleteDC(hdcCaptureBmp);
- ReleaseDC(NULL, hdc);
- DeleteDC(hdc);
+
 
 
 double red, green, blue;
@@ -294,7 +293,8 @@ _snprintf(str_top, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,
        DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
 
    }
-
+ ReleaseDC(NULL, hdc);
+ DeleteDC(hdc);
       EndPaint(hwnd, &ps);
 
 
