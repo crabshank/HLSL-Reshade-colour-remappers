@@ -10,7 +10,8 @@ HWND hwnd;
 POINT p;
 POINT p_fixed;
 BOOL b;
-    char str_top[MAX_PATH]={0};
+
+char str_top[MAX_PATH]={0};
 char str_bottom[MAX_PATH]={0};
 char str_both[MAX_PATH]={0};
 char str_paste[MAX_PATH]={0};
@@ -28,9 +29,6 @@ int mode=0; //0: normal, 1: fixed cursor
 
 RECT  xy_txt = {0,smp,0, 0};
 HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
-
-
-
 
 void render(HWND hwnd, HDC hdc,PAINTSTRUCT ps){
     int Rd,Gr,Bl,grey;
@@ -284,15 +282,33 @@ _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 }
 
 
+void mousewheel_hdl(WPARAM wParam){
+    if (GET_WHEEL_DELTA_WPARAM(wParam) > 0){
+    smp+=1;
+    xy_txt = {0,smp,0, 0};
+        if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
+            mode=(mode+1>1)?0:mode+1;
+        }
+    } else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
+        smp=(smp>=2)?smp-1:smp;
+        xy_txt = {0,smp,0, 0};
+        if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
+            mode=(mode-1<0)?1:mode-1;
+        }
+    }
+    smp2=smp+smp4;
+    smp3=smp+smp5;
+    SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
     switch(message)
     {
-
             case WM_CREATE:
-        SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
-        break;
+            SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
+            break;
         case WM_PAINT:
         {
             PAINTSTRUCT ps;
@@ -300,42 +316,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             render(hwnd, hdc,ps);
             EndPaint(hwnd, &ps);
         }
-
         break;
-        case WM_MOUSEWHEEL :
-            {
-        	if (GET_WHEEL_DELTA_WPARAM(wParam) > 0){
-                smp+=1;
-                xy_txt = {0,smp,0, 0};
-                if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
-                    mode=(mode+1>1)?0:mode+1;
-                }
-		} else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
-			smp=(smp>=2)?smp-1:smp;
-			xy_txt = {0,smp,0, 0};
-			if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
-                mode=(mode-1<0)?1:mode-1;
-			}
-		}
-        smp2=smp+smp4;
-        smp3=smp+smp5;
-		SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
-        }
-        break;
-        case WM_TIMER:
-           InvalidateRect(hwnd, nullptr, false);
+            case WM_MOUSEWHEEL :
+                mousewheel_hdl(wParam);
             break;
-        case WM_DESTROY:
-            PostQuitMessage(0);
+        case WM_TIMER:
+            InvalidateRect(hwnd, nullptr, false);
+        break;
+            case WM_DESTROY:
+                PostQuitMessage(0);
             break;
         default:
           return DefWindowProc(hwnd, message, wParam, lParam);
-           break;
+        break;
     }
     return 0;
 }
 
-MyRegisterClass(HINSTANCE hInstance)
+ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEX wcex;
     wcex.cbSize = sizeof(WNDCLASSEX);
@@ -365,8 +363,7 @@ RECT sz = {0, 0, smp3+smp+273, smp2+smp+13};
         CW_USEDEFAULT, CW_USEDEFAULT, sz.right - sz.left, sz.bottom - sz.top,
         NULL, NULL, hInstance, NULL);
 
-if(!hwnd)
-    {
+    if(!hwnd){
         return FALSE;
     }
 
@@ -381,19 +378,18 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     MyRegisterClass(hInstance);
-    if(!InitInstance(hInstance, nCmdShow))
-    {
+    if(!InitInstance(hInstance, nCmdShow)){
         return FALSE;
     }
 
 
-                  if(IsWindowVisible(hwnd)==true){
-            SetWindowPos(
-  hwnd,
-  (HWND) HWND_TOPMOST,
-  0, 0, 0, 0,
-  SWP_NOMOVE | SWP_NOSIZE );
-               }
+if(IsWindowVisible(hwnd)==true){
+    SetWindowPos(
+    hwnd,
+    (HWND) HWND_TOPMOST,
+    0, 0, 0, 0,
+    SWP_NOMOVE | SWP_NOSIZE);
+}
 
     MSG msg;
     while(GetMessage(&msg, NULL, 0, 0))
