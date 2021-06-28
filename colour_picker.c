@@ -34,6 +34,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     switch(message)
     {
+
+            case WM_CREATE:
+        SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
+        break;
         case WM_PAINT:
     {
 int Rd,Gr,Bl,grey;
@@ -386,7 +390,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         return FALSE;
     }
 
-   SetTimer(hwnd, 1, 16, nullptr);
 
                   if(IsWindowVisible(hwnd)==true){
             SetWindowPos(
