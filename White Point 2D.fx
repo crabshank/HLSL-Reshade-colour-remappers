@@ -34,7 +34,7 @@ uniform float Debug_thresh < __UNIFORM_DRAG_FLOAT1
 
 uniform int Two_dimensional_output_text <__UNIFORM_COMBO_INT1
     ui_items = "xy\0RGB\0RGB + patch\0";
-    ui_tooltip = "Print xy or RGB (0-255) to the screen in 2D input mode or RGB with a patch of that colour at the top";
+    ui_tooltip = "Print xy or RGB (0-255) to the screen in 2D input mode or RGB with a patch of that colour at the top (last 2 only work if 'Two_dimensional_input_type'=='Direct point-based')";
 > = 0;
 
 uniform int Decimals < __UNIFORM_SLIDER_INT1
@@ -585,6 +585,8 @@ Customxy.y= (buttondown==0)?mousepoint.y*ReShade::PixelSize.y*((Customxy.y+0.5*y
 
 yCoord_Pos=(buttondown==1)?(Customxy.y-(Customxy.y-0.5*y_Range))/((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range)):mousepoint.y*ReShade::PixelSize.y;
 
+
+if(Two_dimensional_input_type==2){
 p0=tex2D(ReShade::BackBuffer, mousepoint*ReShade::PixelSize);
 
 p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
@@ -592,9 +594,8 @@ p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
 float3 WPgf= rgb2XYZ(float3(p0.rgb*rcptwoFiveFive),mode,linr);
 float3 WPgt= rgb2XYZ_grey(float3(p0.rgb*rcptwoFiveFive),mode,linr);
 
-
-
-		Customxy.xy=(buttondown==0)?XYZ2xyY(WPconv2Grey(WPgf,WPgt)).xy:Customxy;
+Customxy.xy=(buttondown==0)?XYZ2xyY(WPconv2Grey(WPgf,WPgt)).xy:Customxy;
+}
 
 }
 
@@ -648,7 +649,7 @@ float textSize=25;
 int decR=Decimals;
 int decG=Decimals;
 int decB=Decimals;
-if(Two_dimensional_output_text==1 || Two_dimensional_output_text==2){
+if((Two_dimensional_output_text==1 || Two_dimensional_output_text==2) && Two_dimensional_input_type==2){
 	float rd=p0_rnd.r;
 	[flatten]if(rd>=100){
 		rd=rd*0.001;
@@ -710,7 +711,7 @@ c1.rgb=res.rgb;
 }
 
 p0.rgb=float3(p0_rnd.r*rcptwoFiveFive,p0_rnd.g*rcptwoFiveFive,p0_rnd.b*rcptwoFiveFive);
-c1.rgb=(Two_dimensional_input==true && Two_dimensional_output_text==2 && ((texcoord.x>=0.551 && texcoord.x<=0.611) && (texcoord.y<=0.023) ))?p0.rgb:c1.rgb;
+c1.rgb=(Two_dimensional_input==true && Two_dimensional_input_type==2 && Two_dimensional_output_text==2 && ((texcoord.x>=0.551 && texcoord.x<=0.611) && (texcoord.y<=0.023) ))?p0.rgb:c1.rgb;
 
 return c1;
 
