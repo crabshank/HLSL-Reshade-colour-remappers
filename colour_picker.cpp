@@ -95,19 +95,16 @@ if(mode!=1){
         goto done;
 	}
 
-    if(!BitBlt(hdcWindow, 0,0, 1,1, hdcScreen,p_fixed.x,p_fixed.y, SRCCOPY)){
+    if(!BitBlt(hdcScreen, 0,0, 1,1, hdcScreen,p_fixed.x,p_fixed.y, SRCCOPY)){
         goto done;
     }
-	hbmScreen=CreateCompatibleBitmap(hdcWindow,1,1);
+	hbmScreen=CreateCompatibleBitmap(hdcScreen,1,1);
 	if(!hbmScreen){
         goto done;
 	}
 	SelectObject(hdcMemDC,hbmScreen);
-    if(!BitBlt(hdcMemDC, 0,0, 1,1, hdcWindow,0,0, SRCCOPY)){
-        goto done;
-    }
 
-            color = GetPixel(hdcWindow,0,0);
+            color = GetPixel(hdcScreen,0,0);
             Rd=GetRValue(color);
             Gr=GetGValue(color);
             Bl=GetBValue(color);
