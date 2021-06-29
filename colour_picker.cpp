@@ -28,22 +28,19 @@ int smp5 = 297;
 int mode=0; //0: normal, 1: fixed cursor
 
 RECT  xy_txt = {0,smp,0, 0};
-HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
 
-void render(HWND hwnd, HDC hdc,PAINTSTRUCT ps){
-    int Rd,Gr,Bl,grey;
+void renderWnd(HWND hwnd, PAINTSTRUCT ps){
+int Rd,Gr,Bl,grey;
 
 char* nomin_hue="";
 double sat_out=0;
 double hue_out=0;
 int out_col=0;
 COLORREF color;
-HGDIOBJ oldObject;
-HBITMAP hbCapture;
-HDC hDest;
-HDC hdcCaptureBmp;
+HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
 
-  if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
+
+      if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
 if(GetAsyncKeyState(0x41)){
     smp=(smp>=2)?smp-1:smp;
 	smp2=smp+smp4;
@@ -88,39 +85,34 @@ if(mode!=1){
 	p_fixed.x=p.x;
 	p_fixed.y=p.y;
 	}
+	HDC hdcMemDC=NULL;
+	HBITMAP hbmScreen=NULL;
 
- hdc = GetDC(NULL);
+	HDC hdcScreen=GetDC(NULL);
+	HDC hdcWindow=GetDC(hwnd);
+	hdcMemDC=CreateCompatibleDC(hdcWindow);
+	if(!hdcMemDC){
+        goto done;
+	}
 
-hDest = CreateCompatibleDC(hdc);
+    if(!BitBlt(hdcWindow, 0,0, 1,1, hdcScreen,p_fixed.x,p_fixed.y, SRCCOPY)){
+        goto done;
+    }
+	hbmScreen=CreateCompatibleBitmap(hdcWindow,1,1);
+	if(!hbmScreen){
+        goto done;
+	}
+	SelectObject(hdcMemDC,hbmScreen);
+    if(!BitBlt(hdcMemDC, 0,0, 1,1, hdcWindow,0,0, SRCCOPY)){
+        goto done;
+    }
 
-hbCapture=  CreateCompatibleBitmap(hdc, 1,1);
-
-SelectObject(hDest, hbCapture);
-
-BitBlt(hDest, 0,0, 1, 1, hdc,p_fixed.x,p_fixed.y, SRCCOPY);
-
-            ReleaseDC(NULL, hdc);
-            DeleteDC(hDest);
-
-            hdc = BeginPaint(hwnd, &ps);
-
-            color = GetPixel(hdc,0,0);
+            color = GetPixel(hdcWindow,0,0);
             Rd=GetRValue(color);
             Gr=GetGValue(color);
             Bl=GetBValue(color);
             hBrush = CreateSolidBrush(RGB(Rd,Gr,Bl));
-            FillRect(hdc, &ps.rcPaint, hBrush);
-            DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
-            hdcCaptureBmp = CreateCompatibleDC(hdc);
-            oldObject = SelectObject(hdcCaptureBmp, hbCapture);
-        DeleteObject(hbCapture);
-            BitBlt(hdc, 0, 0, 1,1, hdcCaptureBmp, 0,0, SRCCOPY);
-
-            SelectObject(hdcCaptureBmp, oldObject);
-            DeleteObject(oldObject);
-
- ReleaseDC(NULL, hdcCaptureBmp);
- DeleteDC(hdcCaptureBmp);
+            FillRect(hdcWindow, &ps.rcPaint, hBrush);
 
 double red, green, blue;
 
@@ -252,35 +244,36 @@ _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
     EmptyClipboard();
     SetClipboardData(CF_TEXT, hGloblal);
     CloseClipboard();
-    DrawText(hdc,str_both, -1, &xy_txt, DT_NOCLIP);
+    DrawText(hdcWindow,str_both, -1, &xy_txt, DT_NOCLIP);
 
 }else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel
     b= GetCursorPos(&p);
     p_fixed.x=p.x;
     p_fixed.y=p.y;
-
-
     _snprintf(str_top, MAX_PATH-1,"Setting fixed cursor position: %d, %d",p_fixed.x,p_fixed.y);
     strcpy(str_both, str_top);
     strcat(str_both, str_bottom);
-    DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
+    DrawText(hdcWindow,str_both, -1, &xy_txt,DT_NOCLIP);
 }else if(mode==1){
     _snprintf(str_top, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,p_fixed.y,Ro,Go,Bo);
 
     strcpy(str_both, str_top);
     strcat(str_both, str_bottom);
-    DrawText(hdc,str_both, -1, &xy_txt, DT_NOCLIP);
+    DrawText(hdcWindow,str_both, -1, &xy_txt, DT_NOCLIP);
 }else{
     strcpy(str_both, str_top);
     strcat(str_both, str_bottom);
-    DrawText(hdc,str_both, -1, &xy_txt,DT_NOCLIP);
+    DrawText(hdcWindow,str_both, -1, &xy_txt,DT_NOCLIP);
 
    }
 
- ReleaseDC(NULL, hdc);
- DeleteDC(hdc);
-}
+	done:
+	    DeleteObject(hbmScreen);
+	    DeleteObject(hdcMemDC);
+	    ReleaseDC(NULL,hdcScreen);
+	    ReleaseDC(hwnd,hdcWindow);
 
+}
 
 void mousewheel_hdl(WPARAM wParam){
     if (GET_WHEEL_DELTA_WPARAM(wParam) > 0){
@@ -308,29 +301,42 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
             case WM_CREATE:
             SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
+            return 0L;
             break;
         case WM_PAINT:
         {
+            KillTimer(hwnd,1);
             PAINTSTRUCT ps;
-            HDC hdc;
-            render(hwnd, hdc,ps);
+            HDC hdc=BeginPaint(hwnd,&ps);
+            renderWnd(hwnd,ps);
             EndPaint(hwnd, &ps);
+            SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
+            return 0L;
         }
         break;
             case WM_MOUSEWHEEL :
                 mousewheel_hdl(wParam);
+                return 0L;
             break;
         case WM_TIMER:
             InvalidateRect(hwnd, nullptr, false);
+            return 0L;
         break;
             case WM_DESTROY:
-                PostQuitMessage(0);
+                {
+                    KillTimer(hwnd,1);
+                    PostQuitMessage(0);
+                    return 0L;
+                }
             break;
+        case WM_ERASEBKGND:
+            return DefWindowProc(hwnd, message, wParam, lParam);
+        break;
         default:
           return DefWindowProc(hwnd, message, wParam, lParam);
         break;
     }
-    return 0;
+    return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
 ATOM MyRegisterClass(HINSTANCE hInstance)
@@ -344,7 +350,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hInstance = hInstance;
     wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground = hBrush;
+    wcex.hbrBackground = NULL;
     wcex.lpszMenuName = NULL;
     wcex.lpszClassName = "rgbClass";
     wcex.hIconSm = NULL;
