@@ -305,7 +305,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case WM_PAINT:
         {
-            KillTimer(hwnd,1);
             PAINTSTRUCT ps;
             HDC hdc=BeginPaint(hwnd,&ps);
             renderWnd(hwnd,ps);
@@ -319,8 +318,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                 return 0L;
             break;
         case WM_TIMER:
-            InvalidateRect(hwnd, nullptr, false);
-            return 0L;
+            {
+                KillTimer(hwnd,1);
+                InvalidateRect(hwnd, nullptr, false);
+                return 0L;
+            }
         break;
             case WM_DESTROY:
                 {
