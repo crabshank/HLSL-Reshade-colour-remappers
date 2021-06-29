@@ -586,7 +586,7 @@ Customxy.y= (buttondown==0)?mousepoint.y*ReShade::PixelSize.y*((Customxy.y+0.5*y
 yCoord_Pos=(buttondown==1)?(Customxy.y-(Customxy.y-0.5*y_Range))/((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range)):mousepoint.y*ReShade::PixelSize.y;
 
 
-if(Two_dimensional_input_type==2){
+[flatten]if(Two_dimensional_input_type==2){
 p0=tex2D(ReShade::BackBuffer, mousepoint*ReShade::PixelSize);
 
 p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
