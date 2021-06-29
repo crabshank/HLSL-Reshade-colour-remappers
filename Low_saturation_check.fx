@@ -17,7 +17,7 @@ float mx=max(c0.r,max(c0.g,c0.b));
 float mn=min(c0.r,min(c0.g,c0.b));
 float sat=(mx==0)?0:(mx-mn)/mx;
 [flatten]if(sat<=Saturation){
-c0.rgb=(Turn_black==1)?0:1;
+c0.rgb=(Turn_black==true)?0:1;
 }
 return c0;
 
