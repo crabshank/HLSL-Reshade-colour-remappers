@@ -453,6 +453,11 @@ float3 XYZ2xyY(float3 XYZ){
 //Source: https://stackoverflow.com/a/45263428; http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.htm; https://en.wikipedia.org/wiki/Rec._2020#Transfer_characteristics
 
 float delta(float color, float dlt){
+[flatten]if(dlt==1){
+color=1;
+}else if(dlt==-1){
+color=0;
+}else{
 dlt=-0.5*dlt+0.5;
 float2 midp=float2(lerp(0,1,dlt),lerp(1,0,dlt));
 float relx=color/midp.x;
@@ -462,7 +467,7 @@ float newyLow=lerp(0,midp.y,relx);
 float newyHi=lerp(1,midp.y,relxInv);
 
 color=(color<=midp.x)?newyLow:newyHi;
-
+}
 return color;
 }
 
