@@ -4,16 +4,6 @@ uniform float Amplification < __UNIFORM_DRAG_FLOAT1
 ui_min = 0.0; ui_max = 10.0;
 > = 1.25;
 
-uniform bool Split <> = false;
-
-uniform bool Flip_split <> = false;
-
-uniform float Split_position < __UNIFORM_SLIDER_FLOAT1
-	ui_min = 0; ui_max =1;
-	ui_tooltip = "0 is on the far left, 1 on the far right.";
-> = 0.5;
-
-
 #include "ReShade.fxh"
 
 
@@ -37,15 +27,7 @@ c1.g=(c0.g==mx)?dbOut:0;
 
 c1.b=(c0.b==mx)?dbOut:0;
 
-float4 c2=(texcoord.x>=Split_position*Split)?c1:c0;
-float4 c3=(texcoord.x<=Split_position*Split)?c1:c0;
-
-float4 c4=(Flip_split==1 && Split==1)?c3:c2;
-
-float divLine = abs(texcoord.x - Split_position) < BUFFER_RCP_WIDTH;
-c4 =(Split==0)?c4: c4*(1.0 - divLine); //invert divline
-
-return c4;
+return c1;
 
 }
 
