@@ -30,6 +30,7 @@ int mode=0; //0: normal, 1: fixed cursor
 RECT  xy_txt = {0,smp,0, 0};
 
 void renderWnd(HWND hwnd, PAINTSTRUCT ps){
+	            KillTimer(hwnd,1);
 int Rd,Gr,Bl,grey;
 
 char* nomin_hue="";
@@ -217,8 +218,6 @@ _snprintf(str_bottom, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",0);
         case 12:
         nomin_hue="Reddish Pink";
         break;
-        default:
-            ;
     }
 
 _snprintf(str_bottom, MAX_PATH-1,"\nSaturation: %.1f; %s (%.1f°)",sat_out*100,nomin_hue,hue_out);
@@ -264,12 +263,13 @@ _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 
    }
 
-	done:
+	done:{
 	    DeleteObject(hbmScreen);
 	    DeleteObject(hdcMemDC);
 	    ReleaseDC(NULL,hdcScreen);
 	    ReleaseDC(hwnd,hdcWindow);
-
+	}
+            SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
 }
 
 void mousewheel_hdl(WPARAM wParam){
@@ -302,12 +302,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case WM_PAINT:
         {
-            KillTimer(hwnd,1);
             PAINTSTRUCT ps;
             HDC hdc=BeginPaint(hwnd,&ps);
             renderWnd(hwnd,ps);
             EndPaint(hwnd, &ps);
-            SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
             return 0L;
         }
         break;
