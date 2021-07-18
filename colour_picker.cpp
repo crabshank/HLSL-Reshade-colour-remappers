@@ -93,17 +93,17 @@ if(mode!=1){
 	HDC hdcScreen=GetDC(NULL);
 	HDC hdcWindow=GetDC(hwnd);
 	hdcMemDC=CreateCompatibleDC(hdcWindow);
-	if(!hdcMemDC){
+	/*if(!hdcMemDC){
         goto done;
-	}
-
-    if(!BitBlt(hdcScreen, 0,0, 1,1, hdcScreen,p_fixed.x,p_fixed.y, SRCCOPY)){
+	}*/
+BitBlt(hdcScreen, 0,0, 1,1, hdcScreen,p_fixed.x,p_fixed.y, SRCCOPY);
+    /*if(!BitBlt(hdcScreen, 0,0, 1,1, hdcScreen,p_fixed.x,p_fixed.y, SRCCOPY)){
         goto done;
-    }
+    }*/
 	hbmScreen=CreateCompatibleBitmap(hdcScreen,1,1);
-	if(!hbmScreen){
+	/*if(!hbmScreen){
         goto done;
-	}
+	}*/
 	SelectObject(hdcMemDC,hbmScreen);
 
             color = GetPixel(hdcScreen,0,0);
@@ -263,13 +263,17 @@ _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
     DrawText(hdcWindow,str_both, -1, &xy_txt,DT_NOCLIP);
 
    }
-SetTimer(hwnd, 1, 6, NULL);
-	done:{
+	/*done:{
 	    DeleteObject(hbmScreen);
 	    DeleteObject(hdcMemDC);
 	    ReleaseDC(NULL,hdcScreen);
 	    ReleaseDC(hwnd,hdcWindow);
-	}
+	}*/
+		    DeleteObject(hbmScreen);
+	    DeleteObject(hdcMemDC);
+	    ReleaseDC(NULL,hdcScreen);
+	    ReleaseDC(hwnd,hdcWindow);
+SetTimer(hwnd, 1, 6, NULL);
 
 }
 
