@@ -31,6 +31,7 @@ RECT  xy_txt = {0,smp,0, 0};
 
 void renderWnd(HWND hwnd, PAINTSTRUCT ps){
 	            KillTimer(hwnd,1);
+	             InvalidateRect(hwnd, nullptr, false);
 int Rd,Gr,Bl,grey;
 
 char* nomin_hue="";
@@ -269,7 +270,7 @@ _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
 	    ReleaseDC(NULL,hdcScreen);
 	    ReleaseDC(hwnd,hdcWindow);
 	}
-            SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
+            SetTimer(hwnd, 1, 6, NULL);
 }
 
 void mousewheel_hdl(WPARAM wParam){
@@ -297,7 +298,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch(message)
     {
             case WM_CREATE:
-            SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
+            SetTimer(hwnd, 1, 6, NULL);
             return 0L;
             break;
         case WM_PAINT:
@@ -313,27 +314,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                 mousewheel_hdl(wParam);
                 return 0L;
             break;
-        case WM_TIMER:
-            {
-            InvalidateRect(hwnd, nullptr, false);
-            return 0L;
-            }
         break;
-            case WM_DESTROY:
-                {
-                    KillTimer(hwnd,1);
-                    PostQuitMessage(0);
-                    return 0L;
-                }
+        case WM_DESTROY:
+            PostQuitMessage(0);
             break;
-        case WM_ERASEBKGND:
-            return DefWindowProc(hwnd, message, wParam, lParam);
-        break;
         default:
-          return DefWindowProc(hwnd, message, wParam, lParam);
-        break;
+            return DefWindowProc (hwnd, message, wParam, lParam);
     }
-    return DefWindowProc(hwnd, message, wParam, lParam);
+
 }
 
 ATOM MyRegisterClass(HINSTANCE hInstance)
