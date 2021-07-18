@@ -263,14 +263,14 @@ _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
     DrawText(hdcWindow,str_both, -1, &xy_txt,DT_NOCLIP);
 
    }
-
+SetTimer(hwnd, 1, 6, NULL);
 	done:{
 	    DeleteObject(hbmScreen);
 	    DeleteObject(hdcMemDC);
 	    ReleaseDC(NULL,hdcScreen);
 	    ReleaseDC(hwnd,hdcWindow);
 	}
-            SetTimer(hwnd, 1, 6, NULL);
+
 }
 
 void mousewheel_hdl(WPARAM wParam){
