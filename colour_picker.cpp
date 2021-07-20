@@ -2,136 +2,174 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <math.h>
+#include <iostream>
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
+#define minHgt 75
+#define minWdt 410
 
-HINSTANCE hInst;
-HWND hwnd;
+void paster(HWND console,char* str_paste){
+
+           const size_t len = strlen(str_paste) + 1;
+    HGLOBAL hGloblal =  GlobalAlloc(GMEM_MOVEABLE, len);
+    memcpy(GlobalLock(hGloblal),str_paste , len);
+    GlobalUnlock(hGloblal);
+    OpenClipboard(console);
+    EmptyClipboard();
+    SetClipboardData(CF_TEXT, hGloblal);
+    CloseClipboard();
+}
+
+void ClearConsoleToColors(HWND console,int rgbVal[3])
+{
+
+    RECT r;
+    GetWindowRect(console, &r);
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_SCREEN_BUFFER_INFOEX info;
+    info.cbSize = sizeof(info);
+
+   GetConsoleScreenBufferInfoEx(hConsole, &info);
+
+info.ColorTable[0] = RGB(rgbVal[0],rgbVal[1],rgbVal[2]);
+
+SetConsoleScreenBufferInfoEx(hConsole, &info);
+
+
+    MoveWindow(console, r.left, r.top, MAX(minWdt,r.right-r.left), MAX(minHgt,r.bottom-r.top), TRUE);
+
+     return;
+}
+
+int main()
+{
+
+
+HDC hDC = GetDC(NULL);
 POINT p;
 POINT p_fixed;
+POINT p_fixed2;
 BOOL b;
-
-char str_top[MAX_PATH]={0};
-char str_bottom[MAX_PATH]={0};
-char str_both[MAX_PATH]={0};
-char str_paste[MAX_PATH]={0};
-
-int Ro=0;
-int Go=0;
-int Bo=0;
-int smp = 10;
-int smp2 = 0;
-int smp3 = 0;
-int smp4 = 72;
-int smp5 = 297;
-
-int mode=0; //0: normal, 1: fixed cursor
-
-RECT  xy_txt = {0,smp,0, 0};
-
-void renderWnd(HWND hwnd, PAINTSTRUCT ps){
-	            KillTimer(hwnd,1);
-	             InvalidateRect(hwnd, nullptr, false);
-int Rd,Gr,Bl,grey;
-
-char* nomin_hue="";
-double sat_out=0;
-double hue_out=0;
-int out_col=0;
+                  b= GetCursorPos(&p);
+                  p_fixed.x=p.x;
+                  p_fixed.y=p.y;
+                p_fixed2.x=p.x;
+                  p_fixed2.y=p.y;
 COLORREF color;
-HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
+int redInt,greenInt,blueInt,red2,green2,blue2,grey,out_col;
+double red,green,blue,mx,sat,mn,diff,hue_d;
+double hue_out=0;
+char* nomin_hue="Greyscale";
+char str_paste[MAX_PATH]={0};
+    HANDLE rhnd = GetStdHandle(STD_INPUT_HANDLE);
+
+    DWORD Events = 0;
+    DWORD EventsRead = 0;
+int shiftKy=0;
+int altKy=0;
+int ctrlKy=0;
+
+ HWND console = GetConsoleWindow();
+
+     RECT r;
+    GetWindowRect(console, &r);
+MoveWindow(console, r.left, r.top, minWdt,minHgt, TRUE);
+
+while(1){
+
+ GetNumberOfConsoleInputEvents(rhnd, &Events);
+
+        if(Events != 0){
+
+            INPUT_RECORD eventBuffer[Events];
+
+            ReadConsoleInput(rhnd, eventBuffer, Events, &EventsRead);
+
+            for(DWORD i = 0; i < EventsRead; ++i){
+
+                if(eventBuffer[i].EventType == KEY_EVENT){
+                        if(eventBuffer[i].Event.KeyEvent.bKeyDown){
+
+                    if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_SHIFT){
+                            shiftKy=1;
+                          // break;
+                    }
+                    if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_CONTROL){
+                            ctrlKy=1;
+                          // break;
+                    }
+                    /*if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_MENU){
+                            altKy=1;
+                          // break;
+                    }*/
+                }else{
+                     if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_SHIFT){
+                        shiftKy=2;
+                        break;
+                     }
+                    if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_CONTROL){
+                        ctrlKy=2;
+                        break;
+                    }
+                   /* if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_MENU){
+                        altKy=2;
+                        break;
+                    }*/
+                }
+
+            }
+        }
+
+        }
+          if(ctrlKy==1){
+                  b= GetCursorPos(&p);
+                  p_fixed.x=p.x;
+                  p_fixed.y=p.y;
+               }
+
+          color = GetPixel(hDC, p.x, p.y);
+
+redInt= round(GetRValue(color));
+greenInt= round(GetGValue(color));
+blueInt= round(GetBValue(color));
+
+red= ((double)redInt)/255.0;
+green= ((double)greenInt)/255.0;
+blue= ((double)blueInt)/255.0;
 
 
-      if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
-if(GetAsyncKeyState(0x41)){
-    smp=(smp>=2)?smp-1:smp;
-	smp2=smp+smp4;
-	smp3=smp+smp5;
-    SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
-    xy_txt = {0,smp,0, 0};
-    _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+if ((((red2!=redInt)|| (green2!=greenInt) || (blue2!=blueInt)))||((shiftKy==1)||(shiftKy==2))||(ctrlKy==1&&(p_fixed2.x!=p_fixed.x || p_fixed2.y!=p_fixed.y))){
 
-    strcpy(str_both, str_top);
-    strcat(str_both, str_bottom);
+               system("cls");
+ printf("                            ");
+ int intCol[3]={redInt,greenInt,blueInt};
+                if ((redInt==0)&&(greenInt==0)&&(blueInt==0)){
+                         system("cls");
+               ClearConsoleToColors(console,intCol);
+               nomin_hue="Greyscale";
+                  if(shiftKy==1){
+        printf("\033[0;34;43mPASTING \(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: 0.0; %s \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,nomin_hue);
+        _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
+        paster(console,str_paste);
 
-}else if(GetAsyncKeyState(0x53)){
-    smp+=1;
-	smp2=smp+smp4;
-	smp3=smp+smp5;
-    SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
-    xy_txt = {0,smp,0, 0};
-    _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
+        }else{
+            printf("\033[0;34;43m\(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: 0.0; %s \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,nomin_hue);
+  }
 
-    strcpy(str_both, str_top);
-    strcat(str_both, str_bottom);
+                }else{
+int Rd=redInt;
+int Gr=greenInt;
+int Bl=blueInt;
 
-}else{
-_snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
-    strcpy(str_both, str_top);
-    strcat(str_both, str_bottom);
+mx=MAX(red,MAX(green,blue));
+sat=((mx-MIN(red,MIN(green,blue)))/mx)*100;
 
-}
-}else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel
-                    b= GetCursorPos(&p);
-                        p_fixed.x=p.x;
-                        p_fixed.y=p.y;
-}else{
-    _snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
-
-    strcpy(str_both, str_top);
-    strcat(str_both, str_bottom);
-}
-
-if(mode!=1){
-	b= GetCursorPos(&p);
-	p_fixed.x=p.x;
-	p_fixed.y=p.y;
-	}
-	HDC hdcMemDC=NULL;
-	HBITMAP hbmScreen=NULL;
-
-	HDC hdcScreen=GetDC(NULL);
-	HDC hdcWindow=GetDC(hwnd);
-	hdcMemDC=CreateCompatibleDC(hdcWindow);
-	/*if(!hdcMemDC){
-        goto done;
-	}*/
-BitBlt(hdcScreen, 0,0, 1,1, hdcScreen,p_fixed.x,p_fixed.y, SRCCOPY);
-    /*if(!BitBlt(hdcScreen, 0,0, 1,1, hdcScreen,p_fixed.x,p_fixed.y, SRCCOPY)){
-        goto done;
-    }*/
-	hbmScreen=CreateCompatibleBitmap(hdcScreen,1,1);
-	/*if(!hbmScreen){
-        goto done;
-	}*/
-	SelectObject(hdcMemDC,hbmScreen);
-
-            color = GetPixel(hdcScreen,0,0);
-            Rd=GetRValue(color);
-            Gr=GetGValue(color);
-            Bl=GetBValue(color);
-            hBrush = CreateSolidBrush(RGB(Rd,Gr,Bl));
-            FillRect(hdcWindow, &ps.rcPaint, hBrush);
-
-double red, green, blue;
-
-double mn,mx,diff,hue_d;
-
-     Ro=Rd;
-     Go=Gr;
-     Bo=Bl;
-
-    red= (double)(Rd)/255.0;
-    green= (double)(Gr)/255.0;
-    blue= (double)(Bl)/255.0;
-
-  grey=((Rd==Gr)&&(Gr==Bl))?1:0;
+grey=((Rd==Gr)&&(Gr==Bl))?1:0;
   mn=MIN(red,MIN(green,blue));
-  mx=MAX(red,MAX(green,blue));
   diff=mx-mn;
-  sat_out=(mx==0)?0:diff/mx;
 
-if (grey==0){
+  if (grey==0){
 
 if ((Rd>Gr)&&(Rd>Bl)){
     hue_d =(green - blue) / diff;
@@ -172,15 +210,6 @@ out_col=11;
 out_col=12;
 }
 
-}
-
-if (grey==1){
-_snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
-_snprintf(str_bottom, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",0);
-    strcpy(str_both, str_top);
-    strcat(str_both, str_bottom);
-}else{
-
     switch(out_col)
     {
         case 1:
@@ -220,177 +249,45 @@ _snprintf(str_bottom, MAX_PATH-1,"\nSaturation: %.1f; Greyscale",0);
         nomin_hue="Reddish Pink";
         break;
     }
+     system("cls");
+               ClearConsoleToColors(console,intCol);
+                       if(shiftKy==1){
+  printf("\033[0;34;43mPASTING \(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: %.1f\; %s \(%.1f deg\) \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
+          _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
+        paster(console,str_paste);
+                   }else{
+           printf("\033[0;34;43m\(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: %.1f\; %s \(%.1f deg\) \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
 
-_snprintf(str_bottom, MAX_PATH-1,"\nSaturation: %.1f; %s (%.1f°)",sat_out*100,nomin_hue,hue_out);
-}
-
-_snprintf(str_top, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
-
-   if(GetAsyncKeyState(VK_SHIFT) && !(GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
-
-    _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",Ro,Go,Bo);
-    _snprintf(str_top, MAX_PATH-1,"PASTING: %d, %d, %d",Ro,Go,Bo);
-
-    strcpy(str_both, str_top);
-    strcat(str_both, str_bottom);
-    const size_t len = strlen(str_paste) + 1;
-    HGLOBAL hGloblal =  GlobalAlloc(GMEM_MOVEABLE, len);
-    memcpy(GlobalLock(hGloblal), str_paste, len);
-    GlobalUnlock(hGloblal);
-    OpenClipboard(hwnd);
-    EmptyClipboard();
-    SetClipboardData(CF_TEXT, hGloblal);
-    CloseClipboard();
-    DrawText(hdcWindow,str_both, -1, &xy_txt, DT_NOCLIP);
-
-}else if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && (GetAsyncKeyState(VK_MENU)) && mode==1){ //choose fixed pixel
-    b= GetCursorPos(&p);
-    p_fixed.x=p.x;
-    p_fixed.y=p.y;
-    _snprintf(str_top, MAX_PATH-1,"Setting fixed cursor position: %d, %d",p_fixed.x,p_fixed.y);
-    strcpy(str_both, str_top);
-    strcat(str_both, str_bottom);
-    DrawText(hdcWindow,str_both, -1, &xy_txt,DT_NOCLIP);
-}else if(mode==1){
-    _snprintf(str_top, MAX_PATH-1,"Fixed cursor (x:%d, y:%d): %d, %d, %d",p_fixed.x,p_fixed.y,Ro,Go,Bo);
-
-    strcpy(str_both, str_top);
-    strcat(str_both, str_bottom);
-    DrawText(hdcWindow,str_both, -1, &xy_txt, DT_NOCLIP);
+    }
 }else{
-    strcpy(str_both, str_top);
-    strcat(str_both, str_bottom);
-    DrawText(hdcWindow,str_both, -1, &xy_txt,DT_NOCLIP);
+     system("cls");
+               ClearConsoleToColors(console,intCol);
+                   nomin_hue="Greyscale";
+                       if(shiftKy==1){
+  printf("\033[0;34;43mPASTING \(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: %.1f\; %s \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,sat,nomin_hue);
+          _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
+        paster(console,str_paste);
+                   }else{
+           printf("\033[0;34;43m\(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: %.1f\; %s \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,sat,nomin_hue);
 
-   }
-	/*done:{
-	    DeleteObject(hbmScreen);
-	    DeleteObject(hdcMemDC);
-	    ReleaseDC(NULL,hdcScreen);
-	    ReleaseDC(hwnd,hdcWindow);
-	}*/
-		    DeleteObject(hbmScreen);
-	    DeleteObject(hdcMemDC);
-	    ReleaseDC(NULL,hdcScreen);
-	    ReleaseDC(hwnd,hdcWindow);
-SetTimer(hwnd, 1, 6, NULL);
-
-}
-
-void mousewheel_hdl(WPARAM wParam){
-    if (GET_WHEEL_DELTA_WPARAM(wParam) > 0){
-    smp+=1;
-    xy_txt = {0,smp,0, 0};
-        if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
-            mode=(mode+1>1)?0:mode+1;
-        }
-    } else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
-        smp=(smp>=2)?smp-1:smp;
-        xy_txt = {0,smp,0, 0};
-        if(!GetAsyncKeyState(VK_SHIFT) && (GetAsyncKeyState(VK_CONTROL)) && !(GetAsyncKeyState(VK_MENU))){
-            mode=(mode-1<0)?1:mode-1;
-        }
     }
-    smp2=smp+smp4;
-    smp3=smp+smp5;
-    SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
+shiftKy=0;
+altKy=0;
+ctrlKy=0;
+                }
 
-    switch(message)
-    {
-            case WM_CREATE:
-            SetTimer(hwnd, 1, 6, NULL);
-            return 0L;
-            break;
-        case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc=BeginPaint(hwnd,&ps);
-            renderWnd(hwnd,ps);
-            EndPaint(hwnd, &ps);
-            return 0L;
-        }
-        break;
-            case WM_MOUSEWHEEL :
-                mousewheel_hdl(wParam);
-                return 0L;
-            break;
-        break;
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            break;
-        default:
-            return DefWindowProc (hwnd, message, wParam, lParam);
-    }
+
+red2=redInt;
+green2=greenInt;
+blue2=blueInt;
+p_fixed2.x=p_fixed.x;
+p_fixed2.y=p_fixed.y;
+
+ }
 
 }
 
-ATOM MyRegisterClass(HINSTANCE hInstance)
-{
-    WNDCLASSEX wcex;
-    wcex.cbSize = sizeof(WNDCLASSEX);
-   // wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = WndProc;
-    wcex.cbClsExtra = 0;
-    wcex.cbWndExtra = 0;
-    wcex.hInstance = hInstance;
-    wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground = NULL;
-    wcex.lpszMenuName = NULL;
-    wcex.lpszClassName = "rgbClass";
-    wcex.hIconSm = NULL;
-    return RegisterClassEx(&wcex);
-}
-
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
-{
-
-RECT sz = {0, 0, smp3+smp+273, smp2+smp+13};
-        /*{x-coordinate of the upper-left corner of the rectangle, y-coordinate of the upper-left corner of the rectangle,
-    x-coordinate of the lower-right corner of the rectangle, y-coordinate of the lower-right corner of the rectangle}
-    */
-    AdjustWindowRect(&sz, WS_OVERLAPPEDWINDOW, TRUE);
-    hwnd = CreateWindow("rgbClass", "Colour picker", WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, sz.right - sz.left, sz.bottom - sz.top,
-        NULL, NULL, hInstance, NULL);
-
-    if(!hwnd){
-        return FALSE;
-    }
-
-    ShowWindow(hwnd, nCmdShow);
-    UpdateWindow(hwnd);
-    return TRUE;
-}
-
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
-
-    MyRegisterClass(hInstance);
-    if(!InitInstance(hInstance, nCmdShow)){
-        return FALSE;
-    }
-
-
-if(IsWindowVisible(hwnd)==true){
-    SetWindowPos(
-    hwnd,
-    (HWND) HWND_TOPMOST,
-    0, 0, 0, 0,
-    SWP_NOMOVE | SWP_NOSIZE);
-}
-
-    MSG msg;
-    while(GetMessage(&msg, NULL, 0, 0))
-    {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-    return (int)msg.wParam;
+  return 0;
 }
