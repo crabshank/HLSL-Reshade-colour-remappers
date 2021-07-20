@@ -332,7 +332,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEX wcex;
     wcex.cbSize = sizeof(WNDCLASSEX);
-    wcex.style = CS_HREDRAW | CS_VREDRAW | CS_SAVEBITS;
+   // wcex.style = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc = WndProc;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
