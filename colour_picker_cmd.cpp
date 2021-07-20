@@ -3,10 +3,71 @@
 #include <windows.h>
 #include <math.h>
 #include <iostream>
+#include <unistd.h>
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define minHgt 75
 #define minWdt 410
+#define _WIN32_WINNT 0x0400
+#pragma comment( lib, "user32.lib" )
+
+HHOOK hKeyboardHook;
+    int shiftKy=0;
+    int ctrlKy=0;
+    int altKy=0;
+
+__declspec(dllexport) LRESULT CALLBACK KeyboardEvent (int nCode, WPARAM wParam, LPARAM lParam)
+{
+
+  PKBDLLHOOKSTRUCT  hooked_key =     (PKBDLLHOOKSTRUCT) lParam;
+
+
+        if((wParam == WM_SYSKEYDOWN) ||  (wParam == WM_KEYDOWN)){
+if (hooked_key->vkCode==VK_LSHIFT||hooked_key->vkCode==VK_RSHIFT||hooked_key->vkCode==VK_SHIFT){
+                    shiftKy=1;
+}
+if (hooked_key->vkCode==VK_LCONTROL||hooked_key->vkCode==VK_RCONTROL||hooked_key->vkCode==VK_CONTROL){
+                    ctrlKy=1;
+}
+
+    }else if((wParam == WM_SYSKEYUP) ||  (wParam == WM_KEYUP)){
+if (hooked_key->vkCode==VK_LSHIFT||hooked_key->vkCode==VK_RSHIFT||hooked_key->vkCode==VK_SHIFT){
+                    shiftKy=0;
+}
+if (hooked_key->vkCode==VK_LCONTROL||hooked_key->vkCode==VK_RCONTROL||hooked_key->vkCode==VK_CONTROL){
+                    ctrlKy=0;
+}
+    }
+
+
+
+
+
+    return CallNextHookEx(hKeyboardHook,    nCode,wParam,lParam);
+}
+
+void MessageLoop()
+{
+    MSG message;
+    while (GetMessage(&message,NULL,0,0))
+    {
+        TranslateMessage( &message );
+        DispatchMessage( &message );
+    }
+}
+
+DWORD WINAPI monitorKeys(LPVOID lpParm)
+{
+    HINSTANCE hInstance = GetModuleHandle(NULL);
+    if (!hInstance) hInstance = LoadLibrary((LPCSTR) lpParm);
+    if (!hInstance) return 1;
+
+    hKeyboardHook = SetWindowsHookEx (  WH_KEYBOARD_LL, (HOOKPROC) KeyboardEvent,   hInstance,  NULL    );
+    MessageLoop();
+    UnhookWindowsHookEx(hKeyboardHook);
+    return 0;
+}
+
 
 void paster(HWND console,char* str_paste){
 
@@ -42,8 +103,14 @@ SetConsoleScreenBufferInfoEx(hConsole, &info);
      return;
 }
 
-int main()
+int main(int argc, char** argv)
 {
+
+    HANDLE hThread;
+    DWORD dwThread;
+
+
+    hThread = CreateThread(NULL,NULL,(LPTHREAD_START_ROUTINE)   monitorKeys, (LPVOID) argv[0], NULL, &dwThread);
 
 
 HDC hDC = GetDC(NULL);
@@ -62,13 +129,7 @@ double red,green,blue,mx,sat,mn,diff,hue_d;
 double hue_out=0;
 char* nomin_hue="Greyscale";
 char str_paste[MAX_PATH]={0};
-    HANDLE rhnd = GetStdHandle(STD_INPUT_HANDLE);
 
-    DWORD Events = 0;
-    DWORD EventsRead = 0;
-int shiftKy=0;
-int altKy=0;
-int ctrlKy=0;
 
  HWND console = GetConsoleWindow();
 
@@ -78,50 +139,6 @@ MoveWindow(console, r.left, r.top, minWdt,minHgt, TRUE);
 
 while(1){
 
- GetNumberOfConsoleInputEvents(rhnd, &Events);
-
-        if(Events != 0){
-
-            INPUT_RECORD eventBuffer[Events];
-
-            ReadConsoleInput(rhnd, eventBuffer, Events, &EventsRead);
-
-            for(DWORD i = 0; i < EventsRead; ++i){
-
-                if(eventBuffer[i].EventType == KEY_EVENT){
-                        if(eventBuffer[i].Event.KeyEvent.bKeyDown){
-
-                    if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_SHIFT){
-                            shiftKy=1;
-                          // break;
-                    }
-                    if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_CONTROL){
-                            ctrlKy=1;
-                          // break;
-                    }
-                    /*if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_MENU){
-                            altKy=1;
-                          // break;
-                    }*/
-                }else{
-                     if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_SHIFT){
-                        shiftKy=2;
-                        break;
-                     }
-                    if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_CONTROL){
-                        ctrlKy=2;
-                        break;
-                    }
-                   /* if(eventBuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_MENU){
-                        altKy=2;
-                        break;
-                    }*/
-                }
-
-            }
-        }
-
-        }
           if(ctrlKy==1){
                   b= GetCursorPos(&p);
                   p_fixed.x=p.x;
@@ -139,7 +156,7 @@ green= ((double)greenInt)/255.0;
 blue= ((double)blueInt)/255.0;
 
 
-if ((((red2!=redInt)|| (green2!=greenInt) || (blue2!=blueInt)))||((shiftKy==1)||(shiftKy==2))||(ctrlKy==1&&(p_fixed2.x!=p_fixed.x || p_fixed2.y!=p_fixed.y))){
+if ((((red2!=redInt)|| (green2!=greenInt) || (blue2!=blueInt)))||((shiftKy==1))||(ctrlKy==1 && (p_fixed.x!=p_fixed2.x||p_fixed.y!=p_fixed2.y))){
 
                system("cls");
  printf("                            ");
@@ -149,7 +166,7 @@ if ((((red2!=redInt)|| (green2!=greenInt) || (blue2!=blueInt)))||((shiftKy==1)||
                ClearConsoleToColors(console,intCol);
                nomin_hue="Greyscale";
                   if(shiftKy==1){
-        printf("\033[0;34;43mPASTING \(x:%d,y:%d): %d, %d, %d\nSaturation: 0.0; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,nomin_hue);
+        printf("\033[0;34;43mPASTING (x:%d,y:%d): %d, %d, %d\nSaturation: 0.0; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,nomin_hue);
         _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
         paster(console,str_paste);
 
@@ -252,7 +269,7 @@ out_col=12;
      system("cls");
                ClearConsoleToColors(console,intCol);
                        if(shiftKy==1){
-  printf("\033[0;34;43mPASTING \(x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
+  printf("\033[0;34;43mPASTING (x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
           _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
         paster(console,str_paste);
                    }else{
@@ -264,7 +281,7 @@ out_col=12;
                ClearConsoleToColors(console,intCol);
                    nomin_hue="Greyscale";
                        if(shiftKy==1){
-  printf("\033[0;34;43mPASTING \(x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue);
+  printf("\033[0;34;43mPASTING (x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue);
           _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
         paster(console,str_paste);
                    }else{
@@ -273,9 +290,6 @@ out_col=12;
     }
 }
 
-shiftKy=0;
-altKy=0;
-ctrlKy=0;
                 }
 
 
@@ -287,7 +301,14 @@ p_fixed2.y=p_fixed.y;
 
  }
 
+ sleep(1/144);
+
 }
 
-  return 0;
+
+
+  if (hThread)return WaitForSingleObject(hThread,INFINITE);
+    else return 1;
+
+
 }
