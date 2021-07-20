@@ -149,12 +149,12 @@ if ((((red2!=redInt)|| (green2!=greenInt) || (blue2!=blueInt)))||((shiftKy==1)||
                ClearConsoleToColors(console,intCol);
                nomin_hue="Greyscale";
                   if(shiftKy==1){
-        printf("\033[0;34;43mPASTING \(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: 0.0; %s \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,nomin_hue);
+        printf("\033[0;34;43mPASTING \(x:%d,y:%d): %d, %d, %d\nSaturation: 0.0; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,nomin_hue);
         _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
         paster(console,str_paste);
 
         }else{
-            printf("\033[0;34;43m\(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: 0.0; %s \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,nomin_hue);
+            printf("\033[0;34;43m\(x:%d,y:%d): %d, %d, %d\nSaturation: 0.0; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,nomin_hue);
   }
 
                 }else{
@@ -252,11 +252,11 @@ out_col=12;
      system("cls");
                ClearConsoleToColors(console,intCol);
                        if(shiftKy==1){
-  printf("\033[0;34;43mPASTING \(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: %.1f\; %s \(%.1f deg\) \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
+  printf("\033[0;34;43mPASTING \(x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
           _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
         paster(console,str_paste);
                    }else{
-           printf("\033[0;34;43m\(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: %.1f\; %s \(%.1f deg\) \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
+           printf("\033[0;34;43m\(x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
 
     }
 }else{
@@ -264,11 +264,11 @@ out_col=12;
                ClearConsoleToColors(console,intCol);
                    nomin_hue="Greyscale";
                        if(shiftKy==1){
-  printf("\033[0;34;43mPASTING \(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: %.1f\; %s \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,sat,nomin_hue);
+  printf("\033[0;34;43mPASTING \(x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue);
           _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
         paster(console,str_paste);
                    }else{
-           printf("\033[0;34;43m\(x\:%d\,y\:%d\)\: %d, %d, %d\nSaturation: %.1f\; %s \033[0m",p_fixed.x,p_fixed.x,redInt,greenInt,blueInt,sat,nomin_hue);
+           printf("\033[0;34;43m\(x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue);
 
     }
 }
