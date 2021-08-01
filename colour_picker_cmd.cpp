@@ -14,7 +14,7 @@
 HHOOK hKeyboardHook;
     int shiftKy=0;
     int ctrlKy=0;
-    int altKy=0;
+    int F2Ky=1;
 
 __declspec(dllexport) LRESULT CALLBACK KeyboardEvent (int nCode, WPARAM wParam, LPARAM lParam)
 {
@@ -28,6 +28,8 @@ if (hooked_key->vkCode==VK_LSHIFT||hooked_key->vkCode==VK_RSHIFT||hooked_key->vk
 }
 if (hooked_key->vkCode==VK_LCONTROL||hooked_key->vkCode==VK_RCONTROL||hooked_key->vkCode==VK_CONTROL){
                     ctrlKy=1;
+}if (hooked_key->vkCode==VK_F2){
+                    F2Ky=(F2Ky==1)?0:1;
 }
 
     }else if((wParam == WM_SYSKEYUP) ||  (wParam == WM_KEYUP)){
@@ -139,7 +141,7 @@ MoveWindow(console, r.left, r.top, minWdt,minHgt, TRUE);
 
 while(1){
 
-          if(ctrlKy==1){
+          if(ctrlKy==1 && F2Ky==1){
                   b= GetCursorPos(&p);
                   p_fixed.x=p.x;
                   p_fixed.y=p.y;
@@ -156,7 +158,7 @@ green= ((double)greenInt)/255.0;
 blue= ((double)blueInt)/255.0;
 
 
-if ((((red2!=redInt)|| (green2!=greenInt) || (blue2!=blueInt)))||((shiftKy==1))||(ctrlKy==1 && (p_fixed.x!=p_fixed2.x||p_fixed.y!=p_fixed2.y))){
+if ((((red2!=redInt)|| (green2!=greenInt) || (blue2!=blueInt)))||((shiftKy==1))||(ctrlKy==1 && F2Ky==1 && (p_fixed.x!=p_fixed2.x||p_fixed.y!=p_fixed2.y))){
 
                system("cls");
  printf("                            ");
