@@ -15,6 +15,7 @@ HHOOK hKeyboardHook;
     int shiftKy=0;
     int ctrlKy=0;
     int F2Ky=1;
+    int F2KyLast=1;
 
 __declspec(dllexport) LRESULT CALLBACK KeyboardEvent (int nCode, WPARAM wParam, LPARAM lParam)
 {
@@ -29,6 +30,7 @@ if (hooked_key->vkCode==VK_LSHIFT||hooked_key->vkCode==VK_RSHIFT||hooked_key->vk
 if (hooked_key->vkCode==VK_LCONTROL||hooked_key->vkCode==VK_RCONTROL||hooked_key->vkCode==VK_CONTROL){
                     ctrlKy=1;
 }if (hooked_key->vkCode==VK_F2){
+                    F2KyLast=F2Ky;
                     F2Ky=(F2Ky==1)?0:1;
 }
 
@@ -158,31 +160,18 @@ green= ((double)greenInt)/255.0;
 blue= ((double)blueInt)/255.0;
 
 
-if ((((red2!=redInt)|| (green2!=greenInt) || (blue2!=blueInt)))||((shiftKy==1))||(ctrlKy==1 && F2Ky==1 && (p_fixed.x!=p_fixed2.x||p_fixed.y!=p_fixed2.y))){
-
+if ((((red2!=redInt)|| (green2!=greenInt) || (blue2!=blueInt)))||((shiftKy==1))||(F2Ky!=F2KyLast)||(ctrlKy==1 && F2Ky==1 && (p_fixed.x!=p_fixed2.x||p_fixed.y!=p_fixed2.y))){
+ F2KyLast=(F2Ky!=F2KyLast)?F2Ky:F2KyLast;
                system("cls");
  printf("                            ");
  int intCol[3]={redInt,greenInt,blueInt};
-                if ((redInt==0)&&(greenInt==0)&&(blueInt==0)){
-                         system("cls");
-               ClearConsoleToColors(console,intCol);
-               nomin_hue="Greyscale";
-                  if(shiftKy==1){
-        printf("\033[0;34;43mPASTING (x:%d,y:%d): %d, %d, %d\nSaturation: 0.0; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,nomin_hue);
-        _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
-        paster(console,str_paste);
 
-        }else{
-            printf("\033[0;34;43m\(x:%d,y:%d): %d, %d, %d\nSaturation: 0.0; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,nomin_hue);
-  }
-
-                }else{
 int Rd=redInt;
 int Gr=greenInt;
 int Bl=blueInt;
 
 mx=MAX(red,MAX(green,blue));
-sat=((mx-MIN(red,MIN(green,blue)))/mx)*100;
+sat=(mx==0)?0:((mx-MIN(red,MIN(green,blue)))/mx)*100;
 
 grey=((Rd==Gr)&&(Gr==Bl))?1:0;
   mn=MIN(red,MIN(green,blue));
@@ -271,28 +260,43 @@ out_col=12;
      system("cls");
                ClearConsoleToColors(console,intCol);
                        if(shiftKy==1){
-  printf("\033[0;34;43mPASTING (x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
+                             if(F2Ky==1){
+  printf("\033[0;34;43mPASTING (x:%d, y:%d): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
+                             }else{
+                              printf("\033[0;34;43mPASTING (_x:%d, y:%d_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
+                             }
           _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
         paster(console,str_paste);
                    }else{
-           printf("\033[0;34;43m\(x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
-
+                         if(F2Ky==1){
+           printf("\033[0;34;43m\(x:%d, y:%d): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
+                         }else{
+                              printf("\033[0;34;43m\(_x:%d, y:%d_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
+                         }
     }
 }else{
      system("cls");
                ClearConsoleToColors(console,intCol);
                    nomin_hue="Greyscale";
                        if(shiftKy==1){
-  printf("\033[0;34;43mPASTING (x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue);
+                             if(F2Ky==1){
+  printf("\033[0;34;43mPASTING (x:%d, y:%d): %d, %d, %d\nSaturation: %.1f; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue);
+   }else{
+        printf("\033[0;34;43mPASTING (_x:%d, y:%d_): %d, %d, %d\nSaturation: %.1f; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue);
+   }
+
           _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
         paster(console,str_paste);
                    }else{
-           printf("\033[0;34;43m\(x:%d,y:%d): %d, %d, %d\nSaturation: %.1f; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue);
+                          if(F2Ky==1){
+           printf("\033[0;34;43m\(x:%d, y:%d): %d, %d, %d\nSaturation: %.1f; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue);
+            }else{
+                 printf("\033[0;34;43m\(_x:%d, y:%d_): %d, %d, %d\nSaturation: %.1f; %s \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue);
+            }
 
     }
 }
 
-                }
 
 
 red2=redInt;
