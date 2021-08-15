@@ -468,7 +468,11 @@ nw_Y=(nw_Y<og_XYZ.y)?og_XYZ.y:nw_Y;
 
 float3 nw_xyY= XYZ2xyY(LinRGB2XYZ(c0Lin.rgb,Mode));
 
+[branch]if (lin==1){
 c0.rgb=XYZ2LinRGB(xyY2XYZ(float3(nw_xyY.xy,nw_Y)),Mode);
+}else{
+c0.rgb=XYZ2rgb(xyY2XYZ(float3(nw_xyY.xy,nw_Y)),Mode);
+}
 
 return c0;
 
