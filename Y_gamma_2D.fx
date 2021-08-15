@@ -16,8 +16,23 @@ uniform float Y_Gamma_Hi < __UNIFORM_DRAG_FLOAT1
 	ui_min = 0; ui_max=10; ui_tooltip = "N.B. avoid_grey and colour include settings have no effect on this setting!";
 > =0.2;
 
+uniform bool Two_dimensional_input <> = false;
+
+
+uniform int Two_dimensional_input_type <__UNIFORM_COMBO_INT1
+    ui_items = "Crosshairs on\0Crosshairs off\0";
+	> = 0;
+
+uniform float Two_dimensional_input_Range < __UNIFORM_SLIDER_FLOAT1
+	ui_min = 20; ui_max = 0.0;
+> = 2;
 
 #include "ReShade.fxh";
+#include "DrawText_mod.fxh"
+
+uniform bool buttondown < source = "mousebutton"; keycode = 0; mode = ""; >;
+
+uniform float2 mousepoint < source = "mousepoint"; >;
 
 #define rcptwoFiveFive 1.0/255.0
 #define rcpTwoFour 1.0/2.4
@@ -427,7 +442,7 @@ float3 XYZ2xyY(float3 XYZ){
 }
 //Source: https://stackoverflow.com/a/45263428; http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.htm; https://en.wikipedia.org/wiki/Rec._2020#Transfer_characteristics
 
-float4 change(float4 c0){
+float4 change(float4 c0,float Y_Gamma_lo, float Y_Gamma_hi){
 	
 float3 c0Lin=c0.rgb;
 	
@@ -441,7 +456,7 @@ float3 og_XYZ=LinRGB2XYZ(c0_og_Lin,Mode);
 
 c0Lin.rgb=c0Lin.rgb;
 
-float nw_Y=(Y_Gamma_Lo==1 && Y_Gamma_Hi==1)?og_XYZ.y:lerp(pow(og_XYZ.y,Y_Gamma_Lo),pow(og_XYZ.y,Y_Gamma_Hi),og_XYZ.y);
+float nw_Y=(Y_Gamma_lo==1 && Y_Gamma_hi==1)?og_XYZ.y:lerp(pow(og_XYZ.y,Y_Gamma_lo),pow(og_XYZ.y,Y_Gamma_hi),og_XYZ.y);
 nw_Y=(nw_Y<og_XYZ.y)?og_XYZ.y:nw_Y;
 
 float3 nw_xyY= XYZ2xyY(LinRGB2XYZ(c0Lin.rgb,Mode));
@@ -456,24 +471,59 @@ return c0;
 
 }
 
-float4 Y_gamma_pass(float4 vpos : SV_Position, float2 texcoord : TexCoord) : SV_Target
+float4 Y_gamma_2D_pass(float4 vpos : SV_Position, float2 texcoord : TexCoord) : SV_Target
 {
 
 float4 c0=tex2D(ReShade::BackBuffer, texcoord);
 float3 c0_hsv=rgb2hsv(c0.rgb);
 
-float4 c1=change(c0);
+float xCoord_Pos;
+float yCoord_Pos;
+float Y_Gamma_lo=Y_Gamma_Lo;
+float Y_Gamma_hi=Y_Gamma_Hi;
+
+[branch]if(Two_dimensional_input==true){
+	
+float x_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range*(BUFFER_RCP_HEIGHT/BUFFER_RCP_WIDTH):Two_dimensional_input_Range;
+
+float y_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range:Two_dimensional_input_Range*(BUFFER_RCP_WIDTH/BUFFER_RCP_HEIGHT);
+
+Y_Gamma_lo= (buttondown==0)?  mousepoint.x*ReShade::PixelSize.x*((Y_Gamma_lo+0.5*x_Range)-(Y_Gamma_lo-0.5*x_Range))+(Y_Gamma_lo-0.5*x_Range):Y_Gamma_lo;
+
+xCoord_Pos=(buttondown==1)?(Y_Gamma_lo-(Y_Gamma_lo-0.5*x_Range))/((Y_Gamma_lo+0.5*x_Range)-(Y_Gamma_lo-0.5*x_Range)):mousepoint.x*ReShade::PixelSize.x;
+
+Y_Gamma_hi= (buttondown==0)?mousepoint.y*ReShade::PixelSize.y*((Y_Gamma_hi+0.5*y_Range)-(Y_Gamma_hi-0.5*y_Range))+(Y_Gamma_hi-0.5*y_Range):Y_Gamma_hi;
+
+yCoord_Pos=(buttondown==1)?(Y_Gamma_hi-(Y_Gamma_hi-0.5*y_Range))/((Y_Gamma_hi+0.5*y_Range)-(Y_Gamma_hi-0.5*y_Range)):mousepoint.y*ReShade::PixelSize.y;
+}
 
 
+float4 c1=change(c0,Y_Gamma_lo,Y_Gamma_hi);
+
+c1.rgb =(Two_dimensional_input==1 && Two_dimensional_input_type==0 && (abs(texcoord.x-xCoord_Pos)<BUFFER_RCP_WIDTH || abs(texcoord.y-yCoord_Pos)<BUFFER_RCP_HEIGHT))?float3(0.369,0.745,0):c1.rgb;
+
+c1.rgb =(Two_dimensional_input==1 && Two_dimensional_input_type==1 && (abs(texcoord.x-xCoord_Pos)<3*BUFFER_RCP_WIDTH && abs(texcoord.y-yCoord_Pos)<3*BUFFER_RCP_HEIGHT))?float3(0.498,1,0):c1.rgb;
+
+float4 res =float4(c1.rgb,0);
+float textSize=33;
+[flatten]if(Two_dimensional_input==1){
+    DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-9, 0), textSize, 1), int2(8, 0), textSize, 1) , 
+						textSize, 1, texcoord,  3, Y_Gamma_lo, res,1); 
+						
+						
+						DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-9, 1), textSize, 1), int2(8, 0), textSize, 1) , 
+						textSize, 1, texcoord,  3, Y_Gamma_hi, res,1);
+}
+c1.rgb=res.rgb;
 return c1;
 
 }
 
-technique Y_gamma
+technique Y_gamma_2D
 {
 	pass
 	{
 		VertexShader = PostProcessVS;
-		PixelShader = Y_gamma_pass;
+		PixelShader = Y_gamma_2D_pass;
 	}
 }
