@@ -9,11 +9,11 @@ ui_tooltip = "Take linear RGB as input and output linear RGB";
 > = false;
 
 uniform float Y_Gamma_Lo < __UNIFORM_DRAG_FLOAT1
-	ui_min = 0; ui_max=10; ui_tooltip = "N.B. avoid_grey and colour include settings have no effect on this setting!";
+	ui_min = -20; ui_max=20; ui_tooltip = "N.B. avoid_grey and colour include settings have no effect on this setting!";
 > = 0.9;
 
 uniform float Y_Gamma_Hi < __UNIFORM_DRAG_FLOAT1
-	ui_min = 0; ui_max=10; ui_tooltip = "N.B. avoid_grey and colour include settings have no effect on this setting!";
+	ui_min = -20; ui_max=20; ui_tooltip = "N.B. avoid_grey and colour include settings have no effect on this setting!";
 > =0.2;
 
 uniform bool Two_dimensional_input <> = false;
