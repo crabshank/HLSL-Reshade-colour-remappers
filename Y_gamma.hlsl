@@ -12,6 +12,8 @@ float4 p1 :  register(c1);
 #define Y_Gamma_Lo 0.9
 #define Y_Gamma_Hi 0.2
 
+#define Y_Gamma_Mode 0 // 0 - Brighten only | 1 - Darken only | 2 - No bias
+
 #define MODE 3 // 0 - sRGB | 1 - Rec 601 NTSC | 2 - Rec. 601 PAL | 3 - Rec. 709 | 4 - Rec.2020 | 5 - DCI-P3 | 6 - Display P3 | 7 - Orginal NTSC (47 CFR ยง 73.682 - TV transmission standards) | 8 - Rec. 601 D93 | 9 - Rec. 709 D93 | 10 - DCI-P3 (D60/ACES)
 
 #define Linear 0 // 0-1 Take linear RGB as input and output linear RGB
@@ -464,7 +466,16 @@ float Y_Gamma_lo=Y_Gamma_Lo;
 float Y_Gamma_hi=Y_Gamma_Hi;
 
 float nw_Y=(Y_Gamma_lo==1 && Y_Gamma_hi==1)?og_XYZ.y:lerp(pow(og_XYZ.y,Y_Gamma_lo),pow(og_XYZ.y,Y_Gamma_hi),og_XYZ.y);
+
 nw_Y=(nw_Y<og_XYZ.y)?og_XYZ.y:nw_Y;
+
+int Y_Gamma_mode=Y_Gamma_Mode;
+
+[flatten]if(Y_Gamma_mode==0){
+nw_Y=(nw_Y>og_XYZ.y)?nw_Y:og_XYZ.y;
+}else if(Y_Gamma_mode==1){
+nw_Y=(nw_Y<og_XYZ.y)?nw_Y:og_XYZ.y;
+}
 
 float3 nw_xyY= XYZ2xyY(LinRGB2XYZ(c0Lin.rgb,Mode));
 

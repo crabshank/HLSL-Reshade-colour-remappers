@@ -16,6 +16,10 @@ uniform float Y_Gamma_Hi < __UNIFORM_DRAG_FLOAT1
 	ui_min = -20; ui_max=20; ui_tooltip = "N.B. avoid_grey and colour include settings have no effect on this setting!";
 > =0.2;
 
+uniform int Y_Gamma_Mode <__UNIFORM_COMBO_INT1
+    ui_items = "Brighten only\0Darken only\0No bias\0";
+	> = 0;
+
 uniform bool Two_dimensional_input <> = false;
 
 
@@ -457,7 +461,12 @@ float3 og_XYZ=LinRGB2XYZ(c0_og_Lin,Mode);
 c0Lin.rgb=c0Lin.rgb;
 
 float nw_Y=(Y_Gamma_lo==1 && Y_Gamma_hi==1)?og_XYZ.y:lerp(pow(og_XYZ.y,Y_Gamma_lo),pow(og_XYZ.y,Y_Gamma_hi),og_XYZ.y);
-nw_Y=(nw_Y<og_XYZ.y)?og_XYZ.y:nw_Y;
+
+[flatten]if(Y_Gamma_Mode==0){
+nw_Y=(nw_Y>og_XYZ.y)?nw_Y:og_XYZ.y;
+}else if(Y_Gamma_Mode==1){
+nw_Y=(nw_Y<og_XYZ.y)?nw_Y:og_XYZ.y;
+}
 
 float3 nw_xyY= XYZ2xyY(LinRGB2XYZ(c0Lin.rgb,Mode));
 
