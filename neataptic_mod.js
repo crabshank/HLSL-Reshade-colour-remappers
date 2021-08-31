@@ -2059,7 +2059,7 @@ var multi = {
     function (x) { return x > 0 ? 1 : 0; },
     function (x) { return x > 0 ? x : 0; },
     function (x) { return x / (1 + Math.abs(x)); },
-    function (x) { return ((Math.exp(1) - 1)*Math.exp(x))/((Math.exp(x) + Math.exp(1))*(1 + Math.exp(x))); },	
+    function (x) { return ((Math.E - 1)*Math.exp(x))/((Math.exp(x) + Math.E)*(1 + Math.exp(x))); },	
     function (x) { return Math.sin(x); },
     function (x) { return Math.exp(-Math.pow(x, 2)); },
     function (x) { return (Math.sqrt(Math.pow(x, 2) + 1) - 1) / 2 + x; },
@@ -2781,7 +2781,7 @@ var activation = {
     return x / d;
   },
   SOFTCLIP:function (x,derivative){
-	if (derivative) return ((Math.exp(1) - 1)*Math.exp(x))/((Math.exp(x) + Math.exp(1))*(1 + Math.exp(x)));
+	if (derivative) return ((Math.E - 1)*Math.exp(x))/((Math.exp(x) + Math.E)*(1 + Math.exp(x)));
 	return Math.log ((1+Math.exp(x))/(1+Math.exp(x-1)));   
   },
   SINUSOID: function (x, derivate) {
