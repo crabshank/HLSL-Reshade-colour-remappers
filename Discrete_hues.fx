@@ -44,6 +44,8 @@ float hueCol;
 int grey=(((c0.r==c0.g)&&(c0.g==c0.b))||(c0_hsv.y==0))?1:0;
 
 [flatten]if(grey==0){
+	
+float hueSat=1.0;
 
 if((hue>=3525)||(((hue>=0) && (hue<75)))){
 hueCol=0.0;
@@ -67,11 +69,13 @@ hueCol=240.0;
 hueCol=270.0;
 }else if((hue>=3075) && (hue<3375)){
 hueCol=330.0;
+hueSat=0.8;
 }else if((hue>=3375) && (hue<3525)){
 hueCol=345.0;
+hueSat=0.95;
 }
 
-c1.rgb=hsv2rgb(float3(hueCol/360.0,1,Out_value));
+c1.rgb=hsv2rgb(float3(hueCol/360.0,hueSat,Out_value));
 
 }else{
 	
