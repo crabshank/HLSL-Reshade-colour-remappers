@@ -10,12 +10,37 @@
 #define minWdt 410
 #define _WIN32_WINNT 0x0400
 #pragma comment( lib, "user32.lib" )
+int intCol[3]={0,0,0};
+HWND console = GetConsoleWindow();
+
+void ClearConsoleToColors(HWND console,int rgbVal[3])
+{
+
+    RECT r;
+    GetWindowRect(console, &r);
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_SCREEN_BUFFER_INFOEX info;
+    info.cbSize = sizeof(info);
+
+   GetConsoleScreenBufferInfoEx(hConsole, &info);
+
+info.ColorTable[0] = RGB(rgbVal[0],rgbVal[1],rgbVal[2]);
+
+SetConsoleScreenBufferInfoEx(hConsole, &info);
+
+
+    MoveWindow(console, r.left, r.top, MAX(minWdt,r.right-r.left), MAX(minHgt,r.bottom-r.top), TRUE);
+
+     return;
+}
 
 HHOOK hKeyboardHook;
     int shiftKy=0;
     int ctrlKy=0;
     int F2Ky=1;
     int F2KyLast=1;
+    int pastingNow=0;
 
 __declspec(dllexport) LRESULT CALLBACK KeyboardEvent (int nCode, WPARAM wParam, LPARAM lParam)
 {
@@ -37,6 +62,7 @@ if (hooked_key->vkCode==VK_LCONTROL||hooked_key->vkCode==VK_RCONTROL||hooked_key
     }else if((wParam == WM_SYSKEYUP) ||  (wParam == WM_KEYUP)){
 if (hooked_key->vkCode==VK_LSHIFT||hooked_key->vkCode==VK_RSHIFT||hooked_key->vkCode==VK_SHIFT){
                     shiftKy=0;
+                    ClearConsoleToColors(console,intCol);
 }
 if (hooked_key->vkCode==VK_LCONTROL||hooked_key->vkCode==VK_RCONTROL||hooked_key->vkCode==VK_CONTROL){
                     ctrlKy=0;
@@ -85,27 +111,6 @@ void paster(HWND console,char* str_paste){
     CloseClipboard();
 }
 
-void ClearConsoleToColors(HWND console,int rgbVal[3])
-{
-
-    RECT r;
-    GetWindowRect(console, &r);
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    CONSOLE_SCREEN_BUFFER_INFOEX info;
-    info.cbSize = sizeof(info);
-
-   GetConsoleScreenBufferInfoEx(hConsole, &info);
-
-info.ColorTable[0] = RGB(rgbVal[0],rgbVal[1],rgbVal[2]);
-
-SetConsoleScreenBufferInfoEx(hConsole, &info);
-
-
-    MoveWindow(console, r.left, r.top, MAX(minWdt,r.right-r.left), MAX(minHgt,r.bottom-r.top), TRUE);
-
-     return;
-}
 
 int main(int argc, char** argv)
 {
@@ -135,8 +140,6 @@ char* nomin_hue="Greyscale";
 char str_paste[MAX_PATH]={0};
 
 
- HWND console = GetConsoleWindow();
-
      RECT r;
     GetWindowRect(console, &r);
 MoveWindow(console, r.left, r.top, minWdt,minHgt, TRUE);
@@ -164,7 +167,9 @@ if ((((red2!=redInt)|| (green2!=greenInt) || (blue2!=blueInt)))||((shiftKy==1))|
  F2KyLast=(F2Ky!=F2KyLast)?F2Ky:F2KyLast;
                system("cls");
  printf("                            ");
- int intCol[3]={redInt,greenInt,blueInt};
+  intCol[0]=redInt;
+  intCol[1]=greenInt;
+  intCol[2]=blueInt;
 
 int Rd=redInt;
 int Gr=greenInt;
@@ -266,6 +271,7 @@ out_col=12;
                               printf("\033[0;34;43mPASTING (_x:%d, y:%d_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m",p_fixed.x,p_fixed.y,redInt,greenInt,blueInt,sat,nomin_hue,hue_out);
                              }
           _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
+           pastingNow=(pastingNow==0)?1:pastingNow;
         paster(console,str_paste);
                    }else{
                          if(F2Ky==1){
@@ -286,6 +292,7 @@ out_col=12;
    }
 
           _snprintf(str_paste, MAX_PATH-1,"%d, %d, %d",redInt,greenInt,blueInt);
+          pastingNow=(pastingNow==0)?1:pastingNow;
         paster(console,str_paste);
                    }else{
                           if(F2Ky==1){
