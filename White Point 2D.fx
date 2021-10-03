@@ -711,7 +711,7 @@ c1.rgb=res.rgb;
 }
 
 p0.rgb=float3(p0_rnd.r*rcptwoFiveFive,p0_rnd.g*rcptwoFiveFive,p0_rnd.b*rcptwoFiveFive);
-c1.rgb=(Two_dimensional_input==true && Two_dimensional_input_type==2 && Two_dimensional_output_text==2 && ((texcoord.x>=0.551 && texcoord.x<=0.611) && (texcoord.y<=0.023) ))?p0.rgb:c1.rgb;
+c1.rgb=(Two_dimensional_input==true && Two_dimensional_input_type==2 && Two_dimensional_output_text==2 && ((texcoord.x>=0.556 && texcoord.x<=0.616) && (texcoord.y<=0.023) ))?p0.rgb:c1.rgb;
 
 return c1;
 
