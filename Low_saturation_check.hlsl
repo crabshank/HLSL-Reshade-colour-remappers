@@ -14,7 +14,7 @@ float4 p1 : register(c1);
 
 #define Grey_colour 0 // 0 to 2 (Black, Mid_grey, White)
 #define Metric 0 // 0 to 1 (saturation, min(chroma,saturation))
-#define Greyness 0.15 // 0 to 1 [Blacken/whiten pixels with: saturation<=Greyness OR min(chroma,saturation)<=Greyness]
+#define Greyness 0.15 // 0 to 1 [Blacken/whiten pixels with Metric<=Greyness]
 
 float4 main(float2 tex : TEXCOORD0) : COLOR 
 { 

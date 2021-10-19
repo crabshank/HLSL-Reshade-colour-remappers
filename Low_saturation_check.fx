@@ -10,7 +10,7 @@ uniform int Metric < __UNIFORM_COMBO_INT1
 
 uniform float Greyness < __UNIFORM_DRAG_FLOAT1
 	ui_min = 0.0; ui_max = 1;
-		ui_tooltip = "Blacken/whiten pixels with: saturation<=Greyness OR min(chroma,saturation)<=Greyness";
+		ui_tooltip = "Blacken/whiten pixels with Metric<=Greyness";
 > = 0.015;
 
 #include "ReShade.fxh"
