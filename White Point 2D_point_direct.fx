@@ -13,6 +13,11 @@ uniform float2 Custom_xy < __UNIFORM_DRAG_FLOAT2
 	ui_tooltip = "N.B. output will be D65 (white point for most colour spaces)";
 > =float2(0.312727,0.329023);
 
+uniform int Debug <__UNIFORM_COMBO_INT1
+    ui_items = "Blacken sat <= Debug_thresh\0Saturation change map\0";
+    ui_tooltip = "Saturation change map: Sat unchanged => Green; Sat decreased => Cyan to Blue; Sat increased => Magenta to Orange";
+	> = 0;
+
 uniform float Debug_thresh < __UNIFORM_DRAG_FLOAT1
 	ui_min = 0; ui_max =1;
 > = 0.015;
@@ -557,7 +562,24 @@ float max_rgb=max(max(c1.r,c1.g),c1.b);
 float min_rgb=min(min(c1.r,c1.g),c1.b);
 float sat=(max_rgb==0)?0:(max_rgb-min_rgb)/max_rgb;
 
-c1.rgb=(sat<=Debug_thresh)?0:c1.rgb;
+[branch]if(Debug==1){
+float max_rgb_og=max(max(c0.r,c0.g),c0.b);
+float min_rgb_og=min(min(c0.r,c0.g),c0.b);
+float sat_og=(max_rgb_og==0)?0:(max_rgb_og-min_rgb_og)/max_rgb_og;
+
+float hue_dbg=120;
+    
+	hue_dbg=(sat<sat_og)?lerp(157.5,240,(sat_og-sat)/sat_og):hue_dbg; 
+    hue_dbg=(sat>sat_og)?lerp(307.5,367.5,(sat-sat_og)/(1-sat_og)):hue_dbg;
+    hue_dbg=(hue_dbg==360)?0:hue_dbg;
+    hue_dbg=(hue_dbg>360)?hue_dbg-360:hue_dbg;
+	
+	c1.rgb=hsv2rgb(float3(hue_dbg/360.0,1,1-Debug_thresh));
+
+}else{
+	c1.rgb=(sat<=Debug_thresh)?0:c1.rgb;
+}
+
 
 float4 res =float4(c1.rgb,0);
 
