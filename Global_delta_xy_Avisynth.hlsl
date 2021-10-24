@@ -20,7 +20,7 @@ float4 p8 : register(c8); // Blue, Violet__Purple, Magenta__Pink, Reddish_pink
 	#define DEBUG_val p2.w
 	#define DEBUG_type p3.z
 
-#define satDeltaAmnt p5.x //-1 to <1 - avoid_grey and colour include settings have no effect on this setting
+#define satDeltaAmnt p5.x //-1 to <1 - colour include settings have no effect on this setting
 #define redDeltaAmnt p4.x
 #define greenDeltaAmnt p4.y
 #define blueDeltaAmnt p4.z
@@ -503,7 +503,8 @@ float3 c0_og_Lin=c0Lin;
 [branch]if(satDeltaAmnt!=0){
 float3 dltHSV=rgb2hsv(c0_og_Lin);
 
-dltHSV.y=delta(dltHSV.y,satDeltaAmnt);
+float nwSat=delta(dltHSV.y,satDeltaAmnt);
+dltHSV.y=(avoid_grey==1)?lerp(dltHSV.y,nwSat,min(dltHSV.y,dltHSV.y*dltHSV.z)):nwSat;
 
 c0Lin=hsv2rgb(dltHSV);
 }

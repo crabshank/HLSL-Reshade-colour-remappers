@@ -9,7 +9,7 @@ ui_tooltip = "Take linear RGB as input and output linear RGB";
 > = false;
 
 uniform float satDeltaAmnt < __UNIFORM_DRAG_FLOAT1
-	ui_min = -1.0; ui_max=1.0; ui_tooltip = "N.B. avoid_grey and colour include settings have no effect on this setting!";
+	ui_min = -1.0; ui_max=1.0; ui_tooltip = "N.B.  colour include settings have no effect on this setting!";
 > = 0;
 
 
@@ -486,14 +486,15 @@ float3 c0Lin=c0.rgb;
 	
 [branch]if (Linear==false){
 c0Lin=rgb2LinRGB(c0.rgb, Mode);
-}
+}	
 
 float3 c0_og_Lin=c0Lin;
 
 [branch]if(satDeltaAmnt!=0){
 float3 dltHSV=rgb2hsv(c0_og_Lin);
 
-dltHSV.y=delta(dltHSV.y,satDeltaAmnt);
+float nwSat=delta(dltHSV.y,satDeltaAmnt);
+dltHSV.y=(avoid_grey==true)?lerp(dltHSV.y,nwSat,min(dltHSV.y,dltHSV.y*dltHSV.z)):nwSat;
 
 c0Lin=hsv2rgb(dltHSV);
 }
