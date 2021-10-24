@@ -555,7 +555,7 @@ c0Lin.b=(blueDeltaAmnt==0)?c0Lin.b:delta(c0Lin.b,blueDeltaAmnt);
 
 int Avoid_grey=avoid_grey;
 
-c0Lin.rgb=(avoid_grey==true)?lerp(c0_og_Lin.rgb, c0Lin.rgb,min(h_sat_val.y,h_sat_val.y*h_sat_val.z)):c0Lin.rgb;
+c0Lin.rgb=(avoid_grey==1)?lerp(c0_og_Lin.rgb, c0Lin.rgb,min(h_sat_val.y,h_sat_val.y*h_sat_val.z)):c0Lin.rgb;
 
 }
 
