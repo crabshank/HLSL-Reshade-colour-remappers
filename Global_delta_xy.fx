@@ -480,7 +480,7 @@ return color;
 }
 
 
-float4 change(float4 c0, float2 hue_sat){
+float4 change(float4 c0, float3 h_sat_val){
 	
 float3 c0Lin=c0.rgb;
 	
@@ -504,8 +504,8 @@ c0Lin=float3(delta(c0Lin.r,rgbDeltaAmnt),delta(c0Lin.g,rgbDeltaAmnt),delta(c0Lin
 
 [branch]if((redDeltaAmnt!=0)||(greenDeltaAmnt!=0)||(blueDeltaAmnt!=0)){
 
-int hue=floor(hue_sat.x*3600);
-int grey=(((c0.r==c0.g)&&(c0.g==c0.b))||(hue_sat.y==0))?1:0;
+int hue=floor(h_sat_val.x*3600);
+int grey=(((c0.r==c0.g)&&(c0.g==c0.b))||(h_sat_val.y==0))?1:0;
 
 int act=0;
 
@@ -543,7 +543,7 @@ c0Lin.g=(greenDeltaAmnt==0)?c0Lin.g:delta(c0Lin.g,greenDeltaAmnt);
 
 c0Lin.b=(blueDeltaAmnt==0)?c0Lin.b:delta(c0Lin.b,blueDeltaAmnt);
 
-c0Lin.rgb=(avoid_grey==true)?lerp(c0_og_Lin.rgb, c0Lin.rgb,hue_sat.y):c0Lin.rgb;
+c0Lin.rgb=(avoid_grey==true)?lerp(c0_og_Lin.rgb, c0Lin.rgb,min(h_sat_val.y,h_sat_val.y*h_sat_val.z)):c0Lin.rgb;
 
 }
 
@@ -573,7 +573,7 @@ float4 deltaxyPass(float4 vpos : SV_Position, float2 texcoord : TexCoord) : SV_T
 float4 c0=tex2D(ReShade::BackBuffer, texcoord);
 float3 c0_hsv=rgb2hsv(c0.rgb);
 
-float4 c1=change(c0, c0_hsv.xy);
+float4 c1=change(c0, c0_hsv);
 
 
 return c1;

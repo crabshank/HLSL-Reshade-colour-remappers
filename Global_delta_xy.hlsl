@@ -471,7 +471,7 @@ color=(color<=midp.x)?newyLow:newyHi;
 return color;
 }
 
-float4 change(float4 c0, float2 hue_sat, int Mode, int lin){
+float4 change(float4 c0, float3 h_sat_val, int Mode, int lin){
 	
 int red=Red;
 int orange__Brown=Orange__Brown;
@@ -508,8 +508,8 @@ c0Lin=float3(delta(c0Lin.r,rgbDeltaAmnt),delta(c0Lin.g,rgbDeltaAmnt),delta(c0Lin
 
 [branch]if((redDeltaAmnt!=0)||(greenDeltaAmnt!=0)||(blueDeltaAmnt!=0)){
 
-int hue=floor(hue_sat.x*3600);
-int grey=(((c0.r==c0.g)&&(c0.g==c0.b))||(hue_sat.y==0))?1:0;
+int hue=floor(h_sat_val.x*3600);
+int grey=(((c0.r==c0.g)&&(c0.g==c0.b))||(h_sat_val.y==0))?1:0;
 
 int act=0;
 
@@ -549,7 +549,7 @@ c0Lin.b=(blueDeltaAmnt==0)?c0Lin.b:delta(c0Lin.b,blueDeltaAmnt);
 
 int Avoid_grey=avoid_grey;
 
-c0Lin.rgb=(Avoid_grey==1)?lerp(c0_og_Lin.rgb, c0Lin.rgb,hue_sat.y):c0Lin.rgb;
+c0Lin.rgb=(avoid_grey==true)?lerp(c0_og_Lin.rgb, c0Lin.rgb,min(h_sat_val.y,h_sat_val.y*h_sat_val.z)):c0Lin.rgb;
 
 }
 
@@ -587,7 +587,7 @@ float Flip_split=flip_split;
 int Mode=MODE;
 int linr=Linear;
 
-float4 c1=change(c0,c0_hsv.xy,Mode,linr);
+float4 c1=change(c0,c0_hsv,Mode,linr);
 
 float4 c2=(tex.x>=Split_position*Split)?c1:c0;
 float4 c3=(tex.x<=Split_position*Split)?c1:c0;
