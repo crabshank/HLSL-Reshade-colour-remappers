@@ -618,13 +618,15 @@ float min_rgb_og=min(min(c0.r,c0.g),c0.b);
 float sat_og=(max_rgb_og==0)?0:(max_rgb_og-min_rgb_og)/max_rgb_og;
 
 float hue_dbg=120;
-    
-	hue_dbg=(sat<sat_og)?lerp(157.5,240,(sat_og-sat)/sat_og):hue_dbg; 
-    hue_dbg=(sat>sat_og)?lerp(307.5,367.5,(sat-sat_og)/(1-sat_og)):hue_dbg;
+    float abs_satDiff=(sat_og==0)?abs(sat_og-sat):abs(sat_og-sat)/sat_og;
+    float satDiff1=(sat_og==0)?sat_og-sat:abs(sat_og-sat)/sat_og;
+    float satDiff2=(sat_og==1)?sat-sat_og:(sat-sat_og)/(1-sat_og);
+	hue_dbg=(sat<sat_og)?lerp(157.5,240,satDiff1):hue_dbg; 
+    hue_dbg=(sat>sat_og)?lerp(307.5,367.5,satDiff2):hue_dbg;
     hue_dbg=(hue_dbg==360)?0:hue_dbg;
     hue_dbg=(hue_dbg>360)?hue_dbg-360:hue_dbg;
 	
-	c1.rgb=hsv2rgb(float3(hue_dbg/360.0,1,1-Debug_thresh));
+	c1.rgb=hsv2rgb(float3(hue_dbg/360.0,1,lerp(0.3*(1-Debug_thresh),1-Debug_thresh,abs_satDiff)));
 
 }
 
