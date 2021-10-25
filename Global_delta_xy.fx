@@ -494,7 +494,8 @@ float3 c0_og_Lin=c0Lin;
 float3 dltHSV=rgb2hsv(c0_og_Lin);
 
 float nwSat=delta(dltHSV.y,satDeltaAmnt);
-dltHSV.y=(avoid_grey==true)?lerp(dltHSV.y,nwSat,min(dltHSV.y,dltHSV.y*dltHSV.z)):nwSat;
+float greyMtrc=lerp(min(dltHSV.y,dltHSV.y*dltHSV.z),dltHSV.y,dltHSV.z);
+dltHSV.y=(avoid_grey==true)?lerp(dltHSV.y,nwSat,greyMtrc):nwSat;
 
 c0Lin=hsv2rgb(dltHSV);
 }
@@ -544,7 +545,8 @@ c0Lin.g=(greenDeltaAmnt==0)?c0Lin.g:delta(c0Lin.g,greenDeltaAmnt);
 
 c0Lin.b=(blueDeltaAmnt==0)?c0Lin.b:delta(c0Lin.b,blueDeltaAmnt);
 
-c0Lin.rgb=(avoid_grey==true)?lerp(c0_og_Lin.rgb, c0Lin.rgb,min(h_sat_val.y,h_sat_val.y*h_sat_val.z)):c0Lin.rgb;
+float greyMtrc=lerp(min(h_sat_val.y,h_sat_val.y*h_sat_val.z),h_sat_val.y,h_sat_val.z);
+c0Lin.rgb=(avoid_grey==true)?lerp(c0_og_Lin.rgb, c0Lin.rgb,greyMtrc):c0Lin.rgb;
 
 }
 
