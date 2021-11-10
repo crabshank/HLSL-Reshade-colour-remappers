@@ -547,7 +547,7 @@ float4 c0=tex2D(ReShade::BackBuffer, texcoord); //current pixel
 float2 Customxy=Custom_xy;
 int linr=(Linear==true)?1:0;
 
-float4 p0=tex2D(ReShade::BackBuffer, mousepoint*ReShade::PixelSize);
+float4 p0=tex2D(ReShade::BackBuffer, mousepoint*float2(BUFFER_RCP_WIDTH,BUFFER_RCP_HEIGHT));
 
 float3 p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
 

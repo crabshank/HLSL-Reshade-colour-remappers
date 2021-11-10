@@ -577,17 +577,17 @@ float x_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range*(BUFFER_
 
 float y_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range:Two_dimensional_input_Range*(BUFFER_RCP_WIDTH/BUFFER_RCP_HEIGHT);
 
-Customxy.x= (buttondown==0)?  mousepoint.x*ReShade::PixelSize.x*((Customxy.x+0.5*x_Range)-(Customxy.x-0.5*x_Range))+(Customxy.x-0.5*x_Range):Customxy.x;
+Customxy.x= (buttondown==0)?  mousepoint.x*BUFFER_RCP_WIDTH*((Customxy.x+0.5*x_Range)-(Customxy.x-0.5*x_Range))+(Customxy.x-0.5*x_Range):Customxy.x;
 
-xCoord_Pos=(buttondown==1)?(Customxy.x-(Customxy.x-0.5*x_Range))/((Customxy.x+0.5*x_Range)-(Customxy.x-0.5*x_Range)):mousepoint.x*ReShade::PixelSize.x;
+xCoord_Pos=(buttondown==1)?(Customxy.x-(Customxy.x-0.5*x_Range))/((Customxy.x+0.5*x_Range)-(Customxy.x-0.5*x_Range)):mousepoint.x*BUFFER_RCP_WIDTH;
 
-Customxy.y= (buttondown==0)?mousepoint.y*ReShade::PixelSize.y*((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range))+(Customxy.y-0.5*y_Range):Customxy.y;
+Customxy.y= (buttondown==0)?mousepoint.y*BUFFER_RCP_HEIGHT*((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range))+(Customxy.y-0.5*y_Range):Customxy.y;
 
-yCoord_Pos=(buttondown==1)?(Customxy.y-(Customxy.y-0.5*y_Range))/((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range)):mousepoint.y*ReShade::PixelSize.y;
+yCoord_Pos=(buttondown==1)?(Customxy.y-(Customxy.y-0.5*y_Range))/((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range)):mousepoint.y*BUFFER_RCP_HEIGHT;
 
 
 [flatten]if(Two_dimensional_input_type==2){
-p0=tex2D(ReShade::BackBuffer, mousepoint*ReShade::PixelSize);
+p0=tex2D(ReShade::BackBuffer, mousepoint*float2(BUFFER_RCP_WIDTH,BUFFER_RCP_HEIGHT));
 
 p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
 

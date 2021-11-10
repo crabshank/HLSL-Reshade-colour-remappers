@@ -497,13 +497,13 @@ float x_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range*(BUFFER_
 
 float y_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range:Two_dimensional_input_Range*(BUFFER_RCP_WIDTH/BUFFER_RCP_HEIGHT);
 
-Y_Gamma_lo= (buttondown==0)?  mousepoint.x*ReShade::PixelSize.x*((Y_Gamma_lo+0.5*x_Range)-(Y_Gamma_lo-0.5*x_Range))+(Y_Gamma_lo-0.5*x_Range):Y_Gamma_lo;
+Y_Gamma_lo= (buttondown==0)?  mousepoint.x*BUFFER_RCP_WIDTH*((Y_Gamma_lo+0.5*x_Range)-(Y_Gamma_lo-0.5*x_Range))+(Y_Gamma_lo-0.5*x_Range):Y_Gamma_lo;
 
-xCoord_Pos=(buttondown==1)?(Y_Gamma_lo-(Y_Gamma_lo-0.5*x_Range))/((Y_Gamma_lo+0.5*x_Range)-(Y_Gamma_lo-0.5*x_Range)):mousepoint.x*ReShade::PixelSize.x;
+xCoord_Pos=(buttondown==1)?(Y_Gamma_lo-(Y_Gamma_lo-0.5*x_Range))/((Y_Gamma_lo+0.5*x_Range)-(Y_Gamma_lo-0.5*x_Range)):mousepoint.x*BUFFER_RCP_WIDTH;
 
-Y_Gamma_hi= (buttondown==0)?mousepoint.y*ReShade::PixelSize.y*((Y_Gamma_hi+0.5*y_Range)-(Y_Gamma_hi-0.5*y_Range))+(Y_Gamma_hi-0.5*y_Range):Y_Gamma_hi;
+Y_Gamma_hi= (buttondown==0)?mousepoint.y*BUFFER_RCP_HEIGHT*((Y_Gamma_hi+0.5*y_Range)-(Y_Gamma_hi-0.5*y_Range))+(Y_Gamma_hi-0.5*y_Range):Y_Gamma_hi;
 
-yCoord_Pos=(buttondown==1)?(Y_Gamma_hi-(Y_Gamma_hi-0.5*y_Range))/((Y_Gamma_hi+0.5*y_Range)-(Y_Gamma_hi-0.5*y_Range)):mousepoint.y*ReShade::PixelSize.y;
+yCoord_Pos=(buttondown==1)?(Y_Gamma_hi-(Y_Gamma_hi-0.5*y_Range))/((Y_Gamma_hi+0.5*y_Range)-(Y_Gamma_hi-0.5*y_Range)):mousepoint.y*BUFFER_RCP_HEIGHT;
 }
 
 

@@ -316,17 +316,17 @@ float x_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range*(BUFFER_
 
 float y_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range:Two_dimensional_input_Range*(BUFFER_RCP_WIDTH/BUFFER_RCP_HEIGHT);
 
-Customxy.x= ((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==0 && Two_dimensional_input==1))?  mousepoint.x*ReShade::PixelSize.x*((Customxy.x+0.5*x_Range)-(Customxy.x-0.5*x_Range))+(Customxy.x-0.5*x_Range):Customxy.x;
+Customxy.x= ((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==0 && Two_dimensional_input==1))?  mousepoint.x*BUFFER_RCP_WIDTH*((Customxy.x+0.5*x_Range)-(Customxy.x-0.5*x_Range))+(Customxy.x-0.5*x_Range):Customxy.x;
 
-float xCoord_Pos=((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==1 && Two_dimensional_input==1))?(Customxy.x-(Customxy.x-0.5*x_Range))/((Customxy.x+0.5*x_Range)-(Customxy.x-0.5*x_Range)):mousepoint.x*ReShade::PixelSize.x;
+float xCoord_Pos=((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==1 && Two_dimensional_input==1))?(Customxy.x-(Customxy.x-0.5*x_Range))/((Customxy.x+0.5*x_Range)-(Customxy.x-0.5*x_Range)):mousepoint.x*BUFFER_RCP_WIDTH;
 
-Customxy.y= ((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==0 && Two_dimensional_input==1))?mousepoint.y*ReShade::PixelSize.y*((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range))+(Customxy.y-0.5*y_Range):Customxy.y;
+Customxy.y= ((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==0 && Two_dimensional_input==1))?mousepoint.y*BUFFER_RCP_HEIGHT*((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range))+(Customxy.y-0.5*y_Range):Customxy.y;
 
-float yCoord_Pos=(buttondown==1 && Two_dimensional_input==1)?(Customxy.y-(Customxy.y-0.5*y_Range))/((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range)):mousepoint.y*ReShade::PixelSize.y;
+float yCoord_Pos=(buttondown==1 && Two_dimensional_input==1)?(Customxy.y-(Customxy.y-0.5*y_Range))/((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range)):mousepoint.y*BUFFER_RCP_HEIGHT;
 
 float4 c1=c0;
 
-Customxy=(Two_dimensional_input==1 && Two_dimensional_input_type==2)?XYZ2xyY(rgb2XYZ(tex2D(ReShade::BackBuffer, mousepoint*ReShade::PixelSize).rgb,From_space,linr)).xy:Customxy;
+Customxy=(Two_dimensional_input==1 && Two_dimensional_input_type==2)?XYZ2xyY(rgb2XYZ(tex2D(ReShade::BackBuffer, mousepoint*float2(BUFFER_RCP_WIDTH,BUFFER_RCP_HEIGHT)).rgb,From_space,linr)).xy:Customxy;
 
 [branch]if(Two_dimensional_input==1 && Two_dimensional_input_primary==0){
 to_Red=Customxy;
@@ -392,7 +392,7 @@ c4 =(Split==0 || (Debug==1 && Debug_type==1))?c4: c4*(1.0 - divLine); //invert d
 
 c4.rgb =(Two_dimensional_input==1 && Two_dimensional_input_type==0 && (abs(texcoord.x-xCoord_Pos)<BUFFER_RCP_WIDTH || abs(texcoord.y-yCoord_Pos)<BUFFER_RCP_HEIGHT))?float3(0.369,0.745,0):c4.rgb;
 
-c4.rgb =((Two_dimensional_input==1 && Two_dimensional_input_type==1 && (abs(texcoord.x-xCoord_Pos)<3*BUFFER_RCP_WIDTH && abs(texcoord.y-yCoord_Pos)<3*BUFFER_RCP_HEIGHT))||(Two_dimensional_input==1 && buttondown==1 && Debug==1 && Debug_type==1)&& (abs(texcoord.x-mousepoint.x*ReShade::PixelSize.x)<3*BUFFER_RCP_WIDTH && abs(texcoord.y-mousepoint.y*ReShade::PixelSize.y)<3*BUFFER_RCP_HEIGHT) && Two_dimensional_input_type!=2)?float3(0.498,1,0):c4.rgb;
+c4.rgb =((Two_dimensional_input==1 && Two_dimensional_input_type==1 && (abs(texcoord.x-xCoord_Pos)<3*BUFFER_RCP_WIDTH && abs(texcoord.y-yCoord_Pos)<3*BUFFER_RCP_HEIGHT))||(Two_dimensional_input==1 && buttondown==1 && Debug==1 && Debug_type==1)&& (abs(texcoord.x-mousepoint.x*BUFFER_RCP_WIDTH)<3*BUFFER_RCP_WIDTH && abs(texcoord.y-mousepoint.y*BUFFER_RCP_HEIGHT)<3*BUFFER_RCP_HEIGHT) && Two_dimensional_input_type!=2)?float3(0.498,1,0):c4.rgb;
 
 float4 res =float4(c4.rgb,0);
 
