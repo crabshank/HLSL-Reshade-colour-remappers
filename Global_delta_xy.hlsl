@@ -459,12 +459,12 @@ color=1;
 color=0;
 }else{
 dlt=-0.5*dlt+0.5;
-float2 midp=float2(lerp(0,1,dlt),lerp(1,0,dlt));
+float2 midp=float2(dlt,1-dlt);
 float relx=color/midp.x;
 float relxInv=(1-color)/(1-midp.x);
 
-float newyLow=lerp(0,midp.y,relx);
-float newyHi=lerp(1,midp.y,relxInv);
+float newyLow=midp.y*relx;
+float newyHi=relxInv*(midp.y-1)+1;
 
 color=(color<=midp.x)?newyLow:newyHi;
 }
