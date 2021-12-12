@@ -174,9 +174,9 @@ int main(int argc, char ** argv) {
 
       if (grey == 0) {
 
-        if ((Rd > Gr) && (Rd > Bl)) {
+        if ((Rd >= Gr) && (Rd >= Bl)) {
           hue_d = (green - blue) / diff;
-        } else if ((Gr > Rd) && (Gr > Bl)) {
+        } else if ((Gr >= Rd) && (Gr >= Bl)) {
           hue_d = 2.0 + (blue - red) / diff;
         } else {
           hue_d = 4.0 + (red - green) / diff;
