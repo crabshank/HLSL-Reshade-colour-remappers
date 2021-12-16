@@ -1,21 +1,16 @@
 #include <stdio.h>
-
 #include <stdlib.h>
-
 #include <windows.h>
-
 #include <math.h>
-
 #include <iostream>
-
 #include <unistd.h>
+#include <winuser.h>
 
 #define MAX(x, y)(((x) > (y)) ? (x) : (y))
 #define MIN(x, y)(((x) < (y)) ? (x) : (y))
 #define minHgt 75
 #define minWdt 410
-#define _WIN32_WINNT 0x0400
-#pragma comment(lib, "user32.lib")
+
 int intCol[3] = {0,0,0};
 HWND console = GetConsoleWindow();
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -133,6 +128,12 @@ int main(int argc, char ** argv) {
   RECT r;
   GetWindowRect(console, & r);
   MoveWindow(console, r.left, r.top, minWdt, minHgt, TRUE);
+  double rfsh=1/144;
+      DEVMODE dm = { 0 };
+dm.dmSize = sizeof(DEVMODE);
+if(EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm)){
+    rfsh=1/((double)(dm.dmDisplayFrequency));
+}
 
   while (1) {
 
@@ -254,22 +255,22 @@ int main(int argc, char ** argv) {
         ClearConsoleToColors(console, intCol);
         if (shiftKy == 1) {
           if (F2Ky == 1) {
-            printf("\033[0;34;43mPASTING (x:%d, y:%d): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
+            printf("\033[0;34;43mPASTING (x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
           } else if (F2Ky == 2) {
-            printf("\033[0;34;43mPASTING (<x:%d, y:%d>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
+            printf("\033[0;34;43mPASTING (<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
           } else {
-            printf("\033[0;34;43mPASTING (_x:%d, y:%d_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
+            printf("\033[0;34;43mPASTING (_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
           }
           _snprintf(str_paste, MAX_PATH - 1, "%d, %d, %d", redInt, greenInt, blueInt);
           pastingNow = (pastingNow == 0) ? 1 : pastingNow;
           paster(console, str_paste);
         } else {
           if (F2Ky == 1) {
-            printf("\033[0;34;43m\(x:%d, y:%d): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
+            printf("\033[0;34;43m\(x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
           } else if (F2Ky == 2) {
-            printf("\033[0;34;43m\(<x:%d, y:%d>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
+            printf("\033[0;34;43m\(<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
           } else {
-            printf("\033[0;34;43m\(_x:%d, y:%d_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
+            printf("\033[0;34;43m\(_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f deg) \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out);
           }
         }
       } else {
@@ -278,11 +279,11 @@ int main(int argc, char ** argv) {
         nomin_hue = "Greyscale";
         if (shiftKy == 1) {
           if (F2Ky == 1) {
-            printf("\033[0;34;43mPASTING (x:%d, y:%d): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
+            printf("\033[0;34;43mPASTING (x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
           } else if (F2Ky == 2) {
-            printf("\033[0;34;43mPASTING (<x:%d, y:%d>): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
+            printf("\033[0;34;43mPASTING (<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
           } else {
-            printf("\033[0;34;43mPASTING (_x:%d, y:%d_): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
+            printf("\033[0;34;43mPASTING (_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
           }
 
           _snprintf(str_paste, MAX_PATH - 1, "%d, %d, %d", redInt, greenInt, blueInt);
@@ -290,11 +291,11 @@ int main(int argc, char ** argv) {
           paster(console, str_paste);
         } else {
           if (F2Ky == 1) {
-            printf("\033[0;34;43m\(x:%d, y:%d): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
+            printf("\033[0;34;43m\(x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
           } else if (F2Ky == 2) {
-            printf("\033[0;34;43m\(<x:%d, y:%d>): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
+            printf("\033[0;34;43m\(<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
           } else {
-            printf("\033[0;34;43m\(_x:%d, y:%d_): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
+            printf("\033[0;34;43m\(_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
           }
 
         }
@@ -308,7 +309,8 @@ int main(int argc, char ** argv) {
 
     }
 
-    sleep(1 / 144);
+    sleep(rfsh);
+
 
   }
 
