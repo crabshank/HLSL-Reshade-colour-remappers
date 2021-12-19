@@ -563,7 +563,7 @@ float3 XYZ2xyY(float3 XYZ){
 }
 //Source: https://stackoverflow.com/a/45263428; http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.htm; https://en.wikipedia.org/wiki/Rec._2020#Transfer_characteristics https://en.wikipedia.org/wiki/Rec._2020#Transfer_characteristics
 
-float hue_rotate(float hue,float rot){rot*=pow(360,-1);float r=hue+rot;if(r<0){return 1+r;}else if(r>1){return r-1;}else{return r;}} 
+float hue_rotate(float hue,float rot){rot*=(1.0/360.0);float r=hue+rot;if(r<0){return 1+r;}else if(r>1){return r-1;}else{return r;}} 
 
 float hue_map(float hue){int i=0;int exact=0;[unroll(hue_points)]for(i=0;i<hue_points;i++){[branch]if(h[i][0]/360==hue) {hue=h[i][1]/360;exact=1;i=hue_points-1;}else{if(h[i][0]/360<hue&&h[i][0]/360>=h_x_b[0]){h_x_b[0]=h[i][0]/360;h_y_b[0]=h[i][1]/360;} if(h[i][0]/360<=h_x_b[1]&&hue<h[i][0]/360){h_x_b[1]=h[i][0]/360;h_y_b[1]=h[i][1]/360;}}} if(exact==0){hue=h_y_b[0]+(hue-h_x_b[0])*((h_y_b[1]-h_y_b[0])/(h_x_b[1]-h_x_b[0]));}return hue;} 
 

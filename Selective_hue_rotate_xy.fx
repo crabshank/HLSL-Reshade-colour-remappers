@@ -574,7 +574,7 @@ float3 XYZ2xyY(float3 XYZ){
 }
 //Source: https://stackoverflow.com/a/45263428; http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.htm; https://en.wikipedia.org/wiki/Rec._2020#Transfer_characteristics
 
-float hue_rotate(float hue,float rot){rot*=pow(360,-1);float r=hue+rot;if(r<0){return 1+r;}else if(r>1){return r-1;}else{return r;}} 
+float hue_rotate(float hue,float rot){rot*=(1.0/360.0);float r=hue+rot;if(r<0){return 1+r;}else if(r>1){return r-1;}else{return r;}} 
 
 float4 selHueRotPass(float4 vpos : SV_Position, float2 texcoord : TexCoord) : SV_Target
 {

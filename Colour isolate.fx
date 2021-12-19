@@ -49,8 +49,8 @@ int hue=floor(c0_hsv.x*3600);
 
 int grey=(((c0.r==c0.g)&&(c0.g==c0.b))||(c0_hsv.y==0))?1:0;
 
-float Cust_from=Custom_from*pow(360,-1);
-float Cust_to=Custom_to*pow(360,-1);
+float Cust_from=Custom_from/360.0;
+float Cust_to=Custom_to/360.0;
 
 [flatten]if(Col==0){
 c1.rgb=(grey==1)?c0.rgb:0;

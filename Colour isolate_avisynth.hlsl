@@ -52,8 +52,8 @@ float Split=split;
 float Split_position=split_position;
 float Flip_split=flip_split;
 
-float Cust_from=p3.x*pow(360,-1);
-float Cust_to=p3.y*pow(360,-1);
+float Cust_from=p3.x/360.0;
+float Cust_to=p3.y/360.0;
 
 float3 c0_hsv=rgb2hsv(c0.rgb);
 
