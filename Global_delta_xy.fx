@@ -489,20 +489,6 @@ c0Lin=rgb2LinRGB(c0.rgb, Mode);
 
 float3 c0_og_Lin=c0Lin;
 
-[branch]if(satDeltaAmnt!=0){
-float3 dltHSV=rgb2hsv(c0_og_Lin);
-
-float nwSat=delta(dltHSV.y,satDeltaAmnt);
-float greyMtrc=lerp(min(dltHSV.y,dltHSV.y*dltHSV.z),dltHSV.y,dltHSV.z);
-dltHSV.y=(avoid_grey==true)?lerp(dltHSV.y,nwSat,greyMtrc):nwSat;
-
-c0Lin=hsv2rgb(dltHSV);
-}
-
-[branch]if(rgbDeltaAmnt!=0){
-c0Lin=float3(delta(c0Lin.r,rgbDeltaAmnt),delta(c0Lin.g,rgbDeltaAmnt),delta(c0Lin.b,rgbDeltaAmnt));
-}
-
 [branch]if((redDeltaAmnt!=0)||(greenDeltaAmnt!=0)||(blueDeltaAmnt!=0)){
 
 int hue=floor(h_sat_val.x*3600);
@@ -549,6 +535,20 @@ c0Lin.rgb=(avoid_grey==true)?lerp(c0_og_Lin.rgb, c0Lin.rgb,greyMtrc):c0Lin.rgb;
 
 }
 
+}
+
+float3 nw_hsv=rgb2hsv(c0Lin);
+[branch]if(satDeltaAmnt!=0){
+
+float nwSat=delta(dltHSV.y,satDeltaAmnt);
+float greyMtrc=lerp(min(dltHSV.y,dltHSV.y*dltHSV.z),dltHSV.y,dltHSV.z);
+dltHSV.y=(avoid_grey==true)?lerp(dltHSV.y,nwSat,greyMtrc):nwSat;
+
+c0Lin=hsv2rgb(dltHSV);
+}
+
+[branch]if(rgbDeltaAmnt!=0){
+c0Lin=float3(delta(c0Lin.r,rgbDeltaAmnt),delta(c0Lin.g,rgbDeltaAmnt),delta(c0Lin.b,rgbDeltaAmnt));
 }
 
 float3 og_XYZ=LinRGB2XYZ(c0_og_Lin,Mode);
