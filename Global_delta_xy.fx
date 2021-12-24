@@ -540,11 +540,11 @@ c0Lin.rgb=(avoid_grey==true)?lerp(c0_og_Lin.rgb, c0Lin.rgb,greyMtrc):c0Lin.rgb;
 float3 nw_hsv=rgb2hsv(c0Lin);
 [branch]if(satDeltaAmnt!=0){
 
-float nwSat=delta(dltHSV.y,satDeltaAmnt);
-float greyMtrc=lerp(min(dltHSV.y,dltHSV.y*dltHSV.z),dltHSV.y,dltHSV.z);
-dltHSV.y=(avoid_grey==true)?lerp(dltHSV.y,nwSat,greyMtrc):nwSat;
+float nwSat=delta(nw_hsv.y,satDeltaAmnt);
+float greyMtrc=lerp(min(nw_hsv.y,nw_hsv.y*nw_hsv.z),nw_hsv.y,nw_hsv.z);
+nw_hsv.y=(avoid_grey==true)?lerp(nw_hsv.y,nwSat,greyMtrc):nwSat;
 
-c0Lin=hsv2rgb(dltHSV);
+c0Lin=hsv2rgb(nw_hsv);
 }
 
 [branch]if(rgbDeltaAmnt!=0){
