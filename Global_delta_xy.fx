@@ -465,9 +465,9 @@ color=1;
 }else if(dlt==-1){
 color=0;
 }else if(color==0){
-color=(dlt<0)?color:(1-color)*dlt+color;
+color=(dlt<0)?color:dlt;
 }else if(color==1){
-color=(dlt<0)?color*(1+dlt):color;
+color=(dlt<0)?1+dlt:color;
 }else{
 dlt=-0.5*dlt+0.5;
 float relx=color/dlt;
@@ -480,7 +480,6 @@ color=(color<=dlt)?newyLow:newyHi;
 }
 return color;
 }
-
 
 float4 change(float4 c0, float3 h_sat_val){
 	
