@@ -465,7 +465,7 @@ color=1;
 }else if(dlt==-1){
 color=0;
 }else if(color==0){
-color=(dlt<0)?color:(1-color)*dlt+1;
+color=(dlt<0)?color:(1-color)*dlt+color;
 }else if(color==1){
 color=(dlt<0)?color*(1+dlt):color;
 }else{
