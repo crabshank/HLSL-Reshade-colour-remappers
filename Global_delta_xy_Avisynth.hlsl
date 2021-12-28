@@ -463,6 +463,10 @@ float delta(float color, float dlt){
 color=1;
 }else if(dlt==-1){
 color=0;
+}else if(color==0){
+color=(dlt<0)?color:(1-color)*dlt+1;
+}else if(color==1){
+color=(dlt<0)?color*(1+dlt):color;
 }else{
 dlt=-0.5*dlt+0.5;
 float relx=color/dlt;
