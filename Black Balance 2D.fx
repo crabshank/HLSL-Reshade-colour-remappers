@@ -829,6 +829,7 @@ color.rgb=lerp(c0.rgb,color.rgb,c0HSV.y);
 color.rgb=lerp(color.rgb,c0.rgb,0.5*(max(mcs_bb,chr)+msd));
 color.rgb=lerp(c0.rgb,color.rgb,1-gry);
 color.rgb=lerp(color.rgb,c0.rgb,c0HSV.z*chr_bb);
+color.rgb=lerp(color.rgb,c0.rgb,colHSV.z*colHSV.z*colHSV.z);
 
 [branch]if(lin==0){
 color.rgb=LinRGB2rgb(color.rgb,mode);
