@@ -831,7 +831,7 @@ color.rgb=lerp(c0.rgb,color.rgb,1-gry);
 color.rgb=lerp(color.rgb,c0.rgb,c0HSV.z*chr_bb);
 
 [branch]if(lin==0){
-color=LinRGB2rgb(color.rgb,mode);
+color.rgb=LinRGB2rgb(color.rgb,mode);
 }
 
 return color;
