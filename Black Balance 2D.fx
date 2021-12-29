@@ -802,7 +802,7 @@ float3 XYZ2xyY(float3 XYZ){
 float4 whitePoint(float4 color, float2 CustomxyIn, int lin){
 float4 c0=color;
 [branch]if(lin==0){
-c0=rgb2LinRGB(color.rgb,mode);
+c0.rgb=rgb2LinRGB(color.rgb,mode);
 color=c0;
 }
 
