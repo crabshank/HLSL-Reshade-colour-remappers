@@ -818,7 +818,7 @@ color.rgb= WPChangeRGBLin(color.rgb, from, to,mode);
 
 float3 c0HSV=rgb2hsv(c0.rgb);
 float chr=c0HSV.y*c0HSV.z;
-float mcs=min(c0HSV.y,chr);
+float mcs=min	(c0HSV.y,chr);
 float gry=lerp(mcs,c0HSV.y,c0HSV.z);
 float msd=max(0,min(1,c0HSV.y-min(c0HSV.y,chr)));
 float3 colHSV=rgb2hsv(color.rgb);
@@ -829,7 +829,7 @@ color.rgb=lerp(c0.rgb,color.rgb,c0HSV.y);
 color.rgb=lerp(color.rgb,c0.rgb,0.5*(max(mcs_bb,chr)+msd));
 color.rgb=lerp(c0.rgb,color.rgb,1-gry);
 color.rgb=lerp(color.rgb,c0.rgb,c0HSV.z*chr_bb);
-color.rgb=lerp(color.rgb,c0.rgb,colHSV.z*colHSV.z*colHSV.z);
+color.rgb=lerp(color.rgb,c0.rgb,colHSV.z*(1-chr));
 
 [branch]if(lin==0){
 color.rgb=LinRGB2rgb(color.rgb,mode);
