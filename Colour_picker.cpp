@@ -67,6 +67,8 @@ POINT p_fixed;
 POINT p_fixed2;
 BOOL b;
 HBRUSH hBrush;
+PAINTSTRUCT ps;
+HDC hdc;
 
     HDC hdcMemDC;
     HBITMAP hbmScreen;
@@ -140,6 +142,8 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
      hdcScreen = GetDC(NULL);
      hdcWindow = GetDC(hwnd);
+
+
 
     hdcMemDC = CreateCompatibleDC(hdcWindow);
     /*if(!hdcMemDC){goto done;}*/
@@ -295,6 +299,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
             pastingNow = (pastingNow == 0) ? 1 : pastingNow;
             paster(hwnd, str_paste);
 
+
         } else {
             if (F2Ky == 1) {
                 c1 = asprintf( & out_line, "(x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
@@ -368,10 +373,12 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         p_fixed2.x = p_fixed.x;
         p_fixed2.y = p_fixed.y;
 
+    DeleteDC(hdcMemDC);
+    DeleteObject(hBrush);
     DeleteObject(hbmScreen);
-    DeleteObject(hdcMemDC);
     ReleaseDC(NULL, hdcScreen);
     ReleaseDC(hwnd, hdcWindow);
+
 
     SetTimer(hwnd, 1, rfsh, NULL);
 
@@ -398,8 +405,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
         return 0L;
         break;
     case WM_PAINT: {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hwnd, & ps);
+        hdc = BeginPaint(hwnd, & ps);
         renderWnd(hwnd, ps);
         EndPaint(hwnd, & ps);
         return 0L;
@@ -421,7 +427,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 ATOM MyRegisterClass(HINSTANCE hInstance) {
     WNDCLASSEX wcex;
     wcex.cbSize = sizeof(WNDCLASSEX);
-    // wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc = WndProc;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
