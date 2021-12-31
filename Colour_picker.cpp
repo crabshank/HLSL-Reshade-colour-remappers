@@ -66,12 +66,8 @@ POINT p;
 POINT p_fixed;
 POINT p_fixed2;
 BOOL b;
-HBRUSH hBrush;
 PAINTSTRUCT ps;
 HDC hdc;
-
-    HDC hdcMemDC;
-    HBITMAP hbmScreen;
 
     HDC hdcScreen;
     HDC hdcWindow;
@@ -137,21 +133,18 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         p_fixed.y = p.y;
     }
 
-     hdcMemDC = NULL;
-     hbmScreen = NULL;
-
      hdcScreen = GetDC(NULL);
      hdcWindow = GetDC(hwnd);
 
 
 
-    hdcMemDC = CreateCompatibleDC(hdcWindow);
+    HDC hdcMemDC = CreateCompatibleDC(hdcWindow);
     /*if(!hdcMemDC){goto done;}*/
 
     BitBlt(hdcScreen, 0, 0, 1, 1, hdcScreen, p_fixed.x, p_fixed.y, SRCCOPY);
     /*if(!BitBlt(hdcScreen, 0,0, 1,1, hdcScreen,p_fixed.x,p_fixed.y, SRCCOPY)){goto done;}*/
 
-    hbmScreen = CreateCompatibleBitmap(hdcScreen, 1, 1);
+   HBITMAP hbmScreen = CreateCompatibleBitmap(hdcScreen, 1, 1);
     /*if(!hbmScreen){goto done;}*/
 
     SelectObject(hdcMemDC, hbmScreen);
@@ -271,7 +264,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
     }
 
         InvalidateRect(hwnd, nullptr, false);
-        hBrush = CreateSolidBrush(RGB(redInt, greenInt, blueInt));
+        HBRUSH hBrush = CreateSolidBrush(RGB(redInt, greenInt, blueInt));
         FillRect(hdcWindow, & ps.rcPaint, hBrush);
 
     if(grey==0){
@@ -477,8 +470,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             0, 0, 0, 0,
             SWP_NOMOVE | SWP_NOSIZE);
     }
-
-    hBrush = CreateSolidBrush(RGB(0, 0, 0));
 
     b = GetCursorPos( & p);
     p_fixed.x = p.x;
