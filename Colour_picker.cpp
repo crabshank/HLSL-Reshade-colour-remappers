@@ -66,7 +66,15 @@ POINT p;
 POINT p_fixed;
 POINT p_fixed2;
 BOOL b;
+HBRUSH hBrush;
 
+    HDC hdcMemDC;
+    HBITMAP hbmScreen;
+
+    HDC hdcScreen;
+    HDC hdcWindow;
+
+    DEVMODE dm = {0};
 RECT xy_txt = {0,0,minWdt,minHgt};
 /*{x-coordinate of the upper-left corner of the rectangle, y-coordinate of the upper-left corner of the rectangle,
   x-coordinate of the lower-right corner of the rectangle, y-coordinate of the lower-right corner of the rectangle}
@@ -114,14 +122,12 @@ void paster(HWND hwnd, char * str_paste) {
 void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
     KillTimer(hwnd, 1);
-
-    DEVMODE dm = {0};
+    dm = {0};
     dm.dmSize = sizeof(DEVMODE);
     if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
         rfsh = round(1000 * ((double)(dm.dmDisplayFrequency)));
     }
 
-    HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0));
 
     if ((ctrlKy == 1 && F2Ky == 1) || (F2Ky == 2)) {
         b = GetCursorPos( & p);
@@ -129,11 +135,11 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         p_fixed.y = p.y;
     }
 
-    HDC hdcMemDC = NULL;
-    HBITMAP hbmScreen = NULL;
+     hdcMemDC = NULL;
+     hbmScreen = NULL;
 
-    HDC hdcScreen = GetDC(NULL);
-    HDC hdcWindow = GetDC(hwnd);
+     hdcScreen = GetDC(NULL);
+     hdcWindow = GetDC(hwnd);
 
     hdcMemDC = CreateCompatibleDC(hdcWindow);
     /*if(!hdcMemDC){goto done;}*/
@@ -465,6 +471,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             0, 0, 0, 0,
             SWP_NOMOVE | SWP_NOSIZE);
     }
+
+    hBrush = CreateSolidBrush(RGB(0, 0, 0));
 
     b = GetCursorPos( & p);
     p_fixed.x = p.x;
