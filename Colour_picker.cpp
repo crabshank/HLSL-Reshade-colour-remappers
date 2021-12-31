@@ -115,6 +115,12 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
     KillTimer(hwnd, 1);
 
+    DEVMODE dm = {0};
+    dm.dmSize = sizeof(DEVMODE);
+    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
+        rfsh = round(1000 * ((double)(dm.dmDisplayFrequency)));
+    }
+
     HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0));
 
     if ((ctrlKy == 1 && F2Ky == 1) || (F2Ky == 2)) {
@@ -433,13 +439,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
     hwnd = CreateWindow("rgbClass", "Colour picker", WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, xy_txt.right - xy_txt.left, xy_txt.bottom - xy_txt.top,
         NULL, NULL, hInstance, NULL);
-
-            DEVMODE dm = {0};
-    dm.dmSize = sizeof(DEVMODE);
-    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
-        rfsh = round(1000 * ((double)(dm.dmDisplayFrequency)));
-    }
-
 
     if (!hwnd) {
         return FALSE;
