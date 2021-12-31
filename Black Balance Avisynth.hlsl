@@ -478,20 +478,27 @@ color.rgb=XYZ2rgb(WPconv(WPconv(XYZed02,from,to),to,xy2XYZ(float2(p5.xy))),mde,1
 color.rgb= WPChangeRGB(color.rgb, from, to,mde);
 }
 
-float3 c0HSV=rgb2hsv(c0.rgb);
-float chr=c0HSV.y*c0HSV.z;
-float mcs=min(c0HSV.y,chr);
-float gry=lerp(mcs,c0HSV.y,c0HSV.z);
-float msd=max(0,min(1,c0HSV.y-min(c0HSV.y,chr)));
-float3 colHSV=rgb2hsv(color.rgb);
-float chr_bb=colHSV.y*colHSV.z;
-float mcs_bb=min(colHSV.y,chr_bb);
+float mn=min(c0.r,min(c0.g,c0.b));
+float mx=max(c0.r,max(c0.g,c0.b));
+float chr=mx-mn;
+float sat=(mx==0)?0:chr/mx;
+float mcs=min(chr,sat);
+float gry=lerp(mcs,sat,mx);
+float msd=max(0,min(1,sat-mcs));
 
-color.rgb=lerp(c0.rgb,color.rgb,c0HSV.y);
+float mn_bb=min(color.r,min(color.g,color.b));
+float mx_bb=max(color.r,max(color.g,color.b));
+float chr_bb=mx_bb-mn_bb;
+float sat_bb=(mx_bb==0)?0:chr_bb/mx_bb;
+float mcs_bb=min(chr_bb,sat_bb);
+float gry_bb=lerp(mcs_bb,sat_bb,mx_bb);
+float msd_bb=max(0,min(1,sat_bb-mcs_bb));
+
+color.rgb=lerp(c0.rgb,color.rgb,sat);
 color.rgb=lerp(color.rgb,c0.rgb,0.5*(max(mcs_bb,chr)+msd));
 color.rgb=lerp(c0.rgb,color.rgb,1-gry);
-color.rgb=lerp(color.rgb,c0.rgb,c0HSV.z*chr_bb);
-color.rgb=lerp(color.rgb,c0.rgb,colHSV.z*(1-chr));
+color.rgb=lerp(color.rgb,c0.rgb,mx*chr_bb);
+color.rgb=lerp(color.rgb,c0.rgb,mx_bb*(1-chr));
 
 [branch]if(lnr==0){
 color.rgb=LinRGB2rgb(color.rgb,mde);
