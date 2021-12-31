@@ -262,14 +262,14 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         if (shiftKy == 1) {
             c0 = asprintf( & paste_line, "%d, %d, %d", redInt, greenInt, blueInt);
             if (F2Ky == 1) {
-                c1 = asprintf( & out_line, "PASTING (x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
-                //printf("\033[0;34;43mPASTING (x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                c1 = asprintf( & out_line, "PASTING (x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                //printf("\033[0;34;43mPASTING (x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
             } else if (F2Ky == 2) {
-                c1 = asprintf( & out_line, "PASTING (<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
-                //printf("\033[0;34;43mPASTING (<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                c1 = asprintf( & out_line, "PASTING (<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                //printf("\033[0;34;43mPASTING (<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
             } else {
-                c1 = asprintf( & out_line, "PASTING (_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
-                //printf("\033[0;34;43mPASTING (_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                c1 = asprintf( & out_line, "PASTING (_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                //printf("\033[0;34;43mPASTING (_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
             }
 
             char str_out[c1];
@@ -285,14 +285,14 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
         } else {
             if (F2Ky == 1) {
-                c1 = asprintf( & out_line, "(x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
-                //printf("\033[0;34;43m\(x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                c1 = asprintf( & out_line, "(x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                //printf("\033[0;34;43m\(x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
             } else if (F2Ky == 2) {
-                c1 = asprintf( & out_line, "(<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
-                //printf("\033[0;34;43m\(<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                c1 = asprintf( & out_line, "(<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                //printf("\033[0;34;43m\(<x:%ld, y:%ld>): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
             } else {
-                c1 = asprintf( & out_line, "(_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
-                //printf("\033[0;34;43m\(_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f %c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                c1 = asprintf( & out_line, "(_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c)", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
+                //printf("\033[0;34;43m\(_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
             }
 
             char str_out[c1];
