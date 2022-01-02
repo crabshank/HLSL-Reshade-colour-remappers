@@ -67,12 +67,10 @@ POINT p_fixed;
 POINT p_fixed2;
 BOOL b;
 PAINTSTRUCT ps;
-HDC hdc;
+HDC hdc_px, hdc_px_tmp, hdcWindow;
+BYTE* px_bit_ptr;
 
-    HDC hdcScreen;
-    HDC hdcWindow;
-
-    DEVMODE dm = {0};
+DEVMODE dm = {0};
 RECT xy_txt = {0,0,minWdt,minHgt};
 /*{x-coordinate of the upper-left corner of the rectangle, y-coordinate of the upper-left corner of the rectangle,
   x-coordinate of the lower-right corner of the rectangle, y-coordinate of the lower-right corner of the rectangle}
@@ -133,27 +131,27 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         p_fixed.y = p.y;
     }
 
-     hdcScreen = GetDC(NULL);
+     hdc_px = GetDC(NULL);
+     hdc_px_tmp = CreateCompatibleDC(NULL);
      hdcWindow = GetDC(hwnd);
 
+    BITMAPINFO bmp_px;
+	ZeroMemory(&bmp_px, sizeof(BITMAPINFO));
+	bmp_px.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bmp_px.bmiHeader.biWidth = 1;
+	bmp_px.bmiHeader.biHeight = 1;  //negative so (0,0) is at top left
+	bmp_px.bmiHeader.biPlanes = 1;
+	bmp_px.bmiHeader.biBitCount = 32;
 
+	HBITMAP bmp_px_DIB=CreateDIBSection(hdc_px_tmp,&bmp_px,DIB_RGB_COLORS,(void**)(&px_bit_ptr),NULL,NULL);
+    HGDIOBJ bmp_px_DIB_obj=SelectObject(hdc_px_tmp,bmp_px_DIB);
+    BitBlt(hdc_px_tmp, 0, 0, 1, 1, hdc_px, p_fixed.x, p_fixed.y, SRCCOPY);
 
-    HDC hdcMemDC = CreateCompatibleDC(hdcWindow);
-    /*if(!hdcMemDC){goto done;}*/
+    redInt = (int)px_bit_ptr[2];
+    greenInt = (int)px_bit_ptr[1];
+    blueInt = (int)px_bit_ptr[0];
 
-    BitBlt(hdcScreen, 0, 0, 1, 1, hdcScreen, p_fixed.x, p_fixed.y, SRCCOPY);
-    /*if(!BitBlt(hdcScreen, 0,0, 1,1, hdcScreen,p_fixed.x,p_fixed.y, SRCCOPY)){goto done;}*/
-
-   HBITMAP hbmScreen = CreateCompatibleBitmap(hdcScreen, 1, 1);
-    /*if(!hbmScreen){goto done;}*/
-
-    SelectObject(hdcMemDC, hbmScreen);
-
-    color = GetPixel(hdcScreen, 0, 0);
-
-    redInt = round(GetRValue(color));
-    greenInt = round(GetGValue(color));
-    blueInt = round(GetBValue(color));
+    //Works because 1x1
 
     red = ((double) redInt) / 255.0;
     green = ((double) greenInt) / 255.0;
@@ -266,6 +264,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         InvalidateRect(hwnd, nullptr, false);
         HBRUSH hBrush = CreateSolidBrush(RGB(redInt, greenInt, blueInt));
         FillRect(hdcWindow, & ps.rcPaint, hBrush);
+        FillRect(hdcWindow, & ps.rcPaint, hBrush);
 
     if(grey==0){
         if (shiftKy == 1) {
@@ -281,17 +280,18 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
                 //printf("\033[0;34;43mPASTING (_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
             }
 
-            char str_out[c1];
+            char* str_out=(char*)malloc((c1+1)*sizeof(char));
             strncpy(str_out, out_line, c1);
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
+            free(str_out);
 
-            char str_paste[c0];
+            char* str_paste=(char*)malloc((c0+1)*sizeof(char));
             strncpy(str_paste, paste_line, c0);
             str_paste[c0] = '\0';
             pastingNow = (pastingNow == 0) ? 1 : pastingNow;
             paster(hwnd, str_paste);
-
+            free(str_paste);
 
         } else {
             if (F2Ky == 1) {
@@ -305,10 +305,11 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
                 //printf("\033[0;34;43m\(_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \(%.1f%c \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176);
             }
 
-            char str_out[c1];
+            char* str_out=(char*)malloc((c1+1)*sizeof(char));
             strncpy(str_out, out_line, c1);
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
+            free(str_out);
         }
 
 
@@ -328,17 +329,19 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
                 // printf("\033[0;34;43mPASTING (_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
             }
 
-            //DrawText(hdcWindow,str_both, -1, &xy_txt,DT_NOCLIP);
-            char str_out[c1];
+            char* str_out=(char*)malloc((c1+1)*sizeof(char));
             strncpy(str_out, out_line, c1);
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
+            free(str_out);
 
-            char str_paste[c0];
+            char* str_paste=(char*)malloc((c0+1)*sizeof(char));
             strncpy(str_paste, paste_line, c0);
             str_paste[c0] = '\0';
             pastingNow = (pastingNow == 0) ? 1 : pastingNow;
             paster(hwnd, str_paste);
+            free(str_paste);
+
         } else {
             if (F2Ky == 1) {
                 c1 = asprintf( & out_line, "(x:%ld, y:%ld): %d, %d, %d\nSaturation: %.1f; %s", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
@@ -350,11 +353,12 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
                 c1 = asprintf( & out_line, "(_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
                 //  printf("\033[0;34;43m\(_x:%ld, y:%ld_): %d, %d, %d\nSaturation: %.1f; %s \033[0m", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, sat, nomin_hue);
             }
-            //DrawText(hdcWindow,str_both, -1, &xy_txt,DT_NOCLIP);
-            char str_out[c1];
+
+            char* str_out=(char*)malloc((c1+1)*sizeof(char));
             strncpy(str_out, out_line, c1);
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
+            free(str_out);
         }
     }
 
@@ -366,12 +370,12 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         p_fixed2.x = p_fixed.x;
         p_fixed2.y = p_fixed.y;
 
-    DeleteDC(hdcMemDC);
-    DeleteObject(hBrush);
-    DeleteObject(hbmScreen);
-    ReleaseDC(NULL, hdcScreen);
     ReleaseDC(hwnd, hdcWindow);
-
+    SelectObject(hdc_px_tmp, bmp_px_DIB_obj);
+    DeleteDC(hdc_px_tmp);
+    DeleteObject(bmp_px_DIB_obj);
+    DeleteObject(hBrush);
+    ReleaseDC(NULL, hdc_px);
 
     SetTimer(hwnd, 1, rfsh, NULL);
 
@@ -398,7 +402,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
         return 0L;
         break;
     case WM_PAINT: {
-        hdc = BeginPaint(hwnd, & ps);
+        BeginPaint(hwnd, & ps);
         renderWnd(hwnd, ps);
         EndPaint(hwnd, & ps);
         return 0L;
