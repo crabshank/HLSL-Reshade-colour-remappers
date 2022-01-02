@@ -188,7 +188,6 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
     hdc_scr = GetDC(NULL);
     hdc_scr_tmp = CreateCompatibleDC(NULL);
-    hdcWindow = GetDC(hwnd);
 
    int redoCols = (((red_mx != redInt) || (green_mx != greenInt) || (blue_mx != blueInt)) )? 1 : 0;
    int redo = ((F2Ky != F2KyLast) || (((ctrlKy == 1 && F2Ky == 1) || (F2Ky == 2)) && (p_fixed.x != p_fixed2.x || p_fixed.y != p_fixed2.y))) ? 1 : 0;
