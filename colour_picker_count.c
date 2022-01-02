@@ -96,13 +96,12 @@ LRESULT CALLBACK keyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
             ctrlKy = 1;
         }
         if (hooked_key -> vkCode == VK_F2) {
-            if(altKy==0){
                 F2KyLast = F2Ky;
                 F2Ky = (F2Ky == 2) ? 0 : F2Ky + 1;
-            }else{
+        }
+        if (hooked_key -> vkCode == VK_F7) {
                 b_cnt_mx=0;
                 b_cnt=0;
-            }
         }
 
     } else if ((wParam == WM_SYSKEYUP) || (wParam == WM_KEYUP)) {
