@@ -179,13 +179,17 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
     hdc_scr = GetDC(NULL);
     hdc_scr_tmp = CreateCompatibleDC(NULL);
 
-   int redoCols = (((red_mx != redInt) || (green_mx != greenInt) || (blue_mx != blueInt)) )? 1 : 0;
    int redo = ((F2Ky != F2KyLast) || (((ctrlKy == 1 && F2Ky == 1) || (F2Ky == 2)) && (p_fixed.x != p_fixed2.x || p_fixed.y != p_fixed2.y))) ? 1 : 0;
+   if(redo==1){
+    b_cnt=0;
+    b_cnt_mx=0;
+   }
     b_cnt=b_cnt_mx;
     HBITMAP bmp_scr_DIB;
     HGDIOBJ bmp_scr_DIB_obj;
     BITMAPINFO bmp_scr;
-   if(redInt!=0 || greenInt!=0 || blueInt!=0){
+    if(altKy==0){
+   if(((redInt!=0 || greenInt!=0 || blueInt!=0)||redo==1)){//check for new max
         ZeroMemory(&bmp_scr, sizeof(BITMAPINFO));
         bmp_scr.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         bmp_scr.bmiHeader.biWidth = wdt;
@@ -207,15 +211,20 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
         if(b_cnt>=b_cnt_mx || redo==1){
             b_cnt_mx=b_cnt;
-            if(redoCols==1){
                 red_mx=redInt;
                 green_mx=greenInt;
                 blue_mx=blueInt;
+                grey = ((red_mx == green_mx) && (green_mx == blue_mx)) ? 1 : 0;
                 redo=1;
-            }
         }
+    }else if(red_mx==0 && green_mx==0 && blue_mx==0){
+        grey=1;
+        nomin_hue = "Greyscale";
+        out_col=0;
+        hue_out=0;
+        sat=0;
     }
-
+}
     F2KyLast = (F2Ky != F2KyLast) ? F2Ky : F2KyLast;
 
     if(redo==1){
@@ -231,7 +240,8 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         mn = MIN(red, MIN(green, blue));
         diff = mx - mn;
         nomin_hue = "Greyscale";
-
+        out_col=0;
+        hue_out=0;
         if (grey == 0) {
 
             if ((Rd >= Gr) && (Rd >= Bl)) {
