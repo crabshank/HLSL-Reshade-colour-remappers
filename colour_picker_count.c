@@ -143,16 +143,6 @@ void get_RGB_at_x_y(const BYTE* bit_ptr, int x, int y, int RGB[3], int b_wdt){
 
 void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
-    KillTimer(hwnd, 1);
-    dm = {0};
-    dm.dmSize = sizeof(DEVMODE);
-    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
-        rfsh = round(1000 * ((double)(dm.dmDisplayFrequency)));
-        wdt=(u_int)dm.dmPelsWidth;
-        hgt=(u_int)dm.dmPelsHeight;
-    }
-
-
     if ((ctrlKy == 1 && F2Ky == 1) || (F2Ky == 2)) {
         b = GetCursorPos( & p);
         p_fixed.x = p.x;
@@ -445,8 +435,6 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
     DeleteDC(hdc_scr_tmp);
     ReleaseDC(NULL, hdc_scr);
 
-    SetTimer(hwnd, 1, rfsh, NULL);
-
 }
 
 void mousewheel_hdl(WPARAM wParam) {
@@ -465,10 +453,6 @@ void mousewheel_hdl(WPARAM wParam) {
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
 
     switch (message) {
-    case WM_CREATE:
-        SetTimer(hwnd, 1, rfsh, NULL);
-        return 0L;
-        break;
     case WM_PAINT: {
         BeginPaint(hwnd, & ps);
         renderWnd(hwnd, ps);
@@ -554,6 +538,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         keyboardHookProc,
         hInstance,
         0);
+
+    dm = {0};
+    dm.dmSize = sizeof(DEVMODE);
+    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
+        rfsh = round(1000 * ((double)(dm.dmDisplayFrequency)));
+    }
+
+    SetTimer(hwnd, 1, rfsh, NULL);
 
     MSG msg;
     while (GetMessage( & msg, NULL, 0, 0)) {
