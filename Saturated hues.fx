@@ -39,10 +39,12 @@ float4 c1=c0;
 
 float3 c1_hsv=rgb2hsv(c0.rgb);
 
+int grey=(((c0.r==c0.g)&&(c0.g==c0.b))||(c1_hsv.y==0))?1:0;
+
 c1_hsv.y=1;
 c1_hsv.z=Value;
 
-c1.rgb=hsv2rgb(c1_hsv);
+c1.rgb=(grey==1)?Value:hsv2rgb(c1_hsv);
 
 return c1;
 
