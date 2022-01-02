@@ -117,14 +117,6 @@ void paster(HWND hwnd, char * str_paste) {
 
 void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
-    KillTimer(hwnd, 1);
-    dm = {0};
-    dm.dmSize = sizeof(DEVMODE);
-    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
-        rfsh = round(1000 * ((double)(dm.dmDisplayFrequency)));
-    }
-
-
     if ((ctrlKy == 1 && F2Ky == 1) || (F2Ky == 2)) {
         b = GetCursorPos( & p);
         p_fixed.x = p.x;
@@ -383,8 +375,6 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
     DeleteObject(hBrush);
     ReleaseDC(NULL, hdc_px);
 
-    SetTimer(hwnd, 1, rfsh, NULL);
-
 }
 
 void mousewheel_hdl(WPARAM wParam) {
@@ -403,10 +393,6 @@ void mousewheel_hdl(WPARAM wParam) {
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
 
     switch (message) {
-    case WM_CREATE:
-        SetTimer(hwnd, 1, rfsh, NULL);
-        return 0L;
-        break;
     case WM_PAINT: {
         BeginPaint(hwnd, & ps);
         renderWnd(hwnd, ps);
@@ -473,6 +459,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         return FALSE;
     }
 
+
     if (IsWindowVisible(hwnd) == true) {
         SetWindowPos(
             hwnd,
@@ -480,6 +467,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             0, 0, 0, 0,
             SWP_NOMOVE | SWP_NOSIZE);
     }
+
 
     b = GetCursorPos( & p);
     p_fixed.x = p.x;
@@ -492,6 +480,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         keyboardHookProc,
         hInstance,
         0);
+
+    dm = {0};
+    dm.dmSize = sizeof(DEVMODE);
+    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
+        rfsh = round(1000 * ((double)(dm.dmDisplayFrequency)));
+    }
+
+    SetTimer(hwnd, 1, rfsh, NULL);
 
     MSG msg;
     while (GetMessage( & msg, NULL, 0, 0)) {
