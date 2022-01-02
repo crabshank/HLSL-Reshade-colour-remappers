@@ -284,6 +284,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
             free(str_out);
+            free(out_line);
 
             char* str_paste=(char*)malloc((c0+1)*sizeof(char));
             strncpy(str_paste, paste_line, c0);
@@ -291,6 +292,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
             pastingNow = (pastingNow == 0) ? 1 : pastingNow;
             paster(hwnd, str_paste);
             free(str_paste);
+            free(paste_line);
 
         } else {
             if (F2Ky == 1) {
@@ -309,6 +311,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
             free(str_out);
+            free(out_line);
         }
 
 
@@ -333,6 +336,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
             free(str_out);
+            free(out_line);
 
             char* str_paste=(char*)malloc((c0+1)*sizeof(char));
             strncpy(str_paste, paste_line, c0);
@@ -340,6 +344,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
             pastingNow = (pastingNow == 0) ? 1 : pastingNow;
             paster(hwnd, str_paste);
             free(str_paste);
+            free(paste_line);
 
         } else {
             if (F2Ky == 1) {
@@ -358,6 +363,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
             free(str_out);
+            free(out_line);
         }
     }
 
