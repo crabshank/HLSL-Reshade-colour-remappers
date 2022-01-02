@@ -139,7 +139,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 	ZeroMemory(&bmp_px, sizeof(BITMAPINFO));
 	bmp_px.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	bmp_px.bmiHeader.biWidth = 1;
-	bmp_px.bmiHeader.biHeight = 1;  //negative so (0,0) is at top left
+	bmp_px.bmiHeader.biHeight = -1;  //negative so (0,0) is at top left
 	bmp_px.bmiHeader.biPlanes = 1;
 	bmp_px.bmiHeader.biBitCount = 32;
 
