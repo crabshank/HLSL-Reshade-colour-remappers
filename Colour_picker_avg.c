@@ -224,15 +224,15 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
             free(out_line);
             BitBlt(hdc, 0, 0, smp, smp, hdcCaptureBmp, 0,0, SRCCOPY);
 
-ReleaseDC(NULL, hdc);
-DeleteDC(hdc);
+DeleteObject(hBrush);
 DeleteObject(hbCapture);
 DeleteObject(destCap);
 DeleteObject(hdcBMPObj);
 DeleteDC(hDest);
 DeleteDC(bmp_dc);
 DeleteDC(hdcCaptureBmp);
-
+ReleaseDC(NULL, hdc);
+DeleteDC(hdc);
 EndPaint(hwnd, &ps);
 }
 
