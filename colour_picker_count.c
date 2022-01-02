@@ -324,7 +324,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
    }
 
         InvalidateRect(hwnd, nullptr, false);
-        HBRUSH hBrush = CreateSolidBrush(RGB(redInt, greenInt, blueInt));
+        HBRUSH hBrush = CreateSolidBrush(RGB(red_mx, green_mx, blue_mx));
         FillRect(hdcWindow, & ps.rcPaint, hBrush);
 
     if(grey==0){
