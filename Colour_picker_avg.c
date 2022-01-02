@@ -86,7 +86,7 @@ HBITMAP hbCapture = CreateDIBSection(bmp_dc, &bmi, DIB_RGB_COLORS, (void**)(&scr
 
 HGDIOBJ destCap=SelectObject(hDest, hbCapture);
 
-BitBlt(hDest, 0,0, smp, smp, hdc, p.x-0.5*smp,p.y-0.5*smp, SRCCOPY);
+BitBlt(hDest, 0,0, smp, smp, hdc, round(p.x-0.5*smp),round(p.y-0.5*smp), SRCCOPY);
 
 ReleaseDC(NULL, hdc);
 DeleteDC(hDest);
