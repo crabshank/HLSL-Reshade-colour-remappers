@@ -377,8 +377,9 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
     ReleaseDC(hwnd, hdcWindow);
     SelectObject(hdc_px_tmp, bmp_px_DIB_obj);
-    DeleteDC(hdc_px_tmp);
     DeleteObject(bmp_px_DIB_obj);
+    DeleteObject(bmp_px_DIB);
+    DeleteDC(hdc_px_tmp);
     DeleteObject(hBrush);
     ReleaseDC(NULL, hdc_px);
 
