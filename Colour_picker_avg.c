@@ -39,11 +39,16 @@ int asprintf(char ** strp,
     return retval;
 }
 
-int smp = 10;
-int smp2 = 0;
-int smp3 = 0;
-int smp4 = 72;
-int smp5 = 332;
+int smp = 9;
+double smp_d = 9;
+
+int mds=90; //min display size
+double mds_d=90;
+
+int osz=90;
+
+int smp_r = 340;
+int smp_b = 26;
 
 char* out_line="";
 
@@ -55,19 +60,37 @@ PAINTSTRUCT ps;
 u_int rfsh = 7;
 HDC hdc;
 DEVMODE dm = {0};
+int altKy=0;
 
-void get_RGB_at_x_y(const BYTE* bit_ptr, int x, int y, int RGB[3], int b_wdt){
+LRESULT CALLBACK keyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    PKBDLLHOOKSTRUCT hooked_key = (PKBDLLHOOKSTRUCT) lParam;
+
+    if ((wParam == WM_SYSKEYDOWN) || (wParam == WM_KEYDOWN)) {
+        if (hooked_key -> vkCode == VK_LMENU || hooked_key -> vkCode == VK_RMENU || hooked_key -> vkCode == VK_MENU){
+            altKy = 1;
+        }
+
+    } else if ((wParam == WM_SYSKEYUP) || (wParam == WM_KEYUP)) {
+        if (hooked_key -> vkCode == VK_LMENU || hooked_key -> vkCode == VK_RMENU || hooked_key -> vkCode == VK_MENU){
+            altKy = 0;
+        }
+    }
+
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
+}
+
+void get_RGB_at_x_y_dbl(const BYTE* bit_ptr, int x, int y, double RGB[3], int b_wdt){
     int index=4*(y*b_wdt+x);
 
-    RGB[2]=(int)bit_ptr[index];
-    RGB[1]=(int)bit_ptr[index+1];
-    RGB[0]=(int)bit_ptr[index+2];
+    RGB[2]=(double)bit_ptr[index];
+    RGB[1]=(double)bit_ptr[index+1];
+    RGB[0]=(double)bit_ptr[index+2];
 
 }
 
 void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
-RECT  xy_txt = {0,smp,0, 0};
+RECT  xy_txt = {0,osz,0, 0};
 
 b= GetCursorPos(&p);
 hdc = GetDC(NULL);
@@ -76,8 +99,8 @@ BYTE* scr_bit_ptr;
 BITMAPINFO bmi;
 ZeroMemory(&bmi, sizeof(BITMAPINFO));
 bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-bmi.bmiHeader.biWidth = smp;
-bmi.bmiHeader.biHeight = -smp;  //negative so (0,0) is at top left
+bmi.bmiHeader.biWidth = osz;
+bmi.bmiHeader.biHeight = -osz;  //negative so (0,0) is at top left
 bmi.bmiHeader.biPlanes = 1;
 bmi.bmiHeader.biBitCount = 32;
 
@@ -86,7 +109,7 @@ HBITMAP hbCapture = CreateDIBSection(bmp_dc, &bmi, DIB_RGB_COLORS, (void**)(&scr
 
 HGDIOBJ destCap=SelectObject(hDest, hbCapture);
 
-BitBlt(hDest, 0,0, smp, smp, hdc, round(p.x-0.5*smp),round(p.y-0.5*smp), SRCCOPY);
+StretchBlt(hDest, 0,0, osz, osz, hdc,round(p.x-0.5*smp),round(p.y-0.5*smp) ,smp, smp, SRCCOPY);
 
 ReleaseDC(NULL, hdc);
 DeleteDC(hDest);
@@ -100,11 +123,11 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
 		double cnt=0;
         for(int x=0; x<smp; x++){
         for(int y=0; y<smp; y++){
-            int currRGB[3];
-            get_RGB_at_x_y(scr_bit_ptr,x,y,currRGB,smp);
-			avgRGB[0]+=(double)currRGB[0];
-			avgRGB[1]+=(double)currRGB[1];
-			avgRGB[2]+=(double)currRGB[2];
+            double currRGB[3];
+            get_RGB_at_x_y_dbl(scr_bit_ptr,x,y,currRGB,smp);
+			avgRGB[0]+=currRGB[0];
+			avgRGB[1]+=currRGB[1];
+			avgRGB[2]+=currRGB[2];
 			cnt+=1;
         }
         }
@@ -117,101 +140,63 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
         int  greenInt = round(green);
         int  blueInt =  round(blue);
 
+        double  mn = MIN(red, MIN(green, blue));
         double  mx = MAX(red, MAX(green, blue));
-        double  sat = (mx == 0) ? 0 : ((mx - MIN(red, MIN(green, blue))) / mx) * 100;
+        double chr=mx-mn;
+        double  sat_out = (mx == 0) ? 0 : (chr / mx) * 100;
+        double  chr_out = chr/2.55;
 
         int grey = ((red == green) && (green == blue)) ? 1 : 0;
-        double  mn = MIN(red, MIN(green, blue));
-        double diff = mx - mn;
+
         char* nomin_hue = "Greyscale";
         double hue_d;
-        int out_col=0;
         double hue_out = 0;
     if (grey == 0) {
 
             if ((red >= green) && (red >= blue)) {
-                hue_d = (green - blue) / diff;
+                hue_d = (green - blue) / chr;
             } else if ((green >= red) && (green >= blue)) {
-                hue_d = 2.0 + (blue - red) / diff;
+                hue_d = 2.0 + (blue - red) / chr;
             } else {
-                hue_d = 4.0 + (red - green) / diff;
+                hue_d = 4.0 + (red - green) / chr;
             }
             hue_d *= 60;
             hue_d = (hue_d < 0) ? hue_d + 360 : hue_d;
             hue_out = hue_d;
             int hue = floor(hue_d * 10);
             if ((hue >= 3525) || (((hue >= 0) && (hue < 75)))) {
-                out_col = 1;
-            } else if ((hue >= 75) && (hue < 375)) {
-                out_col = 2;
-            } else if ((hue >= 375) && (hue < 675)) {
-                out_col = 3;
-            } else if ((hue >= 675) && (hue < 975)) {
-                out_col = 4;
-            } else if ((hue >= 975) && (hue < 1275)) {
-                out_col = 5;
-            } else if ((hue >= 1275) && (hue < 1575)) {
-                out_col = 6;
-            } else if ((hue >= 1575) && (hue < 1875)) {
-                out_col = 7;
-            } else if ((hue >= 1875) && (hue < 2175)) {
-                out_col = 8;
-            } else if ((hue >= 2175) && (hue < 2475)) {
-                out_col = 9;
-            } else if ((hue >= 2475) && (hue < 3075)) {
-                out_col = 10;
-            } else if ((hue >= 3075) && (hue < 3375)) {
-                out_col = 11;
-            } else if ((hue >= 3375) && (hue < 3525)) {
-                out_col = 12;
-            }
-
-            switch (out_col) {
-            case 1:
                 nomin_hue = "Red";
-                break;
-            case 2:
+            } else if ((hue >= 75) && (hue < 375)) {
                 nomin_hue = "Orange/Brown";
-                break;
-            case 3:
+            } else if ((hue >= 375) && (hue < 675)) {
                 nomin_hue = "Yellow";
-                break;
-            case 4:
+            } else if ((hue >= 675) && (hue < 975)) {
                 nomin_hue = "Chartreuse/Lime";
-                break;
-            case 5:
+            } else if ((hue >= 975) && (hue < 1275)) {
                 nomin_hue = "Green";
-                break;
-            case 6:
+            } else if ((hue >= 1275) && (hue < 1575)) {
                 nomin_hue = "Spring Green";
-                break;
-            case 7:
+            } else if ((hue >= 1575) && (hue < 1875)) {
                 nomin_hue = "Cyan";
-                break;
-            case 8:
+            } else if ((hue >= 1875) && (hue < 2175)) {
                 nomin_hue = "Azure/Sky blue";
-                break;
-            case 9:
+            } else if ((hue >= 2175) && (hue < 2475)) {
                 nomin_hue = "Blue";
-                break;
-            case 10:
+            } else if ((hue >= 2475) && (hue < 3075)) {
                 nomin_hue = "Violet/Purple";
-                break;
-            case 11:
+            } else if ((hue >= 3075) && (hue < 3375)) {
                 nomin_hue = "Magenta/Pink";
-                break;
-            case 12:
+            } else if ((hue >= 3375) && (hue < 3525)) {
                 nomin_hue = "Reddish Pink";
-                break;
             }
         }
 
     int c1;
 
     if(grey==0){
-         c1 = asprintf( & out_line, "%d, %d, %d\nSaturation: %.1f; %s \(%.1f%c) - [%dx%d]",redInt, greenInt, blueInt, sat, nomin_hue, hue_out,176,smp,smp);
+        c1 = asprintf( & out_line, "%d, %d, %d\nSaturation: %.1f; %s \(%.1f%c) - [%d: %dx%d]\n    Chroma: %.1f",redInt, greenInt, blueInt, sat_out, nomin_hue, hue_out,176,mds,smp,smp,chr_out);
     }else{
-        c1 = asprintf( & out_line, "%d, %d, %d\nSaturation: %.1f; %s - [%dx%d]", redInt, greenInt, blueInt, sat, nomin_hue,smp,smp);
+        c1 = asprintf( & out_line, "%d, %d, %d\nSaturation: %.1f; %s - [%d: %dx%d]\n    Chroma: %.1f", redInt, greenInt, blueInt, sat_out, nomin_hue,mds,smp,smp,chr_out);
     }
 
     char* str_out=(char*)malloc((c1+1)*sizeof(char));
@@ -222,7 +207,7 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
             DrawText(hdc, str_out, -1, & xy_txt, DT_NOCLIP);
             free(str_out);
             free(out_line);
-            BitBlt(hdc, 0, 0, smp, smp, hdcCaptureBmp, 0,0, SRCCOPY);
+            BitBlt(hdc, 0, 0, osz, osz, hdcCaptureBmp, 0,0, SRCCOPY);
 
 DeleteObject(hBrush);
 DeleteObject(hbCapture);
@@ -237,14 +222,29 @@ EndPaint(hwnd, &ps);
 }
 
 void mousewheel_hdl(WPARAM wParam) {
+    if(altKy==0){
         if (GET_WHEEL_DELTA_WPARAM(wParam) > 0){
 			smp+=1;
+			smp_d+=1;
 		}else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
             smp=(smp>=2)?smp-1:smp;
+            smp_d=(double)smp;
 		}
-        smp2=smp+smp4;
-        smp3=smp+smp5;
-		SetWindowPos(hwnd,HWND_TOP,0,0,smp3,smp2, SWP_NOMOVE);
+    }else{
+        if (GET_WHEEL_DELTA_WPARAM(wParam) > 0){
+			mds+=1;
+			mds_d+=1;
+		}else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
+            mds=(mds>=2)?mds-1:mds;
+            mds_d=(double)mds;
+		}
+    }
+
+		if(smp<mds){
+                osz=MAX(smp,round(smp_d*ceil(mds_d/smp_d)));
+		}
+
+		SetWindowPos(hwnd,HWND_TOP,0,0,MAX(osz,smp_r+16),osz+smp_b+61, SWP_NOMOVE);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -291,7 +291,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 
-RECT sz = {0, 0, smp3+smp+316, smp2+smp+10};
+RECT sz = {0, 0, MAX(osz,smp_r), osz+smp_b};
         /*{x-coordinate of the upper-left corner of the rectangle, y-coordinate of the upper-left corner of the rectangle,
     x-coordinate of the lower-right corner of the rectangle, y-coordinate of the lower-right corner of the rectangle}
     */
@@ -323,6 +323,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
         rfsh = round(1000/((double)(dm.dmDisplayFrequency)));
     }
+
+    HHOOK hKeyboardHook;
+
+    hKeyboardHook = SetWindowsHookEx(
+        WH_KEYBOARD_LL,
+        keyboardHookProc,
+        hInstance,
+        0);
 
    SetTimer(hwnd, 1, rfsh, nullptr);
     if (IsWindowVisible(hwnd) == true) {
