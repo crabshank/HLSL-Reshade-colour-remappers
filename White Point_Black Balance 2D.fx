@@ -909,11 +909,11 @@ float mcs_bb=min(chr_bb,sat_bb);
 float gry_bb=lerp(mcs_bb,sat_bb,mx_bb);
 float msd_bb=max(0,min(1,sat_bb-mcs_bb));
 
-c1_bb_lin.rgb=lerp(c0Lin.rgb,c1_bb_lin.rgb,sat);
-c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c0Lin.rgb,0.5*(max(mcs_bb,chr)+msd));
-c1_bb_lin.rgb=lerp(c0Lin.rgb,c1_bb_lin.rgb,1-gry);
-c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c0Lin.rgb,mx*chr_bb);
-c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c0Lin.rgb,mx_bb*(1-chr));
+c1_bb_lin.rgb=lerp(c1_lin.rgb,c1_bb_lin.rgb,sat);
+c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,0.5*(max(mcs_bb,chr)+msd));
+c1_bb_lin.rgb=lerp(c1_lin.rgb,c1_bb_lin.rgb,1-gry);
+c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,mx*chr_bb);
+c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,mx_bb*(1-chr));
 	
 	[branch]if(linr==0){
 		c1.rgb=LinRGB2rgb(c1_bb_lin.rgb,mode);
