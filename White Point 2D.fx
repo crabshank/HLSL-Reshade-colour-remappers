@@ -591,8 +591,8 @@ p0=tex2D(ReShade::BackBuffer, mousepoint*float2(BUFFER_RCP_WIDTH,BUFFER_RCP_HEIG
 
 p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
 
-float3 WPgf= rgb2XYZ(float3(p0.rgb*rcptwoFiveFive),mode,linr);
-float3 WPgt= rgb2XYZ_grey(float3(p0.rgb*rcptwoFiveFive),mode,linr);
+float3 WPgf= rgb2XYZ(p0.rgb,mode,linr);
+float3 WPgt= rgb2XYZ_grey(p0.rgb,mode,linr);
 
 Customxy.xy=(buttondown==0)?XYZ2xyY(WPconv2Grey(WPgf,WPgt)).xy:Customxy;
 }
