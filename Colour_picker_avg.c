@@ -39,8 +39,8 @@ int asprintf(char ** strp,
     return retval;
 }
 
-int smp = 9;
-double smp_d = 9;
+int smp = 5;
+double smp_d = 5;
 
 int mds=90; //min display size
 double mds_d=90;
