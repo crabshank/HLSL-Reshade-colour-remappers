@@ -48,7 +48,7 @@ double mds_d=90;
 int osz=90;
 
 int smp_r = 340;
-int smp_b = 26;
+int smp_b = 42;
 
 char* out_line="";
 
@@ -194,9 +194,9 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
     int c1;
 
     if(grey==0){
-        c1 = asprintf( & out_line, "%d, %d, %d\nSaturation: %.1f; %s \(%.1f%c) - [%d: %dx%d]\n    Chroma: %.1f",redInt, greenInt, blueInt, sat_out, nomin_hue, hue_out,176,mds,smp,smp,chr_out);
+        c1 = asprintf( & out_line, "%d, %d, %d\n%s \(%.1f%c) - [%d: %dx%d]\nSaturation: %.1f\n    Chroma: %.1f",redInt, greenInt, blueInt, nomin_hue, hue_out,176,mds,smp,smp,sat_out,chr_out);
     }else{
-        c1 = asprintf( & out_line, "%d, %d, %d\nSaturation: %.1f; %s - [%d: %dx%d]\n    Chroma: %.1f", redInt, greenInt, blueInt, sat_out, nomin_hue,mds,smp,smp,chr_out);
+        c1 = asprintf( & out_line, "%d, %d, %d\n%s - [%d: %dx%d]\nSaturation: %.1f\n    Chroma: %.1f", redInt, greenInt, blueInt, nomin_hue,mds,smp,smp,sat_out,chr_out);
     }
 
     char* str_out=(char*)malloc((c1+1)*sizeof(char));
