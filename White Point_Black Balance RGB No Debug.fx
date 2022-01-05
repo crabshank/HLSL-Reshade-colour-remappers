@@ -21,7 +21,6 @@ uniform int Balance <__UNIFORM_COMBO_INT1
 	> = 0;
 
 #include "ReShade.fxh"
-#include "DrawText_mod.fxh"
 
 #define rcptwoFiveFive 1.0/255.0
 #define rcpTwoFour 1.0/2.4
@@ -578,7 +577,7 @@ float4 c1=c0;
 float4 c0Lin;
 int linr=(Linear==true)?1:0;
 
-[branch]if(linr==1){
+[flatten]if(linr==1){
 	c0Lin=c0;
 }else{
 	c0Lin.rgb=rgb2LinRGB(c0.rgb,mode);
@@ -628,14 +627,14 @@ c1_bb_lin.rgb=lerp(c1_lin.rgb,c1_bb_lin.rgb,1-gry);
 c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,mx*chr_bb);
 c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,mx_bb*(1-chr));
 	
-	[branch]if(linr==0){
+	[flatten]if(linr==0){
 		c1.rgb=LinRGB2rgb(c1_bb_lin.rgb,mode);
 	}else{
 		c1.rgb=c1_bb_lin.rgb;
 	}
 	
 }else{
-	[branch]if(linr==0){
+	[flatten]if(linr==0){
 		c1.rgb=LinRGB2rgb(c1_lin.rgb,mode);
 	}else{
 		c1.rgb=c1_lin.rgb;

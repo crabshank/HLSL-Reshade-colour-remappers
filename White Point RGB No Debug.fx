@@ -12,48 +12,7 @@ uniform float3 Custom_RGB < __UNIFORM_COLOR_FLOAT3
 	ui_tooltip = "N.B. output will be D65 (white point for most colour spaces)";
 > = float3(1, 1, 1);
 
-uniform float3 Custom_RGB_bb < __UNIFORM_COLOR_FLOAT3
-	ui_tooltip = "N.B. output will be D65 (white point for most colour spaces)";
-> = float3(1, 1, 1);
-
-uniform int Balance <__UNIFORM_COMBO_INT1
-    ui_items = "White point only\0White point + black balance\0Black balance only\0";
-	> = 0;
-
-uniform bool Two_dimensional_input <> = false;
-
-uniform int Two_dimensional_input_type <__UNIFORM_COMBO_INT1
-    ui_items = "Crosshairs on\0Crosshairs off\0Direct point-based\0";
-	> = 0;
-	
-	uniform int Two_dimensional_input_for <__UNIFORM_COMBO_INT1
-    ui_items = "White Point\0Black Balance\0";
-	> = 0;
-
-uniform float Two_dimensional_input_Range < __UNIFORM_SLIDER_FLOAT1
-	ui_min = 2.0; ui_max = 0.0;
-> = 2.0;
-
-uniform int Debug <__UNIFORM_COMBO_INT1
-    ui_items = "Disabled\0Blacken sat <= Debug_thresh\0Saturation change map\0min(chroma, saturation)\0";
-    ui_tooltip = "Saturation change map: Sat unchanged => Green; Sat decreased => Cyan to Blue; Sat increased => Magenta to Orange";
-	> = 0;
-
-uniform float Debug_thresh < __UNIFORM_DRAG_FLOAT1
-	ui_min = 0; ui_max =1;
-> = 0.015;
-
-uniform int Two_dimensional_output_text <__UNIFORM_COMBO_INT1
-    ui_items = "RGB + Patch + xy\0RGB + patch\0";
-    ui_tooltip = "Print RGB (0-255) to the screen in 2D input mode or RGB with a patch of that colour at the top";
-> = 0;
-
-uniform int Decimals < __UNIFORM_SLIDER_INT1
-	ui_min = 1; ui_max =4;
-> = 3;
-
 #include "ReShade.fxh"
-#include "DrawText_mod.fxh"
 
 #define rcptwoFiveFive 1.0/255.0
 #define rcpTwoFour 1.0/2.4
@@ -67,10 +26,6 @@ uniform int Decimals < __UNIFORM_SLIDER_INT1
 #define rcpTxFourFive 10.0/4.5
 #define invTwoTwo 5.0/11.0
 #define invTwoSix 5.0/13.0
-
-uniform bool buttondown < source = "mousebutton"; keycode = 0; mode = ""; >;
-
-uniform float2 mousepoint < source = "mousepoint"; >;
 
 float3 rgb2hsv(float3 c)
 {
@@ -602,7 +557,7 @@ color.rgb= WPChangeRGB(color.rgb, from, to,mode,lin);
 return color;
 }
 
-float4 WhitePoint_BlackBalanceRGBPass2D(float4 vpos : SV_Position, float2 texcoord : TexCoord) : SV_Target
+float4 WhitePoint_RGB_No_DebugPass2D(float4 vpos : SV_Position, float2 texcoord : TexCoord) : SV_Target
 {
 
 float4 c0=tex2D(ReShade::BackBuffer, texcoord);
@@ -610,7 +565,7 @@ float4 c1=c0;
 float4 c0Lin;
 int linr=(Linear==true)?1:0;
 
-[branch]if(linr==1){
+[flatten]if(linr==1){
 	c0Lin=c0;
 }else{
 	c0Lin.rgb=rgb2LinRGB(c0.rgb,mode);
@@ -619,7 +574,6 @@ int linr=(Linear==true)?1:0;
 float4 p0=float4(1,1,1,1);
 float4 p0_rnd=float4(255,255,255,255);
 float2 Customxy=float2(0.312727,0.329023);
-float2 Customxy_bb=float2(0.312727,0.329023);
 
 float3 p0_wp=Custom_RGB;
 
@@ -628,260 +582,23 @@ float3 WPgt= rgb2XYZ_grey(p0_wp,mode,linr);
 
 Customxy.xy=XYZ2xyY(WPconv2Grey(WPgf,WPgt)).xy;
 
-float3 p0_bb=Custom_RGB_bb;
+float4 c1_lin=whitePoint(c0Lin,Customxy,1); 
 
-WPgf= rgb2XYZ(p0_bb,mode,linr);
-WPgt= rgb2XYZ_grey(p0_bb,mode,linr);
-
-Customxy_bb.xy=XYZ2xyY(WPconv2Grey(WPgf,WPgt)).xy;
-
-float xCoord_Pos;
-float yCoord_Pos;
-
-[branch]if(Two_dimensional_input==true){
-	
-	float x_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range*(BUFFER_RCP_HEIGHT/BUFFER_RCP_WIDTH):Two_dimensional_input_Range;
-
-	float y_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range:Two_dimensional_input_Range*(BUFFER_RCP_WIDTH/BUFFER_RCP_HEIGHT);
-
-	xCoord_Pos=(buttondown==1)?0.5:mousepoint.x*BUFFER_RCP_WIDTH;
-	yCoord_Pos=(buttondown==1)?0.5:mousepoint.y*BUFFER_RCP_HEIGHT;
-
-	[flatten]if(Two_dimensional_input_type==2){
-		p0=tex2D(ReShade::BackBuffer, mousepoint*float2(BUFFER_RCP_WIDTH,BUFFER_RCP_HEIGHT));
-
-		p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
-
-		WPgf= rgb2XYZ(p0.rgb,mode,linr);
-		WPgt= rgb2XYZ_grey(p0.rgb,mode,linr);
-
-		[flatten]if(Two_dimensional_input_for==0){
-			[flatten]if(buttondown==0){
-				Customxy.xy=XYZ2xyY(WPconv2Grey(WPgf,WPgt)).xy;
-			}else{
-				Customxy.xy=Customxy;
-				p0=Custom_RGB;
-				p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
-			}
-		}else{
-			[flatten]if(buttondown==0){
-				Customxy_bb.xy=XYZ2xyY(WPconv2Grey(WPgf,WPgt)).xy;
-			}else{
-				Customxy_bb.xy=Customxy_bb;
-				p0=Custom_RGB_bb;
-				p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
-			}
-		}
-
-	}else{
-		float2 tmp_xy;
-		[flatten]if(Two_dimensional_input_for==0){
-			tmp_xy.x= (buttondown==0)?x_Range*(mousepoint.x*BUFFER_RCP_WIDTH-0.5)+Customxy.x:Customxy.x;
-			tmp_xy.y= (buttondown==0)?y_Range*(mousepoint.y*BUFFER_RCP_HEIGHT-0.5)+Customxy.y:Customxy.y;
-		}else{
-			tmp_xy.x= (buttondown==0)?x_Range*(mousepoint.x*BUFFER_RCP_WIDTH-0.5)+Customxy_bb.x:Customxy_bb.x;
-			tmp_xy.y= (buttondown==0)?y_Range*(mousepoint.y*BUFFER_RCP_HEIGHT-0.5)+Customxy_bb.y:Customxy_bb.y;
-		}
-		float3 xy_XYZ=xy2XYZ(tmp_xy);
-		
-		p0=saturate(XYZ2rgb(xy_XYZ,mode,linr));
-		p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
-		// WPgf=xy_XYZ;
-		WPgt=rgb2XYZ(p0.rgb,mode,linr);
-		
-		[flatten]if(Two_dimensional_input_for==0){
-			[flatten]if(buttondown==0){
-				Customxy.xy=XYZ2xyY(WPconv2Grey(xy_XYZ,WPgt)).xy;
-			}else{
-				Customxy.xy=Customxy;
-				p0=Custom_RGB;
-				p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
-			}
-		}else{
-			[flatten]if(buttondown==0){
-				Customxy_bb.xy=XYZ2xyY(WPconv2Grey(xy_XYZ,WPgt)).xy;
-			}else{
-				Customxy_bb.xy=Customxy_bb;
-				p0=Custom_RGB_bb;
-				p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
-			}
-		}
-		
-		}
-	}
-
-float4 c1_lin=whitePoint(c0Lin,((Balance==2)?Customxy_bb:Customxy),1); 
-
-[branch]if(Balance==1){ //WP+bb
-	float4 c1_bb_lin=whitePoint(c0Lin,Customxy_bb,1);
-	
-float mn=min(c1_lin.r,min(c1_lin.g,c1_lin.b));
-float mx=max(c1_lin.r,max(c1_lin.g,c1_lin.b));
-float chr=mx-mn;
-float sat=(mx==0)?0:chr/mx;
-float mcs=min(chr,sat);
-float gry=lerp(mcs,sat,mx);
-float msd=max(0,min(1,sat-mcs));
-
-float mn_bb=min(c1_bb_lin.r,min(c1_bb_lin.g,c1_bb_lin.b));
-float mx_bb=max(c1_bb_lin.r,max(c1_bb_lin.g,c1_bb_lin.b));
-float chr_bb=mx_bb-mn_bb;
-float sat_bb=(mx_bb==0)?0:chr_bb/mx_bb;
-float mcs_bb=min(chr_bb,sat_bb);
-float gry_bb=lerp(mcs_bb,sat_bb,mx_bb);
-float msd_bb=max(0,min(1,sat_bb-mcs_bb));
-
-c1_bb_lin.rgb=lerp(c1_lin.rgb,c1_bb_lin.rgb,sat);
-c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,0.5*(max(mcs_bb,chr)+msd));
-c1_bb_lin.rgb=lerp(c1_lin.rgb,c1_bb_lin.rgb,1-gry);
-c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,mx*chr_bb);
-c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,mx_bb*(1-chr));
-	
-	[flatten]if(linr==0){
-		c1.rgb=LinRGB2rgb(c1_bb_lin.rgb,mode);
-	}else{
-		c1.rgb=c1_bb_lin.rgb;
-	}
-	
-}else{
 	[flatten]if(linr==0){
 		c1.rgb=LinRGB2rgb(c1_lin.rgb,mode);
 	}else{
 		c1.rgb=c1_lin.rgb;
 	}
-}
-
-[branch]if(Debug==1 || Debug==3){
-float max_rgb=max(max(c1.r,c1.g),c1.b);
-float min_rgb=min(min(c1.r,c1.g),c1.b);
-float chr=max_rgb-min_rgb;
-float sat=(max_rgb==0)?0:chr/max_rgb;
-
-[flatten]if(Debug==3){
-c1.rgb=(min(chr,sat)<=Debug_thresh)?0.5:c1.rgb;
-}else{
-c1.rgb=(sat<=Debug_thresh)?0:c1.rgb;
-}
-
-}else if(Debug==2){
-float max_rgb=max(max(c1.r,c1.g),c1.b);
-float min_rgb=min(min(c1.r,c1.g),c1.b);
-float sat=(max_rgb==0)?0:(max_rgb-min_rgb)/max_rgb;
-
-float max_rgb_og=max(max(c0.r,c0.g),c0.b);
-float min_rgb_og=min(min(c0.r,c0.g),c0.b);
-float sat_og=(max_rgb_og==0)?0:(max_rgb_og-min_rgb_og)/max_rgb_og;
-
-float hue_dbg=120;
-    float abs_satDiff=(sat_og==0)?abs(sat_og-sat):abs(sat_og-sat)/sat_og;
-    float satDiff1=(sat_og==0)?sat_og-sat:abs(sat_og-sat)/sat_og;
-     satDiff1=satDiff1*satDiff1;
-    float satDiff2=(sat_og==1)?sat-sat_og:(sat-sat_og)/(1-sat_og);
-     satDiff2=satDiff2*satDiff2;
-	hue_dbg=(sat<sat_og)?lerp(157.5,240,satDiff1):hue_dbg; 
-    hue_dbg=(sat>sat_og)?lerp(307.5,367.5,satDiff2):hue_dbg;
-    hue_dbg=(hue_dbg==360)?0:hue_dbg;
-    hue_dbg=(hue_dbg>360)?hue_dbg-360:hue_dbg;
-	
-	c1.rgb=hsv2rgb(float3(hue_dbg/360.0,1,lerp(0.3*(1-Debug_thresh),1-Debug_thresh,abs_satDiff)));
-
-}
-
-float4 c2;
-float4 c3;
-
-[branch]if(Two_dimensional_input==true){
-	
-c2.rgb =(abs(texcoord.x-xCoord_Pos)<BUFFER_RCP_WIDTH || abs(texcoord.y-yCoord_Pos)<BUFFER_RCP_HEIGHT)?float3(0.369,0.745,0):c1.rgb;
-
-c3.rgb =(abs(texcoord.x-xCoord_Pos)<3*BUFFER_RCP_WIDTH && abs(texcoord.y-yCoord_Pos)<3*BUFFER_RCP_HEIGHT)?float3(0.498,1,0):c1.rgb;
-
-[flatten]if(Two_dimensional_input_type==0){
-	c1.rgb=c2.rgb;
-}else if(Two_dimensional_input_type==1){
-		c1.rgb=c3.rgb;
-}
-
-float4 res =float4(c1.rgb,0);
-
-float textSize=25;
-int decR=Decimals;
-int decG=Decimals;
-int decB=Decimals;
-
-	float rd=p0_rnd.r;
-	[flatten]if(rd>=100){
-		rd=rd*0.001;
-		decR=3;
-	}else if(rd>=10){
-		rd=rd*0.01;
-		decR=2;
-	}else{
-		rd=rd*0.1;
-		decR=1;
-	}	
-	
-	float gr=p0_rnd.g;
-	[flatten]if(gr>=100){
-		gr=gr*0.001;
-		decG=3;
-	}else if(gr>=10){
-		gr=gr*0.01;
-		decG=2;
-	}else{
-		gr=gr*0.1;
-		decG=1;
-	}	
-	
-	float bl=p0_rnd.b;
-	
-	[flatten]if(bl>=100){
-		bl=bl*0.001;
-		decB=3;
-	}else if(bl>=10){
-		bl=bl*0.01;
-		decB=2;
-	}else{
-		bl=bl*0.1;
-		decB=1;
-	}
-
-
-DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-15, 0), textSize, 1), int2(8, 0), textSize, 1) , 
-textSize, 1, texcoord,  -decR, rd, res,1);
-
-DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-10, 0), textSize, 1), int2(8, 0), textSize, 1) , 
-textSize, 1, texcoord,  -decG, gr, res,1);
-
-DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(-5, 0), textSize, 1), int2(8, 0), textSize, 1) , 
-textSize, 1, texcoord,  -decB, bl, res,1);
-
-
-[branch]if(Two_dimensional_output_text==0){ 
-	
-DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(13, 0), textSize, 1), int2(8, 0), textSize, 1) , 
-textSize, 1, texcoord,  Decimals, Customxy.x, res,1);
-
-DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(0.5*BUFFER_WIDTH,0), int2(22, 0), textSize, 1), int2(8, 0), textSize, 1) , 
-textSize, 1, texcoord,  Decimals,  Customxy.y, res,1);
-
-}
-
-c1.rgb=res.rgb;
-}
-
-p0.rgb=float3(p0_rnd.r*rcptwoFiveFive,p0_rnd.g*rcptwoFiveFive,p0_rnd.b*rcptwoFiveFive);
-c1.rgb=(Two_dimensional_input==true && ((texcoord.x>=0.556 && texcoord.x<=0.616) && (texcoord.y<=0.023) ))?p0.rgb:c1.rgb;
 
 return c1;
 
 }
 
-technique White_Point_Black_Balance_RGB_2D
+technique White_Point_RGB_No_Debug
 {
 	pass
 	{
 		VertexShader = PostProcessVS;
-		PixelShader = WhitePoint_BlackBalanceRGBPass2D;
+		PixelShader = WhitePoint_RGB_No_DebugPass2D;
 	}
 }
