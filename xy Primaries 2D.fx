@@ -316,13 +316,13 @@ float x_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range*(BUFFER_
 
 float y_Range=(BUFFER_WIDTH>=BUFFER_HEIGHT)?Two_dimensional_input_Range:Two_dimensional_input_Range*(BUFFER_RCP_WIDTH/BUFFER_RCP_HEIGHT);
 
-Customxy.x= ((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==0 && Two_dimensional_input==1))?  mousepoint.x*BUFFER_RCP_WIDTH*((Customxy.x+0.5*x_Range)-(Customxy.x-0.5*x_Range))+(Customxy.x-0.5*x_Range):Customxy.x;
+Customxy.x= ((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==0 && Two_dimensional_input==1))?x_Range*(mousepoint.x*BUFFER_RCP_WIDTH-0.5)+Customxy.x:Customxy.x;
 
-float xCoord_Pos=((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==1 && Two_dimensional_input==1))?(Customxy.x-(Customxy.x-0.5*x_Range))/((Customxy.x+0.5*x_Range)-(Customxy.x-0.5*x_Range)):mousepoint.x*BUFFER_RCP_WIDTH;
+float xCoord_Pos=((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==1 && Two_dimensional_input==1))?0.5:mousepoint.x*BUFFER_RCP_WIDTH;
 
-Customxy.y= ((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==0 && Two_dimensional_input==1))?mousepoint.y*BUFFER_RCP_HEIGHT*((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range))+(Customxy.y-0.5*y_Range):Customxy.y;
+Customxy.y=((Two_dimensional_input==1 && Debug_type==1 && buttondown==1)||(buttondown==0 && Two_dimensional_input==1))?y_Range*(mousepoint.y*BUFFER_RCP_HEIGHT-0.5)+Customxy.y:Customxy.y;
 
-float yCoord_Pos=(buttondown==1 && Two_dimensional_input==1)?(Customxy.y-(Customxy.y-0.5*y_Range))/((Customxy.y+0.5*y_Range)-(Customxy.y-0.5*y_Range)):mousepoint.y*BUFFER_RCP_HEIGHT;
+float yCoord_Pos=(buttondown==1 && Two_dimensional_input==1)?0.5:mousepoint.y*BUFFER_RCP_HEIGHT;
 
 float4 c1=c0;
 
