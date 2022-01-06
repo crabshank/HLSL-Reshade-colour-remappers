@@ -573,8 +573,8 @@ return XYZ2rgb(WPconv(XYZed,from,to),mode, lin);
 
 }
 
-float3 xy2XYZ(float2 xyCoord){
-return float3((1/xyCoord.y)*xyCoord.x,1,(1/xyCoord.y)*(1-xyCoord.x-xyCoord.y));
+float3 xy2XYZ(float2 xyCoord, int not_half){
+return float3((1/xyCoord.y)*xyCoord.x,((not_half==1)?1:0.5),(1/xyCoord.y)*(1-xyCoord.x-xyCoord.y));
 }
 
 float3 XYZ2xyY(float3 XYZ){
@@ -591,8 +591,8 @@ float4 c0=color;
 
 float2 D65xy=float2(0.312727,0.329023);
 
-float3 D65XYZ=xy2XYZ(D65xy);
-float3 CustomXYZ=xy2XYZ(CustomxyIn);
+float3 D65XYZ=xy2XYZ(D65xy,1);
+float3 CustomXYZ=xy2XYZ(CustomxyIn,1);
 
 float3 from = D65XYZ; 
 float3 to = CustomXYZ;
@@ -682,7 +682,7 @@ float yCoord_Pos;
 			tmp_xy.x= (buttondown==0)?x_Range*(mousepoint.x*BUFFER_RCP_WIDTH-0.5)+Customxy_bb.x:Customxy_bb.x;
 			tmp_xy.y= (buttondown==0)?y_Range*(mousepoint.y*BUFFER_RCP_HEIGHT-0.5)+Customxy_bb.y:Customxy_bb.y;
 		}
-		float3 xy_XYZ=xy2XYZ(tmp_xy);
+		float3 xy_XYZ=xy2XYZ(tmp_xy,0);
 		
 		p0=saturate(XYZ2rgb(xy_XYZ,mode,linr));
 		p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
