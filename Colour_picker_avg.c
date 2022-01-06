@@ -50,6 +50,12 @@ int osz=90;
 int smp_r = 340;
 int smp_b = 42;
 
+double actuX;
+double actuY;
+
+double pWdt;
+double pHgt;
+
 char* out_line="";
 
 HWND hwnd;
@@ -93,6 +99,13 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 RECT  xy_txt = {0,osz,0, 0};
 
 b= GetCursorPos(&p);
+
+double mPos_x=(double)(p.x);
+double mPos_y=(double)(p.y);
+
+p.x=MIN(pWdt,MAX(0,round(pWdt*(mPos_x/actuX))));
+p.y=MIN(pHgt,MAX(0,round(pHgt*(mPos_y/actuY))));
+
 hdc = GetDC(NULL);
 HDC hDest = CreateCompatibleDC(hdc);
 BYTE* scr_bit_ptr;
@@ -323,6 +336,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
         rfsh = round(1000/((double)(dm.dmDisplayFrequency)));
     }
+
+    pWdt=(double)dm.dmPelsWidth-1;
+    pHgt=(double)dm.dmPelsHeight-1;
+
+    actuX=(double)GetSystemMetrics(SM_CXSCREEN)-1;
+    actuY=(double)GetSystemMetrics(SM_CYSCREEN)-1;
 
     HHOOK hKeyboardHook;
 
