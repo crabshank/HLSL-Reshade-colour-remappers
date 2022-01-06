@@ -76,11 +76,14 @@ RECT xy_txt = {0,0,minWdt,minHgt};
   x-coordinate of the lower-right corner of the rectangle, y-coordinate of the lower-right corner of the rectangle}
   */
 
-double actuX;
-double actuY;
+double actuWdt;
+double actuHgt;
 
 double pWdt;
 double pHgt;
+
+double mPos_x;
+double mPos_y;
 
 LRESULT CALLBACK keyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
     PKBDLLHOOKSTRUCT hooked_key = (PKBDLLHOOKSTRUCT) lParam;
@@ -126,13 +129,16 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
     if ((ctrlKy == 1 && F2Ky == 1) || (F2Ky == 2)) {
         b= GetCursorPos(&p);
 
-        double mPos_x=(double)(p.x);
-        double mPos_y=(double)(p.y);
+        if((pWdt!=actuWdt) || (pHgt!=actuHgt)){
+            mPos_x=(double)(p.x);
+            mPos_y=(double)(p.y);
 
-        p.x=MIN(pWdt,MAX(0,round(pWdt*(mPos_x/actuX))));
-        p.y=MIN(pHgt,MAX(0,round(pHgt*(mPos_y/actuY))));
+            p.x=MIN(pWdt,MAX(0,round(pWdt*(mPos_x/actuWdt))));
+            p.y=MIN(pHgt,MAX(0,round(pHgt*(mPos_y/actuHgt))));
+        }
         p_fixed.x = p.x;
         p_fixed.y = p.y;
+
     }
 
      hdc_px = GetDC(NULL);
@@ -449,17 +455,22 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     pWdt=(double)dm.dmPelsWidth-1;
     pHgt=(double)dm.dmPelsHeight-1;
 
-    actuX=(double)GetSystemMetrics(SM_CXSCREEN)-1;
-    actuY=(double)GetSystemMetrics(SM_CYSCREEN)-1;
+    actuWdt=(double)GetSystemMetrics(SM_CXSCREEN)-1;
+    actuHgt=(double)GetSystemMetrics(SM_CYSCREEN)-1;
 
 
     b= GetCursorPos(&p);
 
-    double mPos_x=(double)(p.x);
-    double mPos_y=(double)(p.y);
+    if((pWdt!=actuWdt) || (pHgt!=actuHgt)){
+        mPos_x=(double)(p.x);
+        mPos_y=(double)(p.y);
 
-    p.x=MIN(pWdt,MAX(0,round(pWdt*(mPos_x/actuX))));
-    p.y=MIN(pHgt,MAX(0,round(pHgt*(mPos_y/actuY))));
+        p.x=MIN(pWdt,MAX(0,round(pWdt*(mPos_x/actuWdt))));
+        p.y=MIN(pHgt,MAX(0,round(pHgt*(mPos_y/actuHgt))));
+    }
+
+    p_fixed.x=p.x;
+    p_fixed.y=p.y;
 
     SetTimer(hwnd, 1, rfsh, NULL);
 
