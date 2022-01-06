@@ -684,10 +684,13 @@ float yCoord_Pos;
 		}
 		float3 xy_XYZ=xy2XYZ(tmp_xy,0);
 		
+		float3 xy_XYZ=xy2XYZ(tmp_xy);
+		
 		p0=saturate(XYZ2rgb(xy_XYZ,mode,linr));
 		p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
-		// WPgf=xy_XYZ;
-		WPgt=rgb2XYZ(p0.rgb,mode,linr);
+
+		WPgf=rgb2XYZ(p0.rgb,mode,linr);
+		WPgt=rgb2XYZ_grey(p0.rgb,mode,linr);
 		
 		[flatten]if(Two_dimensional_input_for==0){
 			[flatten]if(buttondown==0){
