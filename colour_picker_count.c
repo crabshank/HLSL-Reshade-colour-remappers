@@ -326,6 +326,20 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
     }else{ //no separators added
          strncpy(d_str_arr_sep, d_str, r);
     }
+
+    /* If b_cnt_mx could be negative:
+
+        char d_str_arr_sep_out[((b_cnt_mx<0)?len+1:len)];
+        d_str_arr_sep_out[((b_cnt_mx<0)?len:len-1)]='\0';
+        if(b_cnt_mx<0){
+            d_str_arr_sep_out[0]='-';
+        }
+        for(int i=0; i<((b_cnt_mx<0)?len+1:len); i++){
+            d_str_arr_sep_out[((b_cnt_mx<0)?i+1:i)]= d_str_arr_sep[i];
+        }
+    */
+
+
     free(d_str);
 
     if(grey==0){
