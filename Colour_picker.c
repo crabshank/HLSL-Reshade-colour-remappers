@@ -60,7 +60,8 @@ char * paste_line = "";
 char * nomin_hue = "Greyscale";
 
 int redInt, greenInt, blueInt, red2, green2, blue2, grey, c0, c1;
-double red, green, blue, mx, sat_out, chr_out, mn, diff, hue_d, hue_out;
+double red, green, blue, mx, sat_out, chr_out, mn, diff, hue_d, hue_out, actuWdt, actuHgt, pWdt, pHgt, mPos_x, mPos_y, w_ratio, h_ratio;
+
 COLORREF color;
 POINT p;
 POINT p_fixed;
@@ -75,15 +76,6 @@ RECT xy_txt = {0,0,minWdt,minHgt};
 /*{x-coordinate of the upper-left corner of the rectangle, y-coordinate of the upper-left corner of the rectangle,
   x-coordinate of the lower-right corner of the rectangle, y-coordinate of the lower-right corner of the rectangle}
   */
-
-double actuWdt;
-double actuHgt;
-
-double pWdt;
-double pHgt;
-
-double mPos_x;
-double mPos_y;
 
 LRESULT CALLBACK keyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
     PKBDLLHOOKSTRUCT hooked_key = (PKBDLLHOOKSTRUCT) lParam;
@@ -127,15 +119,18 @@ void paster(HWND hwnd, char * str_paste) {
 void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
     if ((ctrlKy == 1 && F2Ky == 1) || (F2Ky == 2)) {
-        b= GetCursorPos(&p);
+        b=GetCursorPos(&p);
 
-        if((pWdt!=actuWdt) || (pHgt!=actuHgt)){
+        if(w_ratio!=1){
             mPos_x=(double)(p.x);
-            mPos_y=(double)(p.y);
-
-            p.x=MIN(pWdt,MAX(0,round(pWdt*(mPos_x/actuWdt))));
-            p.y=MIN(pHgt,MAX(0,round(pHgt*(mPos_y/actuHgt))));
+            p.x=MIN(pWdt,MAX(0,round(mPos_x*w_ratio)));
         }
+
+        if(h_ratio!=1){
+            mPos_y=(double)(p.y);
+            p.y=MIN(pHgt,MAX(0,round(mPos_y*h_ratio)));
+        }
+
         p_fixed.x = p.x;
         p_fixed.y = p.y;
 
@@ -249,19 +244,17 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
                 c1 = asprintf( & out_line, "PASTING (_x:%ld, y:%ld_): %d, %d, %d\n%s \(%.1f%c)\nSaturation: %.1f\n    Chroma: %.1f",p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out,chr_out);
             }
 
-            char* str_out=(char*)malloc((c1+1)*sizeof(char));
+            char str_out[c1+1];
             strncpy(str_out, out_line, c1);
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
-            free(str_out);
             free(out_line);
 
-            char* str_paste=(char*)malloc((c0+1)*sizeof(char));
+            char str_paste[c0+1];
             strncpy(str_paste, paste_line, c0);
             str_paste[c0] = '\0';
             pastingNow = (pastingNow == 0) ? 1 : pastingNow;
             paster(hwnd, str_paste);
-            free(str_paste);
             free(paste_line);
 
         } else {
@@ -273,11 +266,10 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
                 c1 = asprintf( & out_line, "(_x:%ld, y:%ld_): %d, %d, %d\n%s \(%.1f%c)\nSaturation: %.1f\n    Chroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out,chr_out);
             }
 
-            char* str_out=(char*)malloc((c1+1)*sizeof(char));
+            char str_out[c1+1];
             strncpy(str_out, out_line, c1);
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
-            free(str_out);
             free(out_line);
         }
 
@@ -295,19 +287,17 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
                 c1 = asprintf( & out_line, "PASTING (_x:%ld, y:%ld_): %d, %d, %d\n%s\nSaturation: %.1f\n    Chroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out,chr_out);
             }
 
-            char* str_out=(char*)malloc((c1+1)*sizeof(char));
+            char str_out[c1+1];
             strncpy(str_out, out_line, c1);
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
-            free(str_out);
             free(out_line);
 
-            char* str_paste=(char*)malloc((c0+1)*sizeof(char));
+            char str_paste[c0+1];
             strncpy(str_paste, paste_line, c0);
             str_paste[c0] = '\0';
             pastingNow = (pastingNow == 0) ? 1 : pastingNow;
             paster(hwnd, str_paste);
-            free(str_paste);
             free(paste_line);
 
         } else {
@@ -319,11 +309,10 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
                 c1 = asprintf( & out_line, "(_x:%ld, y:%ld_): %d, %d, %d\n%s\nSaturation: %.1f\n    Chroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out,chr_out);
             }
 
-            char* str_out=(char*)malloc((c1+1)*sizeof(char));
+            char str_out[c1+1];
             strncpy(str_out, out_line, c1);
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
-            free(str_out);
             free(out_line);
         }
     }
@@ -347,6 +336,30 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 }
 
 void mousewheel_hdl(WPARAM wParam) {
+
+           dm = {0};
+    dm.dmSize = sizeof(DEVMODE);
+    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
+        rfsh = round(1000/((double)(dm.dmDisplayFrequency)));
+    }
+
+    pWdt=(double)dm.dmPelsWidth-1;
+    pHgt=(double)dm.dmPelsHeight-1;
+
+    HDC hdc_wnd=GetDC(hwnd);
+    actuWdt=(double)(GetDeviceCaps(hdc_wnd,HORZRES)-1);
+    actuHgt=(double)(GetDeviceCaps(hdc_wnd,VERTRES)-1);
+
+    int mv_rfrsh=(double)(GetDeviceCaps(hdc_wnd,VREFRESH));
+
+    ReleaseDC(hwnd,hdc_wnd);
+    DeleteDC(hdc_wnd);
+
+    rfsh=(mv_rfrsh==0 || mv_rfrsh==1)?rfsh:round(1000/((double)(mv_rfrsh)));
+
+    w_ratio=(pWdt==actuWdt)?1:pWdt/actuWdt;
+    h_ratio=(pHgt==actuHgt)?1:pHgt/actuHgt;
+
     if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
         xy_txt.right += 1;
         xy_txt.bottom += 1;
@@ -449,24 +462,36 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     dm = {0};
     dm.dmSize = sizeof(DEVMODE);
     if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
-        rfsh = round(1000 * ((double)(dm.dmDisplayFrequency)));
+        rfsh = round(1000/((double)(dm.dmDisplayFrequency)));
     }
 
     pWdt=(double)dm.dmPelsWidth-1;
     pHgt=(double)dm.dmPelsHeight-1;
 
-    actuWdt=(double)GetSystemMetrics(SM_CXSCREEN)-1;
-    actuHgt=(double)GetSystemMetrics(SM_CYSCREEN)-1;
+    HDC hdc_wnd=GetDC(hwnd);
+    actuWdt=(double)(GetDeviceCaps(hdc_wnd,HORZRES)-1);
+    actuHgt=(double)(GetDeviceCaps(hdc_wnd,VERTRES)-1);
 
+    int mv_rfrsh=(double)(GetDeviceCaps(hdc_wnd,VREFRESH));
 
-    b= GetCursorPos(&p);
+    ReleaseDC(hwnd,hdc_wnd);
+    DeleteDC(hdc_wnd);
 
-    if((pWdt!=actuWdt) || (pHgt!=actuHgt)){
+    rfsh=(mv_rfrsh==0 || mv_rfrsh==1)?rfsh:round(1000/((double)(mv_rfrsh)));
+
+    w_ratio=(pWdt==actuWdt)?1:pWdt/actuWdt;
+    h_ratio=(pHgt==actuHgt)?1:pHgt/actuHgt;
+
+    b=GetCursorPos(&p);
+
+    if(w_ratio!=1){
         mPos_x=(double)(p.x);
-        mPos_y=(double)(p.y);
+        p.x=MIN(pWdt,MAX(0,round(mPos_x*w_ratio)));
+    }
 
-        p.x=MIN(pWdt,MAX(0,round(pWdt*(mPos_x/actuWdt))));
-        p.y=MIN(pHgt,MAX(0,round(pHgt*(mPos_y/actuHgt))));
+    if(h_ratio!=1){
+        mPos_y=(double)(p.y);
+        p.y=MIN(pHgt,MAX(0,round(mPos_y*h_ratio)));
     }
 
     p_fixed.x=p.x;
