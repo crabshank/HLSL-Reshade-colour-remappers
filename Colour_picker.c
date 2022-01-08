@@ -71,7 +71,7 @@ PAINTSTRUCT ps;
 HDC hdc_px, hdc_px_tmp, hdcWindow;
 BYTE* px_bit_ptr;
 
-DEVMODE dm = {0};
+DEVMODE dm;
 RECT xy_txt = {0,0,minWdt,minHgt};
 /*{x-coordinate of the upper-left corner of the rectangle, y-coordinate of the upper-left corner of the rectangle,
   x-coordinate of the lower-right corner of the rectangle, y-coordinate of the lower-right corner of the rectangle}
