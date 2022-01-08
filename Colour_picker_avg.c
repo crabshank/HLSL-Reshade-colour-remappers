@@ -50,14 +50,7 @@ int osz=90;
 int smp_r = 340;
 int smp_b = 42;
 
-double actuWdt;
-double actuHgt;
-
-double pWdt;
-double pHgt;
-
-double mPos_x;
-double mPos_y;
+double actuWdt, actuHgt, pWdt, pHgt, mPos_x, mPos_y, w_ratio, h_ratio;
 
 char* out_line="";
 
@@ -68,7 +61,7 @@ HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
 PAINTSTRUCT ps;
 u_int rfsh = 7;
 HDC hdc;
-DEVMODE dm = {0};
+DEVMODE dm;
 int altKy=0;
 
 LRESULT CALLBACK keyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
@@ -101,14 +94,16 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
 RECT  xy_txt = {0,osz,0, 0};
 
-b= GetCursorPos(&p);
+b=GetCursorPos(&p);
 
-if((pWdt!=actuWdt) || (pHgt!=actuHgt)){
+if(w_ratio!=1){
     mPos_x=(double)(p.x);
-    mPos_y=(double)(p.y);
+    p.x=MIN(pWdt,MAX(0,round(mPos_x*w_ratio)));
+}
 
-    p.x=MIN(pWdt,MAX(0,round(pWdt*(mPos_x/actuWdt))));
-    p.y=MIN(pHgt,MAX(0,round(pHgt*(mPos_y/actuHgt))));
+if(h_ratio!=1){
+    mPos_y=(double)(p.y);
+    p.y=MIN(pHgt,MAX(0,round(mPos_y*h_ratio)));
 }
 
 hdc = GetDC(NULL);
@@ -217,13 +212,12 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
         c1 = asprintf( & out_line, "%d, %d, %d\n%s - [%d: %dx%d] (x:%d, y:%d)\nSaturation: %.1f\n    Chroma: %.1f", redInt, greenInt, blueInt, nomin_hue,mds,smp,smp,p.x,p.y,sat_out,chr_out);
     }
 
-    char* str_out=(char*)malloc((c1+1)*sizeof(char));
+            char str_out[c1+1];
             strncpy(str_out, out_line, c1);
             str_out[c1] = '\0';
             hBrush = CreateSolidBrush(RGB(redInt,greenInt,blueInt));
             FillRect(hdc, &ps.rcPaint, hBrush);
             DrawText(hdc, str_out, -1, & xy_txt, DT_NOCLIP);
-            free(str_out);
             free(out_line);
             BitBlt(hdc, 0, 0, osz, osz, hdcCaptureBmp, 0,0, SRCCOPY);
 
@@ -240,6 +234,42 @@ EndPaint(hwnd, &ps);
 }
 
 void mousewheel_hdl(WPARAM wParam) {
+
+    dm = {0};
+    dm.dmSize = sizeof(DEVMODE);
+    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, & dm)) {
+        rfsh = round(1000/((double)(dm.dmDisplayFrequency)));
+    }
+
+    pWdt=(double)dm.dmPelsWidth-1;
+    pHgt=(double)dm.dmPelsHeight-1;
+
+    HDC hdc_wnd=GetDC(hwnd);
+    actuWdt=(double)(GetDeviceCaps(hdc_wnd,HORZRES)-1);
+    actuHgt=(double)(GetDeviceCaps(hdc_wnd,VERTRES)-1);
+
+    int mv_rfrsh=(double)(GetDeviceCaps(hdc_wnd,VREFRESH));
+
+    ReleaseDC(hwnd,hdc_wnd);
+    DeleteDC(hdc_wnd);
+
+    rfsh=(mv_rfrsh==0 || mv_rfrsh==1)?rfsh:round(1000/((double)(mv_rfrsh)));
+
+    w_ratio=(pWdt==actuWdt)?1:pWdt/actuWdt;
+    h_ratio=(pHgt==actuHgt)?1:pHgt/actuHgt;
+
+    b=GetCursorPos(&p);
+
+    if(w_ratio!=1){
+        mPos_x=(double)(p.x);
+        p.x=MIN(pWdt,MAX(0,round(mPos_x*w_ratio)));
+    }
+
+    if(h_ratio!=1){
+        mPos_y=(double)(p.y);
+        p.y=MIN(pHgt,MAX(0,round(mPos_y*h_ratio)));
+    }
+
     if(altKy==0){
         if (GET_WHEEL_DELTA_WPARAM(wParam) > 0){
 			smp+=1;
@@ -345,8 +375,31 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     pWdt=(double)dm.dmPelsWidth-1;
     pHgt=(double)dm.dmPelsHeight-1;
 
-    actuWdt=(double)GetSystemMetrics(SM_CXSCREEN)-1;
-    actuHgt=(double)GetSystemMetrics(SM_CYSCREEN)-1;
+    HDC hdc_wnd=GetDC(hwnd);
+    actuWdt=(double)(GetDeviceCaps(hdc_wnd,HORZRES)-1);
+    actuHgt=(double)(GetDeviceCaps(hdc_wnd,VERTRES)-1);
+
+    int mv_rfrsh=(double)(GetDeviceCaps(hdc_wnd,VREFRESH));
+
+    ReleaseDC(hwnd,hdc_wnd);
+    DeleteDC(hdc_wnd);
+
+    rfsh=(mv_rfrsh==0 || mv_rfrsh==1)?rfsh:round(1000/((double)(mv_rfrsh)));
+
+    w_ratio=(pWdt==actuWdt)?1:pWdt/actuWdt;
+    h_ratio=(pHgt==actuHgt)?1:pHgt/actuHgt;
+
+    b=GetCursorPos(&p);
+
+    if(w_ratio!=1){
+        mPos_x=(double)(p.x);
+        p.x=MIN(pWdt,MAX(0,round(mPos_x*w_ratio)));
+    }
+
+    if(h_ratio!=1){
+        mPos_y=(double)(p.y);
+        p.y=MIN(pHgt,MAX(0,round(mPos_y*h_ratio)));
+    }
 
     HHOOK hKeyboardHook;
 
