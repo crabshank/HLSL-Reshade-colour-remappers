@@ -297,7 +297,7 @@ void mousewheel_hdl(WPARAM wParam) {
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
 
-    switch(message) {
+switch(message) {
 
             case WM_PAINT:
             renderWnd(hwnd, ps);
@@ -305,6 +305,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
             break;
         case WM_MOUSEWHEEL:
         mousewheel_hdl(wParam);
+        return 0L;
         break;
             case WM_TIMER:
                 InvalidateRect(hwnd, nullptr, false);
