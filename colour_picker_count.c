@@ -159,9 +159,13 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         p_fixed.y = p.y;
     }
 
-     hdc_px = GetDC(NULL);
-     hdc_px_tmp = CreateCompatibleDC(NULL);
-     hdcWindow = GetDC(hwnd);
+    hdc_px = GetDC(NULL);
+    hdc_px_tmp = CreateCompatibleDC(NULL);
+    hdcWindow = GetDC(hwnd);
+    COLORREF txtCol=0x00010101; //1, 1, 1 so text pixels aren't counted
+    COLORREF txtColBg=0x00FEFEFE; //254, 254, 254
+    SetTextColor(hdcWindow,txtCol);
+    SetBkColor(hdcWindow,txtColBg);
 
     BITMAPINFO bmp_px;
 	ZeroMemory(&bmp_px, sizeof(BITMAPINFO));
