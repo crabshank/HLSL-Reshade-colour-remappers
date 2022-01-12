@@ -329,6 +329,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         }
     }else{ //no separators added
          strncpy(d_str_arr_sep, d_str, r);
+         d_str_arr_sep[r] = '\0';
     }
 
     /* If b_cnt_mx could be negative:
