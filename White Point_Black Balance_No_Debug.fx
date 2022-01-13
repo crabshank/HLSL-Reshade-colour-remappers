@@ -668,28 +668,34 @@ float4 c1_lin=whitePoint(c0Lin,((Balance==2)?Customxy_bb:Customxy),1);
 
 [branch]if(Balance==1){ //WP+bb
 	float4 c1_bb_lin=whitePoint(c0Lin,Customxy_bb,1);
-	
+
 float mn=min(c1_lin.r,min(c1_lin.g,c1_lin.b));
 float mx=max(c1_lin.r,max(c1_lin.g,c1_lin.b));
 float chr=mx-mn;
 float sat=(mx==0)?0:chr/mx;
-float mcs=min(chr,sat);
-float gry=lerp(mcs,sat,mx);
-float msd=max(0,min(1,sat-mcs));
+
 
 float mn_bb=min(c1_bb_lin.r,min(c1_bb_lin.g,c1_bb_lin.b));
 float mx_bb=max(c1_bb_lin.r,max(c1_bb_lin.g,c1_bb_lin.b));
 float chr_bb=mx_bb-mn_bb;
 float sat_bb=(mx_bb==0)?0:chr_bb/mx_bb;
-float mcs_bb=min(chr_bb,sat_bb);
-float gry_bb=lerp(mcs_bb,sat_bb,mx_bb);
-float msd_bb=max(0,min(1,sat_bb-mcs_bb));
+float h=0;
+if(chr!=0){
+	if ((c1_lin.r >= c1_lin.g) && (c1_lin.r >= c1_lin.b)) {
+		h=(c1_lin.g - c1_lin.b) / chr;
+	} else if ((c1_lin.g >= c1_lin.r) && (c1_lin.g >= c1_lin.b)) {
+	   h = (c1_lin.b - c1_lin.r) / chr + 2.0;
+	} else {
+		h = (c1_lin.r - c1_lin.g) / chr + 4.0;
+	}
+	h/=6.0;
+	h=(h < 0) ? h + 1 : h;
+}
 
-c1_bb_lin.rgb=lerp(c1_lin.rgb,c1_bb_lin.rgb,sat);
-c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,0.5*(max(mcs_bb,chr)+msd));
-c1_bb_lin.rgb=lerp(c1_lin.rgb,c1_bb_lin.rgb,1-gry);
-c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,mx*chr_bb);
-c1_bb_lin.rgb=lerp(c1_bb_lin.rgb,c1_lin.rgb,mx_bb*(1-chr));
+
+float3 c1_lin_adj_hsv=float3(h, min(sat,sat_bb), mx);
+
+c1_bb_lin=hsv2rgb(c1_lin_adj_hsv);
 	
 	[branch]if(linr==0){
 		c1.rgb=LinRGB2rgb(c1_bb_lin.rgb,mode);
