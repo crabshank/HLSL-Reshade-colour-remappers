@@ -693,7 +693,11 @@ float h=0;
 }
 
 
-float3 c1_lin_adj_hsv=float3(h, min(sat,sat_bb), mx);
+float mxs=max(sat_bb,sat);
+float mss=MIN(sat_bb,sat);
+float lrp=(min(chr,max(sat_bb,chr))*(1+(1-min(max(0,1-sat-chr),1-sat))))*0.5;
+
+float3 c1_lin_adj_hsv=float3(h, min(sat,lerp(mss,min(1,2*mxs-mss),lrp)), mx);
 
 c1_bb_lin=hsv2rgb(c1_lin_adj_hsv);
 	
