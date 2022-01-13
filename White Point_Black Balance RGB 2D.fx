@@ -728,8 +728,8 @@ float mx_bb=max(c1_bb_lin.r,max(c1_bb_lin.g,c1_bb_lin.b));
 float chr_bb=mx_bb-mn_bb;
 float sat_bb=(mx_bb==0)?0:chr_bb/mx_bb;
 float h=0;
-if(chr!=0){
-	if ((c1_lin.r >= c1_lin.g) && (c1_lin.r >= c1_lin.b)) {
+[flatten]if(chr!=0){
+	[flatten]if ((c1_lin.r >= c1_lin.g) && (c1_lin.r >= c1_lin.b)) {
 		h=(c1_lin.g - c1_lin.b) / chr;
 	} else if ((c1_lin.g >= c1_lin.r) && (c1_lin.g >= c1_lin.b)) {
 	   h = (c1_lin.b - c1_lin.r) / chr + 2.0;
