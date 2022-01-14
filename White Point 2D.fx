@@ -24,7 +24,7 @@ uniform float Two_dimensional_input_Range < __UNIFORM_SLIDER_FLOAT1
 > = 2.0;
 
 uniform int Debug <__UNIFORM_COMBO_INT1
-    ui_items = "Disabled\0Blacken sat <= Debug_thresh\0Saturation change map\0";
+    ui_items = "Disabled\0Blacken sat <= Debug_thresh\0Saturation change map\0sat <= Debug_thresh to grey\0";
     ui_tooltip = "Saturation change map: Sat unchanged => Green; Sat decreased => Cyan to Blue; Sat increased => Magenta to Orange";
 	> = 0;
 
@@ -602,12 +602,12 @@ Customxy.xy=(buttondown==0)?XYZ2xyY(WPconv2Grey(WPgf,WPgt)).xy:Customxy;
 
 float4 c1=whitePoint(c0,Customxy,linr);
 
-[branch]if(Debug==1){
+[branch]if(Debug==1 || Debug==3){
 float max_rgb=max(max(c1.r,c1.g),c1.b);
 float min_rgb=min(min(c1.r,c1.g),c1.b);
 float sat=(max_rgb==0)?0:(max_rgb-min_rgb)/max_rgb;
 
-c1.rgb=(sat<=Debug_thresh)?0:c1.rgb;
+c1.rgb=(sat<=Debug_thresh)?((Debug==3)?0.5:0):c1.rgb;
 }else if(Debug==2){
 float max_rgb=max(max(c1.r,c1.g),c1.b);
 float min_rgb=min(min(c1.r,c1.g),c1.b);

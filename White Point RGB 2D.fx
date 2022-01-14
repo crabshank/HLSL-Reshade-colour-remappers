@@ -23,7 +23,7 @@ uniform float Two_dimensional_input_Range < __UNIFORM_SLIDER_FLOAT1
 > = 2.0;
 
 uniform int Debug <__UNIFORM_COMBO_INT1
-    ui_items = "Disabled\0Blacken sat <= Debug_thresh\0Saturation change map\0min(chroma, saturation)\0";
+    ui_items = "Disabled\0Blacken sat <= Debug_thresh\0Saturation change map\0min(chroma, saturation)\0sat <= Debug_thresh to grey\0";
     ui_tooltip = "Saturation change map: Sat unchanged => Green; Sat decreased => Cyan to Blue; Sat increased => Magenta to Orange";
 	> = 0;
 
@@ -675,7 +675,7 @@ float4 c1_lin=whitePoint(c0Lin,Customxy,1);
 		c1.rgb=c1_lin.rgb;
 	}
 
-[branch]if(Debug==1 || Debug==3){
+[branch]if(Debug==1 || Debug==3 || Debug==4){
 float max_rgb=max(max(c1.r,c1.g),c1.b);
 float min_rgb=min(min(c1.r,c1.g),c1.b);
 float chr=max_rgb-min_rgb;
@@ -684,7 +684,7 @@ float sat=(max_rgb==0)?0:chr/max_rgb;
 [flatten]if(Debug==3){
 c1.rgb=(min(chr,sat)<=Debug_thresh)?0.5:c1.rgb;
 }else{
-c1.rgb=(sat<=Debug_thresh)?0:c1.rgb;
+c1.rgb=(sat<=Debug_thresh)?((Debug==4)?0.5:0):c1.rgb;
 }
 
 }else if(Debug==2){
