@@ -694,7 +694,8 @@ float h=0;
 
 float mxs=max(sat_bb,sat);
 float mss=min(sat_bb,sat);
-float lrp=(min(chr,max(sat_bb,chr))*(1+(1-min(max(0,1-sat-chr),1-sat))))*0.5;
+float mcs=min(sat,chr);
+float lrp=(min(chr,max(sat_bb,mcs))*(2-min(max(0,1-sat-chr),1-sat)))*0.5;
 
 float3 c1_lin_adj_hsv=float3(h, min(sat,lerp(mss,min(1,2*mxs-mss),lrp)), mx);
 
