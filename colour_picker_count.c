@@ -54,7 +54,7 @@ HWND hwnd;
 int shiftKy = 0;
 int ctrlKy = 0;
 int altKy = 0;
-int F2Ky = 1;
+int F2Ky = 2;
 int F2KyLast = 1;
 int pastingNow = 0;
 
