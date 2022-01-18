@@ -26,7 +26,6 @@ uniform int Gamma_type_2 < __UNIFORM_COMBO_INT1
 #define invTwoTwo 5.0/11.0
 #define invTwoSix 5.0/13.0
 
-
 float3 transferrer(float3 c0, int mode){
 
 float3 c1=c0;
@@ -56,7 +55,6 @@ float3 c1=c0;
 return c1;
 
 }
-
 
 float4 LinearGammaPass(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
