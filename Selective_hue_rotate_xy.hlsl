@@ -9,19 +9,6 @@ float4 p1 :  register(c1);
 #define one_over_width  (p1[0])
 #define one_over_height (p1[1])
 
-#define rcptwoFiveFive 1.0/255.0
-#define rcpTwoFour 1.0/2.4
-#define rcpOFiveFive 1.0/1.055
-#define rcpTwelveNineTwo 1.0/12.92
-#define recAlpha 1.09929682680944
-#define rcpRecAlpha 1.0/1.09929682680944
-#define recBeta 0.018053968510807
-#define recBetaLin 0.004011993002402
-#define rcpFourFive 1.0/4.5
-#define rcpTxFourFive 10.0/4.5
-#define invTwoTwo 5.0/11.0
-#define invTwoSix 5.0/13.0
-
 #define Mode 3 // 0 - sRGB | 1 - Rec 601 NTSC | 2 - Rec. 601 PAL | 3 - Rec. 709 | 4 - Rec.2020 | 5 - DCI-P3 | 6 - Display P3 | 7 - Orginal NTSC (47 CFR ยง 73.682 - TV transmission standards) | 8 - Rec. 601 D93 | 9 - Rec. 709 D93 | 10 - DCI-P3 (D60/ACES) 
 
 #define Linear 0 // 0-1 Take linear RGB as input and output linear RGB
