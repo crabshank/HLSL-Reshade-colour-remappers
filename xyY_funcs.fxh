@@ -11,7 +11,6 @@
 #define invTwoTwo 5.0/11.0
 #define invTwoSix 5.0/13.0 
 
-
 float3 rgb2hsv(float3 c)
 {
     float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -64,7 +63,6 @@ float3 LinRGB2rgb(float3 rgb_i, int mode)
 
 	return RGB;
 }
-
 
 float3 WPconv_func(float3 XYZ, float3 frm, float3 to, float3 mult_XYZ)
 {
