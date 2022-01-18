@@ -64,7 +64,7 @@ float3 LinRGB2rgb(float3 rgb_i, int mode)
 	return RGB;
 }
 
-float3 WPconv_func(float3 XYZ, float3 frm, float3 to, float3 mult_XYZ)
+float3 WPconv_func(float3 XYZ, float3 frm, float3 to)
 {
 	float3x3 Bradford=float3x3(0.8951,0.2664,-0.1614,
 	-0.7502,1.7135,0.0367,
@@ -83,18 +83,18 @@ float3 WPconv_func(float3 XYZ, float3 frm, float3 to, float3 mult_XYZ)
 
 	float3x3 convBrad= mul(mul(BradfordInv,CR),Bradford);
 
-	float3 outp=mul(convBrad,mult_XYZ);
+	float3 outp=mul(convBrad,XYZ);
 	return outp;
 }
 
 float3 WPconv(float3 XYZ,float3 frm, float3 to)
 {
-	return WPconv_func(XYZ, frm, to, XYZ);
+	return WPconv_func(XYZ, frm, to);
 }
 
-float3 WPconv2Grey(float3 XYZ,float3 frm, float3 to)
+float3 WPconv2Grey(float3 frm,float3 to)
 {
-	return WPconv_func(XYZ, frm, to, float3(0.95047,1,1.08883)); //D65
+	return WPconv_func(float3(0.95047,1,1.08883), frm, to); //D65
 }
 
 float3 LinRGB2XYZ(float3 rgbLin,int mode)
@@ -444,6 +444,11 @@ float rgb2Y(float3 rgb, int mode)
 {
 	float3 lin_rgb=rgb2LinRGB(rgb, mode);
 	return LinRGB2Y(lin_rgb, mode);
+}
+
+float3 xy2XYZ(float2 xyCoord)
+{
+	return float3((1/xyCoord.y)*xyCoord.x,1,(1/xyCoord.y)*(1-xyCoord.x-xyCoord.y));
 }
 
 //Source: https://stackoverflow.com/a/45263428; http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.htm; https://en.wikipedia.org/wiki/Rec._2020#Transfer_characteristics
