@@ -87,11 +87,13 @@ float3 WPconv_func(float3 XYZ, float3 frm, float3 to, float3 mult_XYZ)
 	return outp;
 }
 
-float3 WPconv(float3 XYZ,float3 frm, float3 to){
+float3 WPconv(float3 XYZ,float3 frm, float3 to)
+{
 	return WPconv_func(XYZ, frm, to, XYZ);
 }
 
-float3 WPconv2Grey(float3 XYZ,float3 frm, float3 to){
+float3 WPconv2Grey(float3 XYZ,float3 frm, float3 to)
+{
 	return WPconv_func(XYZ, frm, to, float3(0.95047,1,1.08883)); //D65
 }
 
