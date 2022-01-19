@@ -411,13 +411,14 @@ float3 xyY2XYZ(float3 xyY)
 
 float3 LinRGB2xyY(float3 rgb_lin, int mode)
 {
-	int rgb_is_blk=(rgb_lin.r==0 && rgb_lin.g==0 && rgb_lin	.b==0)?1:0;
+	float3 rgb_lin_adj=rgb_lin;
+	int rgb_is_blk=(rgb_lin.r==0 && rgb_lin.g==0 && rgb_lin.b==0)?1:0;
 	
 	[flatten]if(rgb_is_blk==1){
-		rgb_lin.rgb=1;
+		rgb_lin_adj.rgb=1;
 	}
 
-	float3 XYZ=LinRGB2XYZ(rgb_lin, mode);
+	float3 XYZ=LinRGB2XYZ(rgb_lin_adj, mode);
 	float3 xyY=XYZ2xyY(XYZ);
 	xyY.z=(rgb_is_blk==1)?0:xyY.z;
 	return xyY;
