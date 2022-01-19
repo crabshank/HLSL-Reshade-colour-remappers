@@ -115,7 +115,7 @@ float3 LinRGB2rgb(float3 rgb_i, int mode)
 	return RGB;
 }
 
-float3 WPconv_func(float3 XYZ, float3 frm, float3 to, float3 mult_XYZ)
+float3 WPconv_func(float3 XYZ, float3 frm, float3 to)
 {
 	float3x3 Bradford=float3x3(0.8951,0.2664,-0.1614,
 	-0.7502,1.7135,0.0367,
@@ -134,18 +134,18 @@ float3 WPconv_func(float3 XYZ, float3 frm, float3 to, float3 mult_XYZ)
 
 	float3x3 convBrad= mul(mul(BradfordInv,CR),Bradford);
 
-	float3 outp=mul(convBrad,mult_XYZ);
+	float3 outp=mul(convBrad,XYZ);
 	return outp;
 }
 
 float3 WPconv(float3 XYZ,float3 frm, float3 to)
 {
-	return WPconv_func(XYZ, frm, to, XYZ);
+	return WPconv_func(XYZ, frm, to);
 }
 
-float3 WPconv2Grey(float3 XYZ,float3 frm, float3 to)
+float3 WPconv2Grey(float3 frm,float3 to)
 {
-	return WPconv_func(XYZ, frm, to, float3(0.95047,1,1.08883)); //D65
+	return WPconv_func(float3(0.95047,1,1.08883), frm, to); //D65
 }
 
 float3 LinRGB2XYZ(float3 rgbLin,int mode)
@@ -497,6 +497,11 @@ float rgb2Y(float3 rgb, int mode)
 	return LinRGB2Y(lin_rgb, mode);
 }
 
+float3 xy2XYZ(float2 xyCoord)
+{
+	return float3((1/xyCoord.y)*xyCoord.x,1,(1/xyCoord.y)*(1-xyCoord.x-xyCoord.y));
+}
+
 //Source: https://stackoverflow.com/a/45263428; http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.htm; https://en.wikipedia.org/wiki/Rec._2020#Transfer_characteristics
 
 float delta(float color, float dlt){
@@ -599,7 +604,7 @@ float3 nw_hsv=rgb2hsv(c0Lin);
 
 float nwSat=delta(nw_hsv.y,satDeltaAmnt);
 float greyMtrc=lerp(min(nw_hsv.y,nw_hsv.y*nw_hsv.z),nw_hsv.y,nw_hsv.z);
-nw_hsv.y=(avoid_grey==true)?lerp(nw_hsv.y,nwSat,greyMtrc):nwSat;
+nw_hsv.y=(avoid_grey==1)?lerp(nw_hsv.y,nwSat,greyMtrc):nwSat;
 
 c0Lin=hsv2rgb(nw_hsv);
 }
@@ -612,13 +617,13 @@ int Avoid_light=avoid_light;
 
 float og_Y=LinRGB2Y(c0_og_Lin,Mode);
 
-c0Lin.rgb=(avoid_light==true)?lerp(c0Lin.rgb,c0_og_Lin.rgb,og_Y):c0Lin.rgb;
+c0Lin.rgb=(avoid_light==1)?lerp(c0Lin.rgb,c0_og_Lin.rgb,og_Y):c0Lin.rgb;
 
 float nw_Y=(Y_DeltaAmnt==0)?og_Y:delta(og_Y,Y_DeltaAmnt);
 
 float3 nw_xyY= LinRGB2xyY(c0Lin.rgb,Mode);
 
-[branch]if (Linear==true){
+[branch]if (Linear==1){
 c0.rgb=xyY2LinRGB(float3(nw_xyY.xy,nw_Y),Mode);
 }else{
 c0.rgb=xyY2rgb(float3(nw_xyY.xy,nw_Y),Mode);

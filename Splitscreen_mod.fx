@@ -10,6 +10,7 @@ uniform float  split < __UNIFORM_SLIDER_FLOAT1
 uniform bool flip <> = false;
 
 #include "ReShade.fxh"
+#include "xyY_funcs.fxh"
 
 texture Before { Width = BUFFER_WIDTH; Height = BUFFER_HEIGHT; };
 sampler Before_sampler { Texture = Before;};

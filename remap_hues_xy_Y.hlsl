@@ -127,7 +127,7 @@ float3 LinRGB2rgb(float3 rgb_i, int mode)
 	return RGB;
 }
 
-float3 WPconv_func(float3 XYZ, float3 frm, float3 to, float3 mult_XYZ)
+float3 WPconv_func(float3 XYZ, float3 frm, float3 to)
 {
 	float3x3 Bradford=float3x3(0.8951,0.2664,-0.1614,
 	-0.7502,1.7135,0.0367,
@@ -146,16 +146,18 @@ float3 WPconv_func(float3 XYZ, float3 frm, float3 to, float3 mult_XYZ)
 
 	float3x3 convBrad= mul(mul(BradfordInv,CR),Bradford);
 
-	float3 outp=mul(convBrad,mult_XYZ);
+	float3 outp=mul(convBrad,XYZ);
 	return outp;
 }
 
-float3 WPconv(float3 XYZ,float3 frm, float3 to){
-	return WPconv_func(XYZ, frm, to, XYZ);
+float3 WPconv(float3 XYZ,float3 frm, float3 to)
+{
+	return WPconv_func(XYZ, frm, to);
 }
 
-float3 WPconv2Grey(float3 XYZ,float3 frm, float3 to){
-	return WPconv_func(XYZ, frm, to, float3(0.95047,1,1.08883)); //D65
+float3 WPconv2Grey(float3 frm,float3 to)
+{
+	return WPconv_func(float3(0.95047,1,1.08883), frm, to); //D65
 }
 
 float3 LinRGB2XYZ(float3 rgbLin,int mode)
@@ -507,6 +509,11 @@ float rgb2Y(float3 rgb, int mode)
 	return LinRGB2Y(lin_rgb, mode);
 }
 
+float3 xy2XYZ(float2 xyCoord)
+{
+	return float3((1/xyCoord.y)*xyCoord.x,1,(1/xyCoord.y)*(1-xyCoord.x-xyCoord.y));
+}
+
 //Source: https://stackoverflow.com/a/45263428; http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.htm; https://en.wikipedia.org/wiki/Rec._2020#Transfer_characteristics
 
 float hue_rotate(float hue,float rot){rot*=(1.0/360.0);float r=hue+rot;if(r<0){return 1+r;}else if(r>1){return r-1;}else{return r;}} 
@@ -548,7 +555,7 @@ int linr=Linear;
 float3 c0_xyY;
 float3 c1_xyY;
 
-[branch]if(linr==false){
+[branch]if(linr==0){
 	c0_xyY=rgb2xyY(c0.rgb,space);
 	c1_xyY=c0_xyY;
 }else{
@@ -559,7 +566,7 @@ float3 c1_xyY;
 [branch]if(hues_on==1){
 c1=remapper(c0);
 
-	if(linr==false){
+	if(linr==0){
 	c1_xyY=rgb2xyY(c1.rgb,space);
 	}else{
 	c1_xyY=LinRGB2xyY(c1.rgb,space);	
@@ -571,7 +578,7 @@ c1=remapper(c0);
 
 	c1_xyY.z=Y_map(c0_xyY.z);
 
-	if(linr==false){
+	if(linr==0){
 	c1.rgb=xyY2rgb(c1_xyY,space);
 	}else{
 	c1.rgb=xyY2LinRGB(c1_xyY,space);
@@ -579,7 +586,7 @@ c1=remapper(c0);
 
 }else{
 
-	if(linr==false){
+	if(linr==0){
 	c1.rgb=xyY2rgb(float3(c1_xyY.xy,c0_xyY.z),space);
 	}else{
 	c1.rgb=xyY2LinRGB(float3(c1_xyY.xy,c0_xyY.z),space);

@@ -54,9 +54,9 @@ float2 h_x_b=float2(0,1);float2 h_y_b=float2(0,1);i=0;exact=0;for(i=0;i<hue_poin
 float3 color_xyY;
 
 [branch]if(Linear==false){
-	color_xyY=XYZ2xyY(rgb2XYZ(color.rgb,Mode));
+	color_xyY=rgb2xyY(color.rgb,Mode);
 }else{
-	color_xyY=XYZ2xyY(LinRGB2XYZ(color.rgb,Mode));
+	color_xyY=LinRGB2xyY(color.rgb,Mode);
 }
 
 [branch]if(Linear==false){

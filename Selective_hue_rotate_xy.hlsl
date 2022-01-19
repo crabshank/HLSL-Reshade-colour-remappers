@@ -109,7 +109,7 @@ float3 LinRGB2rgb(float3 rgb_i, int mode)
 	return RGB;
 }
 
-float3 WPconv_func(float3 XYZ, float3 frm, float3 to, float3 mult_XYZ)
+float3 WPconv_func(float3 XYZ, float3 frm, float3 to)
 {
 	float3x3 Bradford=float3x3(0.8951,0.2664,-0.1614,
 	-0.7502,1.7135,0.0367,
@@ -128,16 +128,18 @@ float3 WPconv_func(float3 XYZ, float3 frm, float3 to, float3 mult_XYZ)
 
 	float3x3 convBrad= mul(mul(BradfordInv,CR),Bradford);
 
-	float3 outp=mul(convBrad,mult_XYZ);
+	float3 outp=mul(convBrad,XYZ);
 	return outp;
 }
 
-float3 WPconv(float3 XYZ,float3 frm, float3 to){
-	return WPconv_func(XYZ, frm, to, XYZ);
+float3 WPconv(float3 XYZ,float3 frm, float3 to)
+{
+	return WPconv_func(XYZ, frm, to);
 }
 
-float3 WPconv2Grey(float3 XYZ,float3 frm, float3 to){
-	return WPconv_func(XYZ, frm, to, float3(0.95047,1,1.08883)); //D65
+float3 WPconv2Grey(float3 frm,float3 to)
+{
+	return WPconv_func(float3(0.95047,1,1.08883), frm, to); //D65
 }
 
 float3 LinRGB2XYZ(float3 rgbLin,int mode)
@@ -489,6 +491,11 @@ float rgb2Y(float3 rgb, int mode)
 	return LinRGB2Y(lin_rgb, mode);
 }
 
+float3 xy2XYZ(float2 xyCoord)
+{
+	return float3((1/xyCoord.y)*xyCoord.x,1,(1/xyCoord.y)*(1-xyCoord.x-xyCoord.y));
+}
+
 //Source: https://stackoverflow.com/a/45263428; http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.htm; https://en.wikipedia.org/wiki/Rec._2020#Transfer_characteristics
 
 float hue_rotate(float hue,float rot){rot/=360.0;float r=hue+rot;[flatten]if(r<0){return 1+r;}else if(r>1){return r-1;}else{return r;}} 
@@ -535,7 +542,7 @@ float reddish_pink_rotate=Reddish_pink_Rotate;
 
 float Y_og;
 
-[branch]if(Linear==false){
+[branch]if(Linear==0){
 Y_og =rgb2Y(c0.rgb,Mode);
 }else{
 Y_og =LinRGB2Y(c0.rgb,Mode);
@@ -572,7 +579,7 @@ new_hue=((magenta__Pink==1)&&(magenta__Pink_rotate!=0))?hue_rotate(c0_hsv.x,mage
 new_hue=((reddish_pink==1)&&(reddish_pink_rotate!=0))?hue_rotate(c0_hsv.x,reddish_pink_rotate):c0_hsv.x;
 }
 
-[branch]if(Linear==false){
+[branch]if(Linear==0){
 c1.rgb=xyY2rgb(
 		float3(rgb2xyY(
 						hsv2rgb(float3(new_hue,c0_hsv.yz))

@@ -72,6 +72,23 @@ float3 hsv2rgb(float3 c)
 }
 //Source: http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
 
+float3 rgb2LinRGB(float3 rgb, int mode)
+{
+	float3 rgbLin=rgb;
+
+	[branch]if((mode==0)||(mode==6)){ //sRGB transfer
+						rgbLin=(rgb > 0.0404482362771082 )?pow(abs((rgb+0.055)*rcpOFiveFive),2.4):rgb*rcpTwelveNineTwo;
+					}else if ((mode==5)||(mode==10)){ //DCI-P3
+						rgbLin=pow(rgb,2.6);
+					}else if (mode==7){ //Original NTSC
+						rgbLin=pow(rgb,2.2);
+					}else{ //Rec transfer
+						rgbLin=(rgb < recBetaLin )?rcpFourFive*rgb:pow(-1*(rcpRecAlpha*(1-recAlpha-rgb)),rcpTxFourFive);
+					}
+
+	return rgbLin;
+}
+
 float3 LinRGB2rgb(float3 rgb_i, int mode)
 {
 	float3 RGB;
@@ -89,21 +106,197 @@ float3 LinRGB2rgb(float3 rgb_i, int mode)
 	return RGB;
 }
 
-float3 rgb2LinRGB(float3 rgb, int mode)
+float3 WPconv_func(float3 XYZ, float3 frm, float3 to)
 {
-	float3 rgbLin=rgb;
+	float3x3 Bradford=float3x3(0.8951,0.2664,-0.1614,
+	-0.7502,1.7135,0.0367,
+	0.0389,-0.0685,1.0296);
 
-	[branch]if((mode==0)||(mode==6)){ //sRGB transfer
-						rgbLin=(rgb > 0.0404482362771082 )?pow(abs((rgb+0.055)*rcpOFiveFive),2.4):rgb*rcpTwelveNineTwo;
-					}else if ((mode==5)||(mode==10)){ //DCI-P3
-						rgbLin=pow(rgb,2.6);
-					}else if (mode==7){ //Original NTSC
-						rgbLin=pow(rgb,2.2);
-					}else{ //Rec transfer
-						rgbLin=(rgb < recBetaLin )?rcpFourFive*rgb:pow(-1*(rcpRecAlpha*(1-recAlpha-rgb)),rcpTxFourFive);
-					}
+	float3x3 BradfordInv=float3x3(0.9869929,-0.1470543,0.1599627,
+	0.4323053,0.5183603,0.0492912,
+	-0.0085287,0.0400428,0.9684867);
 
-	return rgbLin;
+	float3 BradFrom= mul(Bradford,frm);
+	float3 BradTo= mul(Bradford,to);
+
+	float3x3 CR=float3x3(BradTo.x/BradFrom.x,0,0,
+	0,BradTo.y/BradFrom.y,0,
+	0,0,BradTo.z/BradFrom.z);
+
+	float3x3 convBrad= mul(mul(BradfordInv,CR),Bradford);
+
+	float3 outp=mul(convBrad,XYZ);
+	return outp;
+}
+
+float3 WPconv(float3 XYZ,float3 frm, float3 to)
+{
+	return WPconv_func(XYZ, frm, to);
+}
+
+float3 WPconv2Grey(float3 frm,float3 to)
+{
+	return WPconv_func(float3(0.95047,1,1.08883), frm, to); //D65
+}
+
+float3 LinRGB2XYZ(float3 rgbLin,int mode)
+{
+	float3 v1;
+	float3 v2;
+	float3 v3;
+
+	[branch]if (mode==1){ //Rec 601 NTSC
+		v1.x=0.3935891;
+		v1.y=0.3652497;
+		v1.z=0.1916313;
+		v2.x=0.2124132;
+		v2.y=0.7010437;
+		v2.z=0.0865432;
+		v3.x=0.0187423;
+		v3.y=0.1119313;
+		v3.z=0.9581563;
+	}else if (mode==2){ //Rec 601 PAL
+		v1.x=0.430619;
+		v1.y=0.3415419;
+		v1.z=0.1783091;
+		v2.x=0.2220379;
+		v2.y=0.7066384;
+		v2.z=0.0713236;
+		v3.x=0.0201853;
+		v3.y=0.1295504;
+		v3.z=0.9390944;
+	}else if(mode==5){ //DCI-P3
+		v1.x=0.445169815564552;
+		v1.y=0.277134409206778;
+		v1.z=0.172282669815565;
+		v2.x=0.209491677912731;
+		v2.y=0.721595254161044;
+		v2.z=0.068913067926226;
+		v3.x=0;
+		v3.y=0.047060560053981;
+		v3.z=0.907355394361973;
+	}else if(mode==6){
+		v1.x=0.48663265;
+		v1.y=0.2656631625;
+		v1.z=0.1981741875;
+		v2.x=0.2290036;
+		v2.y=0.691726725;
+		v2.z=0.079269675;
+		v3.x=0;
+		v3.y=0.0451126125;
+		v3.z=1.0437173875;
+	}else if (mode==4){ //Rec 2020
+		v1.x=0.637010191411101;
+		v1.y=0.144615027396969;
+		v1.z=0.16884478119193;
+		v2.x=0.26272171736164;
+		v2.y=0.677989275502262;
+		v2.z=0.059289007136098;
+		v3.x=0;
+		v3.y=0.028072328847647;
+		v3.z=1.06075767115235;
+	}else if (mode==7){ //Original NTSC
+		v1.x=0.6069928;
+		v1.y=0.1734485;
+		v1.z=0.2005713;
+		v2.x=0.2989666;
+		v2.y=0.5864212;
+		v2.z=0.1146122;
+		v3.x=0;
+		v3.y=0.0660756;
+		v3.z=1.1174687;
+	}else if (mode==8){ //Rec 601 D93
+		v1.x=0.3275085;
+		v1.y=0.3684739;
+		v1.z=0.2568954;
+		v2.x=0.1767506;
+		v2.y=0.7072321;
+		v2.z=0.1160173;
+		v3.x=0.0155956;
+		v3.y=0.1129194;
+		v3.z=1.2844772;
+	}else if (mode==9){ //Rec 709 D93
+		v1.x=0.3490195;
+		v1.y=0.3615584;
+		v1.z=0.2422998;
+		v2.x=0.1799632;
+		v2.y=0.7231169;
+		v2.z=0.0969199;
+		v3.x=0.0163603;
+		v3.y=0.1205195;
+		v3.z=1.2761125;
+	}else if (mode==10){ //DCI-P3 D60/ACES
+		v1.x=0.504949534191744;
+		v1.y=0.264681488895262;
+		v1.z=0.18301505148284;
+		v2.x=0.23762331020788;
+		v2.y=0.689170669198985;
+		v2.z=0.073206020593136;
+		v3.x=0;
+		v3.y=0.04494591320863;
+		v3.z=0.963879271142956;
+	}else{ //sRGB - Rec 709
+		v1.x=0.4124564;
+		v1.y=0.3575761;
+		v1.z=0.1804375;
+		v2.x=0.2126729;
+		v2.y=0.7151522;
+		v2.z=0.072175;
+		v3.x=0.0193339;
+		v3.y=0.119192;
+		v3.z=0.9503041;
+	}
+
+	return float3(dot(v1, rgbLin), dot(v2, rgbLin), dot(v3, rgbLin));
+}
+
+float LinRGB2Y(float3 rgbLin,int mode)
+{
+	float3 v2;
+	
+	[branch]if (mode==1){ //Rec 601 NTSC
+		v2.x=0.2124132;
+		v2.y=0.7010437;
+		v2.z=0.0865432;
+	}else if (mode==2){ //Rec 601 PAL
+		v2.x=0.2220379;
+		v2.y=0.7066384;
+		v2.z=0.0713236;
+	}else if(mode==5){ //DCI-P3
+		v2.x=0.209491677912731;
+		v2.y=0.721595254161044;
+		v2.z=0.068913067926226;
+	}else if(mode==6){
+		v2.x=0.2290036;
+		v2.y=0.691726725;
+		v2.z=0.079269675;
+	}else if (mode==4){ //Rec 2020
+		v2.x=0.26272171736164;
+		v2.y=0.677989275502262;
+		v2.z=0.059289007136098;
+	}else if (mode==7){ //Original NTSC
+		v2.x=0.2989666;
+		v2.y=0.5864212;
+		v2.z=0.1146122;
+	}else if (mode==8){ //Rec 601 D93
+		v2.x=0.1767506;
+		v2.y=0.7072321;
+		v2.z=0.1160173;
+	}else if (mode==9){ //Rec 709 D93
+		v2.x=0.1799632;
+		v2.y=0.7231169;
+		v2.z=0.0969199;
+	}else if (mode==10){ //DCI-P3 D60/ACES
+		v2.x=0.23762331020788;
+		v2.y=0.689170669198985;
+		v2.z=0.073206020593136;
+	}else{ //sRGB - Rec 709
+		v2.x=0.2126729;
+		v2.y=0.7151522;
+		v2.z=0.072175;
+	}
+
+	return dot(v2, rgbLin);
 }
 
 float3 XYZ2LinRGB(float3 XYZ, int mode)
@@ -218,117 +411,13 @@ float3 XYZ2LinRGB(float3 XYZ, int mode)
 	
 }
 
-float3 LinRGB2XYZ(float3 rgbLin,int mode)
+float3 LinRGB2XYZ_grey(float3 rgb,int mode)
 {
-	float3 v1;
-	float3 v2;
-	float3 v3;
-
-	[branch]if (mode==1){ //Rec 601 NTSC
-		v1.x=0.3935891;
-		v1.y=0.3652497;
-		v1.z=0.1916313;
-		v2.x=0.2124132;
-		v2.y=0.7010437;
-		v2.z=0.0865432;
-		v3.x=0.0187423;
-		v3.y=0.1119313;
-		v3.z=0.9581563;
-	}else if (mode==2){ //Rec 601 PAL
-		v1.x=0.430619;
-		v1.y=0.3415419;
-		v1.z=0.1783091;
-		v2.x=0.2220379;
-		v2.y=0.7066384;
-		v2.z=0.0713236;
-		v3.x=0.0201853;
-		v3.y=0.1295504;
-		v3.z=0.9390944;
-	}else if(mode==5){ //DCI-P3
-		v1.x=0.445169815564552;
-		v1.y=0.277134409206778;
-		v1.z=0.172282669815565;
-		v2.x=0.209491677912731;
-		v2.y=0.721595254161044;
-		v2.z=0.068913067926226;
-		v3.x=0;
-		v3.y=0.047060560053981;
-		v3.z=0.907355394361973;
-	}else if(mode==6){
-		v1.x=0.48663265;
-		v1.y=0.2656631625;
-		v1.z=0.1981741875;
-		v2.x=0.2290036;
-		v2.y=0.691726725;
-		v2.z=0.079269675;
-		v3.x=0;
-		v3.y=0.0451126125;
-		v3.z=1.0437173875;
-	}else if (mode==4){ //Rec 2020
-		v1.x=0.637010191411101;
-		v1.y=0.144615027396969;
-		v1.z=0.16884478119193;
-		v2.x=0.26272171736164;
-		v2.y=0.677989275502262;
-		v2.z=0.059289007136098;
-		v3.x=0;
-		v3.y=0.028072328847647;
-		v3.z=1.06075767115235;
-	}else if (mode==7){ //Original NTSC
-		v1.x=0.6069928;
-		v1.y=0.1734485;
-		v1.z=0.2005713;
-		v2.x=0.2989666;
-		v2.y=0.5864212;
-		v2.z=0.1146122;
-		v3.x=0;
-		v3.y=0.0660756;
-		v3.z=1.1174687;
-	}else if (mode==8){ //Rec 601 D93
-		v1.x=0.3275085;
-		v1.y=0.3684739;
-		v1.z=0.2568954;
-		v2.x=0.1767506;
-		v2.y=0.7072321;
-		v2.z=0.1160173;
-		v3.x=0.0155956;
-		v3.y=0.1129194;
-		v3.z=1.2844772;
-	}else if (mode==9){ //Rec 709 D93
-		v1.x=0.3490195;
-		v1.y=0.3615584;
-		v1.z=0.2422998;
-		v2.x=0.1799632;
-		v2.y=0.7231169;
-		v2.z=0.0969199;
-		v3.x=0.0163603;
-		v3.y=0.1205195;
-		v3.z=1.2761125;
-	}else if (mode==10){ //DCI-P3 D60/ACES
-		v1.x=0.504949534191744;
-		v1.y=0.264681488895262;
-		v1.z=0.18301505148284;
-		v2.x=0.23762331020788;
-		v2.y=0.689170669198985;
-		v2.z=0.073206020593136;
-		v3.x=0;
-		v3.y=0.04494591320863;
-		v3.z=0.963879271142956;
-	}else{ //sRGB - Rec 709
-		v1.x=0.4124564;
-		v1.y=0.3575761;
-		v1.z=0.1804375;
-		v2.x=0.2126729;
-		v2.y=0.7151522;
-		v2.z=0.072175;
-		v3.x=0.0193339;
-		v3.y=0.119192;
-		v3.z=0.9503041;
-	}
-
-	return float3(dot(v1, rgbLin), dot(v2, rgbLin), dot(v3, rgbLin));
+	float avg=(rgb.r+rgb.g+rgb.b)/3.0;
+	float3 rgb_avg=float3(avg,avg,avg);
+	return LinRGB2XYZ(rgb_avg, mode);
+	
 }
-
 
 float3 XYZ2xyY(float3 XYZ)
 {
@@ -336,6 +425,11 @@ float3 XYZ2xyY(float3 XYZ)
 	//Avoid putting float3(0,0,0) as XYZ!
 	
 	return float3(XYZ.x/tot,XYZ.y/tot,XYZ.y);
+}
+
+float3 xyY2XYZ(float3 xyY)
+{
+       return float3((1.0/xyY.y)*xyY.x*xyY.z, xyY.z,(1.0/xyY.y)*(1-xyY.x-xyY.y)*(xyY.z));
 }
 
 float3 LinRGB2xyY(float3 rgb_lin, int mode)
@@ -352,17 +446,54 @@ float3 LinRGB2xyY(float3 rgb_lin, int mode)
 	return xyY;
 }
 
-float3 xyY2XYZ(float3 xyY)
+float3 rgb2XYZ(float3 rgb, int mode)
 {
-       return float3((1.0/xyY.y)*xyY.x*xyY.z, xyY.z,(1.0/xyY.y)*(1-xyY.x-xyY.y)*(xyY.z));
+	float3 rgb_lin=rgb2LinRGB(rgb, mode);
+	return LinRGB2XYZ(rgb_lin,mode);
 }
 
+float3 rgb2xyY(float3 rgb, int mode)
+{
+	float3 rgb_lin=rgb2LinRGB(rgb,mode);
+	return LinRGB2xyY(rgb_lin, mode);
+}
 
 float3 xyY2LinRGB(float3 xyY, int mode)
 {
 	float3 XYZ=xyY2XYZ(xyY);
 	return XYZ2LinRGB(XYZ, mode);
 }
+
+float3 xyY2rgb(float3 xyY, int mode)
+{
+	float3 lin_rgb=xyY2LinRGB(xyY, mode);
+	return LinRGB2rgb(lin_rgb, mode);
+}
+
+float3 XYZ2rgb(float3 XYZ, int mode)
+{
+	float3 rgb_lin=XYZ2LinRGB(XYZ, mode);
+	return LinRGB2rgb(rgb_lin, mode);
+}
+
+float3 rgb2XYZ_grey(float3 rgb, int mode)
+{
+	float3 lin_rgb=rgb2LinRGB(rgb, mode);
+	return LinRGB2XYZ_grey(lin_rgb, mode);
+}
+
+float rgb2Y(float3 rgb, int mode)
+{
+	float3 lin_rgb=rgb2LinRGB(rgb, mode);
+	return LinRGB2Y(lin_rgb, mode);
+}
+
+float3 xy2XYZ(float2 xyCoord)
+{
+	return float3((1/xyCoord.y)*xyCoord.x,1,(1/xyCoord.y)*(1-xyCoord.x-xyCoord.y));
+}
+
+//Source: https://stackoverflow.com/a/45263428; http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.htm; https://en.wikipedia.org/wiki/Rec._2020#Transfer_characteristics
 
 float delta(float color, float2 dlt){
 color=lerp(dlt.x,dlt.y,color);
@@ -371,8 +502,8 @@ return color;
 
 float2 avoid_grey_rgb(float2 DeltaAmnt, float greyMtrc, int act){
 	float2 Delta=float2(
-		(avoid_grey==true)?DeltaAmnt.x*greyMtrc:DeltaAmnt.x, 
-		(avoid_grey==true)?lerp(1,DeltaAmnt.y,greyMtrc):DeltaAmnt.y
+		(avoid_grey==1)?DeltaAmnt.x*greyMtrc:DeltaAmnt.x, 
+		(avoid_grey==1)?lerp(1,DeltaAmnt.y,greyMtrc):DeltaAmnt.y
 	);
 	Delta=float2(
 		(act==1)?Delta.x:rgbDeltaAmnt.x, 
@@ -389,7 +520,7 @@ float3 change(float3 c0, float3 h_sat_val, int Mode){
 	
 float3 c0Lin=c0.rgb;
 	
-[branch]if (Linear==false){
+[branch]if (Linear==0){
 	c0Lin=rgb2LinRGB(c0.rgb, Mode);
 }	
 
@@ -404,29 +535,29 @@ int grey=(((c0.r==c0.g)&&(c0.g==c0.b))||(h_sat_val.y==0))?1:0;
 
 int act=0;
 
-if(((hue>=3525)||(((hue>=0) && (hue<75))&&(grey==0)))&&(Red==true)){
+if(((hue>=3525)||(((hue>=0) && (hue<75))&&(grey==0)))&&(Red==1)){
 act=1;
-}else if(((hue>=75) && (hue<375))&&(Orange__Brown==true)){
+}else if(((hue>=75) && (hue<375))&&(Orange__Brown==1)){
 act=1;
-}else if(((hue>=375) && (hue<675))&&(Yellow==true)){
+}else if(((hue>=375) && (hue<675))&&(Yellow==1)){
 act=1;
-}else if(((hue>=675) && (hue<975))&&(Chartreuse_Lime==true)){
+}else if(((hue>=675) && (hue<975))&&(Chartreuse_Lime==1)){
 act=1;
-}else if(((hue>=975) && (hue<1275))&&(Green==true)){
+}else if(((hue>=975) && (hue<1275))&&(Green==1)){
 act=1;
-}else if(((hue>=1275) && (hue<1575))&&(Spring_green==true)){
+}else if(((hue>=1275) && (hue<1575))&&(Spring_green==1)){
 act=1;
-}else if(((hue>=1575) && (hue<1875))&&(Cyan==true)){
+}else if(((hue>=1575) && (hue<1875))&&(Cyan==1)){
 act=1;
-}else if(((hue>=1875) && (hue<2175))&&(Azure__Sky_blue==true)){
+}else if(((hue>=1875) && (hue<2175))&&(Azure__Sky_blue==1)){
 act=1;
-}else if(((hue>=2175) && (hue<2475))&&(Blue==true)){
+}else if(((hue>=2175) && (hue<2475))&&(Blue==1)){
 act=1;
-}else if(((hue>=2475) && (hue<3075))&&(Violet__Purple==true)){
+}else if(((hue>=2475) && (hue<3075))&&(Violet__Purple==1)){
 act=1;
-}else if(((hue>=3075) && (hue<3375))&&(Magenta__Pink==true)){
+}else if(((hue>=3075) && (hue<3375))&&(Magenta__Pink==1)){
 act=1;
-}else if(((hue>=3375) && (hue<3525))&&(Reddish_pink==true)){
+}else if(((hue>=3375) && (hue<3525))&&(Reddish_pink==1)){
 act=1;
 }
 float3 c0_lin_post_sat=c0Lin;
@@ -464,7 +595,7 @@ float3 rgb_lin_out=c0_lin_post_rgb;
 
 float3 rgb_out=rgb_lin_out;
 
-[branch]if(Linear==false){
+[branch]if(Linear==0){
 	rgb_out=LinRGB2rgb(rgb_lin_out, Mode);
 }
 

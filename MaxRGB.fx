@@ -6,7 +6,6 @@ ui_min = 0.0; ui_max = 10.0;
 
 #include "ReShade.fxh"
 
-
 float4 Max_RGB_Pass(float4 vpos : SV_Position, float2 texcoord : TexCoord) : SV_Target
 {
 

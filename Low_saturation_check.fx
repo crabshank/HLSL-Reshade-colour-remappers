@@ -14,6 +14,7 @@ uniform float Greyness < __UNIFORM_DRAG_FLOAT1
 > = 0.015;
 
 #include "ReShade.fxh"
+#include "xyY_funcs.fxh"
 
 float4 lowSatPass(float4 position : SV_Position, float2 texcoord : TEXCOORD0) : SV_Target
 {
