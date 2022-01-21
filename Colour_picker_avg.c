@@ -173,10 +173,13 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
             } else {
                 hue_d = 4.0 + (red - green) / chr;
             }
+            hue_d =(hue_d==6)?0:hue_d;
             hue_d *= 60;
             hue_d = (hue_d < 0) ? hue_d + 360 : hue_d;
-            hue_out = hue_d;
-            int hue = floor(hue_d * 10);
+            double hue_col = floor(hue_d*10);
+            hue_out = hue_col/10.0;
+            int hue = round(hue_col);
+
             if ((hue >= 3525) || (((hue >= 0) && (hue < 75)))) {
                 nomin_hue = "Red";
             } else if ((hue >= 75) && (hue < 375)) {
