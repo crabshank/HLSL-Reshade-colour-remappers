@@ -210,9 +210,9 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
     int c1;
 
     if(grey==0){
-        c1 = asprintf( & out_line, "%d, %d, %d\n%s (%.1f%c) - [%d: %dx%d] (x:%d, y:%d)\nSaturation: %.1f\n    Chroma: %.1f",redInt, greenInt, blueInt, nomin_hue, hue_out,176,mds,smp,smp,p.x,p.y,sat_out,chr_out);
+        c1 = asprintf( & out_line, "%d, %d, %d\n%s (%.1f%c) - [%d: %dx%d] (x:%d, y:%d)\nSaturation: %.1f\n    Chroma: %.1f",redInt, greenInt, blueInt, nomin_hue, hue_out,176,mds,smp,osz,p.x,p.y,sat_out,chr_out);
     }else{
-        c1 = asprintf( & out_line, "%d, %d, %d\n%s - [%d: %dx%d] (x:%d, y:%d)\nSaturation: %.1f\n    Chroma: %.1f", redInt, greenInt, blueInt, nomin_hue,mds,smp,smp,p.x,p.y,sat_out,chr_out);
+        c1 = asprintf( & out_line, "%d, %d, %d\n%s - [%d: %dx%d] (x:%d, y:%d)\nSaturation: %.1f\n    Chroma: %.1f", redInt, greenInt, blueInt, nomin_hue,mds,smp,osz,p.x,p.y,sat_out,chr_out);
     }
 
             char str_out[c1+1];
@@ -291,9 +291,9 @@ void mousewheel_hdl(WPARAM wParam) {
 		}
     }
 
-		if(smp<mds){
-                osz=MAX(smp,round(smp_d*ceil(mds_d/smp_d)));
-		}
+
+        osz=MAX(smp,round(smp_d*ceil(mds_d/smp_d)));
+
 
 		SetWindowPos(hwnd,HWND_TOP,0,0,MAX(osz,smp_r+16),osz+smp_b+61, SWP_NOMOVE);
 }
