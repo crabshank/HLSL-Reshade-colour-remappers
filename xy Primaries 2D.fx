@@ -1,7 +1,7 @@
 #include "ReShadeUI.fxh"
 
 uniform int From_space < __UNIFORM_COMBO_INT1
-    ui_items = "sRGB\0Rec 601 NTSC\0Rec. 601 PAL\0Rec. 709\0Rec.2020\0DCI-P3\0Display P3\0Orginal NTSC\0Rec. 601 D93\0Rec. 709 D93\0DCI-P3 (D60/ACES)\0";
+    ui_items = "sRGB\0Rec 601 NTSC\0Rec. 601 PAL\0Rec. 709\0Rec.2020\0DCI-P3\0Display P3\0Orginal NTSC\0Rec. 601 D93\0Rec. 709 D93\0DCI-P3 (D60/ACES)\0Orignal NTSC D65\0";
 > = 0;
 
 uniform bool Linear <
@@ -130,7 +130,7 @@ if ((mode==0)||(mode==6)){ //sRGB transfer
       RGB=(rgb_i> 0.00313066844250063)?1.055 * pow(rgb_i,rcpTwoFour) - 0.055:12.92 *rgb_i;
 }else if ((mode==5)||(mode==10)){ //DCI-P3
       RGB=pow(rgb_i,invTwoSix);
-}else if (mode==7){ //Original NTSC - Source: 47 CFR, Section 73.682 - TV transmission standards
+}else if (mode==7 || mode==11){ //Original NTSC - Source: 47 CFR, Section 73.682 - TV transmission standards
       RGB=pow(rgb_i,invTwoTwo);
 }else{ //Rec transfer
       RGB=(rgb_i< recBeta)?4.5*rgb_i:recAlpha*pow(rgb_i,0.45)-(recAlpha-1);

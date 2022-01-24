@@ -91,7 +91,7 @@ if ((mode==0)||(mode==6)){ //sRGB transfer
       RGB=(rgb_i> 0.00313066844250063)?1.055 * pow(rgb_i,rcpTwoFour) - 0.055:12.92 *rgb_i;
 }else if ((mode==5)||(mode==10)){ //DCI-P3
       RGB=pow(rgb_i,invTwoSix);
-}else if (mode==7){ //Original NTSC - Source: 47 CFR, Section 73.682 - TV transmission standards
+}else if (mode==7 || mode==1){ //Original NTSC - Source: 47 CFR, Section 73.682 - TV transmission standards
       RGB=pow(rgb_i,invTwoTwo);
 }else{ //Rec transfer
       RGB=(rgb_i< recBeta)?4.5*rgb_i:recAlpha*pow(rgb_i,0.45)-(recAlpha-1);
@@ -112,7 +112,7 @@ if ((mode==0)||(mode==6)){ //sRGB transfer
     rgbLin=(rgb > 0.0404482362771082 )?pow(abs((rgb+0.055)*rcpOFiveFive),2.4):rgb*rcpTwelveNineTwo;
 }else if ((mode==5)||(mode==10)){ //DCI-P3
     rgbLin=pow(rgb,2.6);
-}else if (mode==7){ //Original NTSC
+}else if (mode==7 || mode==11){ //Original NTSC
     rgbLin=pow(rgb,2.2);
 }else{ //Rec transfer
     rgbLin=(rgb < recBetaLin )?rcpFourFive*rgb:pow(-1*(rcpRecAlpha*(1-recAlpha-rgb)),rcpTxFourFive);
@@ -123,7 +123,7 @@ if ((mode==0)||(mode==6)){ //sRGB transfer
 	float3 v2;
 	float3 v3;
 
-	[branch]if (mode==1){ //Rec 601 NTSC
+[branch]if (mode==1){ //Rec 601 NTSC
 		v1.x=0.3935891;
 		v1.y=0.3652497;
 		v1.z=0.1916313;
@@ -213,6 +213,16 @@ if ((mode==0)||(mode==6)){ //sRGB transfer
 		v3.x=0;
 		v3.y=0.04494591320863;
 		v3.z=0.963879271142956;
+	}else if(mode==11){ //Original NTSC D65
+		v1.x=0.5881556;
+		v1.y=0.1791317;
+		v1.z=0.1831827;
+		v2.x=0.2896886;
+		v2.y=0.6056356;
+		v2.z=0.1046758;
+		v3.x=0;
+		v3.y=0.0682406;
+		v3.z=1.0205895;
 	}else{ //sRGB - Rec 709
 		v1.x=0.4124564;
 		v1.y=0.3575761;

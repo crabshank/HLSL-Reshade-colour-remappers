@@ -14,7 +14,7 @@ float4 p1 :  register(c1);
 
 #define Y_Gamma_Mode 0 // 0 - Brighten only | 1 - Darken only | 2 - No bias
 
-#define MODE 3 // 0 - sRGB | 1 - Rec 601 NTSC | 2 - Rec. 601 PAL | 3 - Rec. 709 | 4 - Rec.2020 | 5 - DCI-P3 | 6 - Display P3 | 7 - Orginal NTSC (47 CFR ยง 73.682 - TV transmission standards) | 8 - Rec. 601 D93 | 9 - Rec. 709 D93 | 10 - DCI-P3 (D60/ACES)
+#define MODE 3 // 0 - sRGB | 1 - Rec 601 NTSC | 2 - Rec. 601 PAL | 3 - Rec. 709 | 4 - Rec.2020 | 5 - DCI-P3 | 6 - Display P3 | 7 - Orginal NTSC (47 CFR ยง 73.682 - TV transmission standards) | 8 - Rec. 601 D93 | 9 - Rec. 709 D93 | 10 - DCI-P3 (D60/ACES)) | 11 -  Orginal NTSC D65
 
 #define Linear 0 // 0-1 Take linear RGB as input and output linear RGB
 
@@ -80,7 +80,7 @@ float3 rgb2LinRGB(float3 rgb, int mode)
 						rgbLin=(rgb > 0.0404482362771082 )?pow(abs((rgb+0.055)*rcpOFiveFive),2.4):rgb*rcpTwelveNineTwo;
 					}else if ((mode==5)||(mode==10)){ //DCI-P3
 						rgbLin=pow(rgb,2.6);
-					}else if (mode==7){ //Original NTSC
+					}else if (mode==7 || mode==11){ //Original NTSC
 						rgbLin=pow(rgb,2.2);
 					}else{ //Rec transfer
 						rgbLin=(rgb < recBetaLin )?rcpFourFive*rgb:pow(-1*(rcpRecAlpha*(1-recAlpha-rgb)),rcpTxFourFive);
@@ -97,7 +97,7 @@ float3 LinRGB2rgb(float3 rgb_i, int mode)
 						RGB=(rgb_i> 0.00313066844250063)?1.055 * pow(rgb_i,rcpTwoFour) - 0.055:12.92 *rgb_i;
 					}else if ((mode==5)||(mode==10)){ //DCI-P3
 						RGB=pow(rgb_i,invTwoSix);
-					}else if (mode==7){ //Original NTSC - Source: 47 CFR, Section 73.682 - TV transmission standards
+					}else if (mode==7 || mode==11){ //Original NTSC - Source: 47 CFR, Section 73.682 - TV transmission standards
 						RGB=pow(rgb_i,invTwoTwo);
 					}else{ //Rec transfer
 						RGB=(rgb_i< recBeta)?4.5*rgb_i:recAlpha*pow(rgb_i,0.45)-(recAlpha-1);
@@ -235,6 +235,16 @@ float3 LinRGB2XYZ(float3 rgbLin,int mode)
 		v3.x=0;
 		v3.y=0.04494591320863;
 		v3.z=0.963879271142956;
+	}else if(mode==11){ //Original NTSC D65
+		v1.x=0.5881556;
+		v1.y=0.1791317;
+		v1.z=0.1831827;
+		v2.x=0.2896886;
+		v2.y=0.6056356;
+		v2.z=0.1046758;
+		v3.x=0;
+		v3.y=0.0682406;
+		v3.z=1.0205895;
 	}else{ //sRGB - Rec 709
 		v1.x=0.4124564;
 		v1.y=0.3575761;
@@ -290,6 +300,10 @@ float LinRGB2Y(float3 rgbLin,int mode)
 		v2.x=0.23762331020788;
 		v2.y=0.689170669198985;
 		v2.z=0.073206020593136;
+	}else if(mode==11){ //Original NTSC D65
+		v2.x=0.2896886;
+		v2.y=0.6056356;
+		v2.z=0.1046758;
 	}else{ //sRGB - Rec 709
 		v2.x=0.2126729;
 		v2.y=0.7151522;
@@ -395,6 +409,16 @@ float3 XYZ2LinRGB(float3 XYZ, int mode)
 		v3.x=0.038823381466857;
 		v3.y=-0.082499685617071;
 		v3.z=1.03636859971248;
+	}else if(mode==11){ //Original NTSC D65
+		v1.x=1.9708379;
+		v1.y=-0.5494152;
+		v1.z=-0.2973899;
+		v2.x=-0.9537159;
+		v2.y=1.9363323;
+		v2.z=-0.0274184;
+		v3.x=0.0637692;
+		v3.y=-0.1294708;
+		v3.z=0.9816592;
 	}else{ //sRGB - Rec 709
 		v1.x=3.2404542;
 		v1.y=-1.5371385;
