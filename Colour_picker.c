@@ -399,6 +399,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 }
 
 ATOM MyRegisterClass(HINSTANCE hInstance) {
+    HICON hIconLarge, hIconSmall;
+    ExtractIconEx("shell32.dll",161,&hIconLarge, &hIconSmall, 1);
     WNDCLASSEX wcex;
     wcex.cbSize = sizeof(WNDCLASSEX);
     wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -406,7 +408,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance) {
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
     wcex.hInstance = hInstance;
-    wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wcex.hIcon = hIconLarge;
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hbrBackground = NULL;
     wcex.lpszMenuName = NULL;
