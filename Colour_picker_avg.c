@@ -112,8 +112,8 @@ BYTE* scr_bit_ptr;
 BITMAPINFO bmi;
 ZeroMemory(&bmi, sizeof(BITMAPINFO));
 bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-bmi.bmiHeader.biWidth = osz;
-bmi.bmiHeader.biHeight = -osz;  //negative so (0,0) is at top left
+bmi.bmiHeader.biWidth = smp;
+bmi.bmiHeader.biHeight = -smp;  //negative so (0,0) is at top left
 bmi.bmiHeader.biPlanes = 1;
 bmi.bmiHeader.biBitCount = 32;
 
@@ -122,7 +122,7 @@ HBITMAP hbCapture = CreateDIBSection(bmp_dc, &bmi, DIB_RGB_COLORS, (void**)(&scr
 
 HGDIOBJ destCap=SelectObject(hDest, hbCapture);
 
-StretchBlt(hDest, 0,0, osz, osz, hdc,round(p.x-0.5*smp),round(p.y-0.5*smp) ,smp, smp, SRCCOPY);
+StretchBlt(hDest, 0,0, smp, smp, hdc,round(p.x-0.5*smp),round(p.y-0.5*smp) ,smp, smp, SRCCOPY);
 
 ReleaseDC(NULL, hdc);
 DeleteDC(hDest);
@@ -222,7 +222,7 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
             FillRect(hdc, &ps.rcPaint, hBrush);
             DrawText(hdc, str_out, -1, & xy_txt, DT_NOCLIP);
             free(out_line);
-            BitBlt(hdc, 0, 0, osz, osz, hdcCaptureBmp, 0,0, SRCCOPY);
+            StretchBlt(hdc, 0,0, osz, osz, hdcCaptureBmp,0,0,smp, smp, SRCCOPY);
 
 DeleteObject(hBrush);
 DeleteObject(hbCapture);
