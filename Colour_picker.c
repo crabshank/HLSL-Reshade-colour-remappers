@@ -72,13 +72,11 @@ HDC hdc_px, hdc_px_tmp, hdcWindow;
 BYTE* px_bit_ptr;
 
 DEVMODE dm;
-RECT xy_txt = {0,0,minWdt,minHgt-39};
+RECT xy_txt = {0,0,minWdt,minHgt};
+RECT xy_txt_bg = {0,0,minWdt-96,minHgt-39};
 /*{x-coordinate of the upper-left corner of the rectangle, y-coordinate of the upper-left corner of the rectangle,
   x-coordinate of the lower-right corner of the rectangle, y-coordinate of the lower-right corner of the rectangle}
   */
-
-  long brx=minWdt;
-  long bry=minHgt;
 
 LRESULT CALLBACK keyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
     PKBDLLHOOKSTRUCT hooked_key = (PKBDLLHOOKSTRUCT) lParam;
@@ -235,24 +233,23 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
             }
         }
    }
+
         InvalidateRect(hwnd, nullptr, false);
-        HBRUSH hBrush = CreateSolidBrush(RGB(redInt,greenInt,blueInt));
-        FillRect(hdcWindow, &ps.rcPaint, hBrush);
-        xy_txt.right=minWdt-96;
+        HBRUSH hBrush = CreateSolidBrush(RGB(redInt, greenInt, blueInt));
+        FillRect(hdcWindow, & ps.rcPaint, hBrush);
+        SetBkMode(hdcWindow,TRANSPARENT);
         hBrush = CreateSolidBrush(RGB(255,255,255));
-        FillRect(hdcWindow, &xy_txt, hBrush);
-        SetBkColor(hdcWindow,RGB(255,255,255));
-        SetTextColor(hdcWindow,RGB(0,0,0));
+        FillRect(hdcWindow, &xy_txt_bg, hBrush);
 
     if(grey==0){
         if (shiftKy == 1) {
             c0 = asprintf( & paste_line, "%d, %d, %d", redInt, greenInt, blueInt);
             if (F2Ky == 1) {
-                c1 = asprintf( & out_line, "PASTING (x:%ld, y:%ld): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "PASTING (x:%ld, y:%ld): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out,val_out,chr_out);
             } else if (F2Ky == 2) {
-                c1 = asprintf( & out_line, "PASTING (<x:%ld, y:%ld>): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "PASTING (<x:%ld, y:%ld>): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out,val_out,chr_out);
             } else {
-                c1 = asprintf( & out_line, "PASTING (_x:%ld, y:%ld_): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f",p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "PASTING (_x:%ld, y:%ld_): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f",p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out,val_out,chr_out);
             }
 
             char str_out[c1+1];
@@ -270,11 +267,11 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
         } else {
             if (F2Ky == 1) {
-                c1 = asprintf( & out_line, "(x:%ld, y:%ld): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "(x:%ld, y:%ld): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out,val_out,chr_out);
             } else if (F2Ky == 2) {
-                c1 = asprintf( & out_line, "(<x:%ld, y:%ld>): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "(<x:%ld, y:%ld>): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out,val_out,chr_out);
             } else {
-                c1 = asprintf( & out_line, "(_x:%ld, y:%ld_): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "(_x:%ld, y:%ld_): %d, %d, %d\n%s (%.1f%c)\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt, nomin_hue, hue_out,176, sat_out,val_out,chr_out);
             }
 
             char str_out[c1+1];
@@ -291,11 +288,11 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         if (shiftKy == 1) {
             c0 = asprintf( & paste_line, "%d, %d, %d", redInt, greenInt, blueInt);
             if (F2Ky == 1) {
-                c1 = asprintf( & out_line, "PASTING (x:%ld, y:%ld): %d, %d, %d\n%s\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "PASTING (x:%ld, y:%ld): %d, %d, %d\n%s\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out,val_out,chr_out);
             } else if (F2Ky == 2) {
-                c1 = asprintf( & out_line, "PASTING (<x:%ld, y:%ld>): %d, %d, %d\n%s\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "PASTING (<x:%ld, y:%ld>): %d, %d, %d\n%s\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out,val_out,chr_out);
             } else {
-                c1 = asprintf( & out_line, "PASTING (_x:%ld, y:%ld_): %d, %d, %d\n%s\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "PASTING (_x:%ld, y:%ld_): %d, %d, %d\n%s\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out,val_out,chr_out);
             }
 
             char str_out[c1+1];
@@ -313,11 +310,11 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
 
         } else {
             if (F2Ky == 1) {
-                c1 = asprintf( & out_line, "(x:%ld, y:%ld): %d, %d, %d\n%s\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out, val_out,chr_out);
+                c1 = asprintf( & out_line, "(x:%ld, y:%ld): %d, %d, %d\n%s\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out,val_out,chr_out);
             } else if (F2Ky == 2) {
-                c1 = asprintf( & out_line, "(<x:%ld, y:%ld>): %d, %d, %d\n%s\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "(<x:%ld, y:%ld>): %d, %d, %d\n%s\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out,val_out,chr_out);
             } else {
-                c1 = asprintf( & out_line, "(_x:%ld, y:%ld_): %d, %d, %d\n%s\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out, val_out, chr_out);
+                c1 = asprintf( & out_line, "(_x:%ld, y:%ld_): %d, %d, %d\n%s\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", p_fixed.x, p_fixed.y, redInt, greenInt, blueInt,  nomin_hue,sat_out,val_out,chr_out);
             }
 
             char str_out[c1+1];
@@ -370,14 +367,17 @@ void mousewheel_hdl(WPARAM wParam) {
 
     w_ratio=(pWdt==actuWdt)?1:pWdt/actuWdt;
     h_ratio=(pHgt==actuHgt)?1:pHgt/actuHgt;
+
     if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
-        brx += 1;
-        bry += 1;
+        xy_txt.right += 1;
+        xy_txt.bottom += 1;
     } else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
-         brx = (brx > minWdt) ? brx - 1 : brx;
-         bry = (bry > minHgt) ? bry - 1 : bry;
+        long brx = (xy_txt.right > minWdt) ? brx - 1 : brx;
+        long bry = (xy_txt.bottom > minHgt) ? bry - 1 : bry;
+        xy_txt.right = brx;
+        xy_txt.bottom = bry;
     }
-    SetWindowPos(hwnd, HWND_TOP, 0, 0, brx, bry, SWP_NOMOVE);
+    SetWindowPos(hwnd, HWND_TOP, 0, 0, xy_txt.right - xy_txt.left, xy_txt.bottom - xy_txt.top, SWP_NOMOVE);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -430,7 +430,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
     */
     AdjustWindowRect( & sz, WS_OVERLAPPEDWINDOW, TRUE);
     hwnd = CreateWindow("rgbClass", "Colour picker", WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, xy_txt.right - xy_txt.left, minHgt,
+        CW_USEDEFAULT, CW_USEDEFAULT, xy_txt.right - xy_txt.left, xy_txt.bottom - xy_txt.top,
         NULL, NULL, hInstance, NULL);
 
     if (!hwnd) {
