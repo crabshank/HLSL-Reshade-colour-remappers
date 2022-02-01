@@ -72,10 +72,13 @@ HDC hdc_px, hdc_px_tmp, hdcWindow;
 BYTE* px_bit_ptr;
 
 DEVMODE dm;
-RECT xy_txt = {0,0,minWdt,minHgt};
+RECT xy_txt = {0,0,minWdt,minHgt-39};
 /*{x-coordinate of the upper-left corner of the rectangle, y-coordinate of the upper-left corner of the rectangle,
   x-coordinate of the lower-right corner of the rectangle, y-coordinate of the lower-right corner of the rectangle}
   */
+
+  long brx=minWdt;
+  long bry=minHgt;
 
 LRESULT CALLBACK keyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
     PKBDLLHOOKSTRUCT hooked_key = (PKBDLLHOOKSTRUCT) lParam;
@@ -365,17 +368,14 @@ void mousewheel_hdl(WPARAM wParam) {
 
     w_ratio=(pWdt==actuWdt)?1:pWdt/actuWdt;
     h_ratio=(pHgt==actuHgt)?1:pHgt/actuHgt;
-
     if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
-        xy_txt.right += 1;
-        xy_txt.bottom += 1;
+        brx += 1;
+        bry += 1;
     } else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) {
-        long brx = (xy_txt.right > minWdt) ? brx - 1 : brx;
-        long bry = (xy_txt.bottom > minHgt) ? bry - 1 : bry;
-        xy_txt.right = brx;
-        xy_txt.bottom = bry;
+         brx = (brx > minWdt) ? brx - 1 : brx;
+         bry = (bry > minHgt) ? bry - 1 : bry;
     }
-    SetWindowPos(hwnd, HWND_TOP, 0, 0, xy_txt.right - xy_txt.left, xy_txt.bottom - xy_txt.top, SWP_NOMOVE);
+    SetWindowPos(hwnd, HWND_TOP, 0, 0, brx, bry, SWP_NOMOVE);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -428,7 +428,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
     */
     AdjustWindowRect( & sz, WS_OVERLAPPEDWINDOW, TRUE);
     hwnd = CreateWindow("rgbClass", "Colour picker", WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, xy_txt.right - xy_txt.left, xy_txt.bottom - xy_txt.top,
+        CW_USEDEFAULT, CW_USEDEFAULT, xy_txt.right - xy_txt.left, minHgt,
         NULL, NULL, hInstance, NULL);
 
     if (!hwnd) {
