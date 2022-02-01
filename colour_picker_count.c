@@ -307,11 +307,13 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
    }
 
         InvalidateRect(hwnd, nullptr, false);
-        HBRUSH hBrush = CreateSolidBrush(RGB(red_mx, green_mx, blue_mx));
-        FillRect(hdcWindow, & ps.rcPaint, hBrush);
+        HBRUSH hBrush = CreateSolidBrush(RGB(redInt,greenInt,blueInt));
+        FillRect(hdcWindow, &ps.rcPaint, hBrush);
         xy_txt.right=minWdt-96;
         hBrush = CreateSolidBrush(RGB(255,255,255));
         FillRect(hdcWindow, &xy_txt, hBrush);
+        SetBkColor(hdcWindow,RGB(255,255,255));
+        SetTextColor(hdcWindow,RGB(0,0,0));
 
     //Add thousands separators:
 
@@ -416,7 +418,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
             str_out[c1] = '\0';
             DrawText(hdcWindow, str_out, -1, & xy_txt, DT_NOCLIP);
             free(out_line);
-
+\
             char str_paste[c0+1];
             strncpy(str_paste, paste_line, c0);
             str_paste[c0] = '\0';
