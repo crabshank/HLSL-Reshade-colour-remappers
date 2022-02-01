@@ -75,7 +75,7 @@ PAINTSTRUCT ps;
 HDC hdc_px, hdc_px_tmp, hdcWindow, hdc_scr, hdc_scr_tmp;
 BYTE* px_bit_ptr;
 BYTE* scr_bit_ptr;
-HBRUSH hBrush_white = CreateSolidBrush(RGB(0xFF,0xFF,0xFF));
+HBRUSH hBrush_white_m1 = CreateSolidBrush(RGB(0xFE,0xFE,0xFE));
 
 DEVMODE dm;
 RECT xy_txt = {0,0,minWdt,minHgt};
@@ -309,8 +309,9 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         InvalidateRect(hwnd, nullptr, false);
         HBRUSH hBrush = CreateSolidBrush(RGB(redInt, greenInt, blueInt));
         FillRect(hdcWindow, & ps.rcPaint, hBrush);
+        SetTextColor(hdcWindow,RGB(1,1,1));
         SetBkMode(hdcWindow,TRANSPARENT);
-        FillRect(hdcWindow, &xy_txt_bg, hBrush_white);
+        FillRect(hdcWindow, &xy_txt_bg, hBrush_white_m1);
 
     //Add thousands separators:
 
