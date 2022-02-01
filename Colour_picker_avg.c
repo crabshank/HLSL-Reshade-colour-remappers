@@ -47,8 +47,9 @@ double mds_d=90;
 
 int osz=90;
 
-int smp_r = 340;
-int smp_b = 42;
+int smp_r = 350;
+int smp_b = 57;
+int smp_b_xy = 23;
 
 double actuWdt, actuHgt, pWdt, pHgt, mPos_x, mPos_y, w_ratio, h_ratio;
 
@@ -57,12 +58,14 @@ char* out_line="";
 HWND hwnd;
 POINT p;
 BOOL b;
-HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
+HBRUSH hBrush = CreateSolidBrush(RGB(0x00,0x00,0x00));
 PAINTSTRUCT ps;
 u_int rfsh = 7;
 HDC hdc;
 DEVMODE dm;
 int altKy=0;
+
+RECT  xy_txt = {0,osz,MAX(osz,smp_r), osz+smp_b+smp_b_xy};
 
 LRESULT CALLBACK keyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
     PKBDLLHOOKSTRUCT hooked_key = (PKBDLLHOOKSTRUCT) lParam;
@@ -91,8 +94,6 @@ void get_RGB_at_x_y_dbl(const BYTE* bit_ptr, int x, int y, double RGB[3], int b_
 }
 
 void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
-
-RECT  xy_txt = {0,osz,0, 0};
 
 b=GetCursorPos(&p);
 
@@ -157,6 +158,7 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
         double  mx = MAX(red, MAX(green, blue));
         double chr=mx-mn;
         double  sat_out = (mx == 0) ? 0 : (chr / mx) * 100;
+        double  val_out = mx/2.55;
         double  chr_out = chr/2.55;
 
         int grey = ((red == green) && (green == blue)) ? 1 : 0;
@@ -210,9 +212,9 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
     int c1;
 
     if(grey==0){
-        c1 = asprintf( & out_line, "%d, %d, %d\n%s (%.1f%c) - [%d: %dx%d] (x:%d, y:%d)\nSaturation: %.1f\n    Chroma: %.1f",redInt, greenInt, blueInt, nomin_hue, hue_out,176,mds,smp,smp,p.x,p.y,sat_out,chr_out);
+        c1 = asprintf( & out_line, "%d, %d, %d\n%s (%.1f%c) - [%d: %dx%d] (x:%d, y:%d)\n      Saturation: %.1f\n               Value: %.1f\nChroma: %.1f",redInt, greenInt, blueInt, nomin_hue, hue_out,176,mds,smp,smp,p.x,p.y,sat_out, val_out,chr_out);
     }else{
-        c1 = asprintf( & out_line, "%d, %d, %d\n%s - [%d: %dx%d] (x:%d, y:%d)\nSaturation: %.1f\n    Chroma: %.1f", redInt, greenInt, blueInt, nomin_hue,mds,smp,smp,p.x,p.y,sat_out,chr_out);
+        c1 = asprintf( & out_line, "%d, %d, %d\n%s - [%d: %dx%d] (x:%d, y:%d)\n      Saturation: %.1f\n              Value: %.1f\nChroma: %.1f", redInt, greenInt, blueInt, nomin_hue,mds,smp,smp,p.x,p.y,sat_out, val_out,chr_out);
     }
 
             char str_out[c1+1];
@@ -220,7 +222,12 @@ HGDIOBJ hdcBMPObj = SelectObject(hdcCaptureBmp, hbCapture);
             str_out[c1] = '\0';
             hBrush = CreateSolidBrush(RGB(redInt,greenInt,blueInt));
             FillRect(hdc, &ps.rcPaint, hBrush);
-            DrawText(hdc, str_out, -1, & xy_txt, DT_NOCLIP);
+           SetBkColor(hdc,RGB(255,255,255));
+           SetTextColor(hdc,RGB(0,0,0));
+
+            hBrush = CreateSolidBrush(RGB(255,255,255));
+            FillRect(hdc, &xy_txt, hBrush);
+            DrawText(hdc, str_out, -1, &xy_txt, DT_NOCLIP);
             free(out_line);
             StretchBlt(hdc, 0,0, osz, osz, hdcCaptureBmp,0,0,smp, smp, SRCCOPY);
 
@@ -294,8 +301,16 @@ void mousewheel_hdl(WPARAM wParam) {
 
         osz=MAX(smp,round(smp_d*ceil(mds_d/smp_d)));
 
+double nw_cx=MAX(osz,smp_r);
+double nw_cy=osz+smp_b+62;
 
-		SetWindowPos(hwnd,HWND_TOP,0,0,MAX(osz,smp_r+16),osz+smp_b+61, SWP_NOMOVE);
+		SetWindowPos(hwnd,HWND_TOP,0,0,nw_cx+16,nw_cy, SWP_NOMOVE);
+
+		double xy_diff=xy_txt.bottom-xy_txt.top;
+		xy_txt.top=osz;
+		xy_txt.bottom=osz+xy_diff;
+		xy_txt.right=nw_cx;
+
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
