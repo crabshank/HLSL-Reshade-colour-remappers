@@ -70,6 +70,7 @@ BOOL b;
 PAINTSTRUCT ps;
 HDC hdc_px, hdc_px_tmp, hdcWindow;
 BYTE* px_bit_ptr;
+HBRUSH hBrush_white = CreateSolidBrush(RGB(0xFF,0xFF,0xFF));
 
 DEVMODE dm;
 RECT xy_txt = {0,0,minWdt,minHgt};
@@ -238,8 +239,7 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
         HBRUSH hBrush = CreateSolidBrush(RGB(redInt, greenInt, blueInt));
         FillRect(hdcWindow, & ps.rcPaint, hBrush);
         SetBkMode(hdcWindow,TRANSPARENT);
-        hBrush = CreateSolidBrush(RGB(255,255,255));
-        FillRect(hdcWindow, &xy_txt_bg, hBrush);
+        FillRect(hdcWindow, &xy_txt_bg, hBrush_white);
 
     if(grey==0){
         if (shiftKy == 1) {
