@@ -237,13 +237,12 @@ void renderWnd(HWND hwnd, PAINTSTRUCT ps) {
    }
         InvalidateRect(hwnd, nullptr, false);
         HBRUSH hBrush = CreateSolidBrush(RGB(redInt,greenInt,blueInt));
-            FillRect(hdcWindow, &ps.rcPaint, hBrush);
-
-
-            hBrush = CreateSolidBrush(RGB(255,255,255));
-            FillRect(hdcWindow, &xy_txt, hBrush);
-            SetBkColor(hdcWindow,RGB(255,255,255));
-           SetTextColor(hdcWindow,RGB(0,0,0));
+        FillRect(hdcWindow, &ps.rcPaint, hBrush);
+        xy_txt.right=minWdt-96;
+        hBrush = CreateSolidBrush(RGB(255,255,255));
+        FillRect(hdcWindow, &xy_txt, hBrush);
+        SetBkColor(hdcWindow,RGB(255,255,255));
+        SetTextColor(hdcWindow,RGB(0,0,0));
 
     if(grey==0){
         if (shiftKy == 1) {
