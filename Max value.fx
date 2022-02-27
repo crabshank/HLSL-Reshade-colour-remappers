@@ -10,7 +10,7 @@ float4 c1=c0;
 
 float mx=max(c0.r,max(c0.g,c0.b));
 
-c1.rgb=((mx==0)?1:c1.rgb/mx);
+c1.rgb=saturate((mx==0)?1:c1.rgb/mx);
 
 return c1;
 
