@@ -23,13 +23,8 @@ uniform float2 To_Blue < __UNIFORM_DRAG_FLOAT2
 
 #include "ReShade.fxh"
 #include "xyY_funcs.fxh"
-#include "DrawText_mod.fxh"
 
 #define third 1.0/3.0
-
-uniform bool buttondown < source = "mousebutton"; keycode = 0; mode = ""; >;
-
-uniform float2 mousepoint < source = "mousepoint"; >;
 
 float3x3 invThreeByThreeMatrix(float3x3 mtx){
 
