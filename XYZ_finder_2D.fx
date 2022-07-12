@@ -48,7 +48,7 @@ float gr;
 float bl;
 float half_bw=0.5*BUFFER_WIDTH;
 float4 res;
-
+float inv_Y_val;
 
 [flatten]if(linr==1){
 	c0Lin=c0;
@@ -92,15 +92,15 @@ float2 tmp_xy2;
 		}
 		
 			res =float4(c1.rgb,0);
-		
+		inv_Y_val=(xy_XYZ.y<0.5)?1:0;
 				    DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-20, 2), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, xy_XYZ.x, res,0); 
+						textSize, 1, texcoord,  Decimals, xy_XYZ.x, res,inv_Y_val ); 
 						
 					DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-10, 2), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, xy_XYZ.y, res,0);			
+						textSize, 1, texcoord,  Decimals, xy_XYZ.y, res, inv_Y_val);			
 
 						DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(0, 2), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, xy_XYZ.z, res,0);
+						textSize, 1, texcoord,  Decimals, xy_XYZ.z, res,inv_Y_val);
 		
 }else{ 	
 	[branch]if(linr==0){
@@ -109,14 +109,15 @@ float2 tmp_xy2;
 			p0=saturate(XYZ2LinRGB(XYZ,mode));
 		}
 		res =float4(c1.rgb,0);
+		inv_Y_val=(XYZ.y<0.5)?1:0;
 		       DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-20, 2), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, XYZ.x, res,0); 
+						textSize, 1, texcoord,  Decimals, XYZ.x, res,inv_Y_val); 
 						
 					DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-10, 2), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, XYZ.y, res,0);			
+						textSize, 1, texcoord,  Decimals, XYZ.y, res,inv_Y_val);			
 
 						DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(0,2), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, XYZ.z, res,0);
+						textSize, 1, texcoord,  Decimals, XYZ.z, res,inv_Y_val);
 						res.rgb =p0.rgb;
 }
 	
@@ -161,13 +162,13 @@ p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
 
 
 		DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-15, 1), textSize, 1), int2(8, 0), textSize, 1) , 
-			textSize, 1, texcoord,  -decR, rd, res,0);
+			textSize, 1, texcoord,  -decR, rd, res,inv_Y_val);
 
 			DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-10, 1), textSize, 1), int2(8, 0), textSize, 1) , 
-			textSize, 1, texcoord,  -decG, gr, res,0);
+			textSize, 1, texcoord,  -decG, gr, res,inv_Y_val);
 
 			DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-5, 1), textSize, 1), int2(8, 0), textSize, 1) , 
-			textSize, 1, texcoord,  -decB, bl, res,0);
+			textSize, 1, texcoord,  -decB, bl, res,inv_Y_val);
 
 
 	c1.rgb=res.rgb;
