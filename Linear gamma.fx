@@ -12,8 +12,6 @@ uniform int Gamma_type_2 < __UNIFORM_COMBO_INT1
 
 #include "ReShade.fxh"
 
-#include "DrawText_mod.fxh"
-
 #define rcpTwoFour 1.0/2.4
 #define rcpOFiveFive 1.0/1.055
 #define rcpTwelveNineTwo 1.0/12.92
