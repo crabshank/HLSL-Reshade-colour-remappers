@@ -15,12 +15,16 @@ uniform float3 XYZ < __UNIFORM_INPUT_FLOAT3
 uniform bool Two_dimensional_input <> = false;
 
 uniform float Two_dimensional_Y < __UNIFORM_DRAG_FLOAT1
-	ui_min = 0.0; ui_step=0.000001; ui_max = 1.0;
+	ui_min = 0.0; ui_step=0.001; ui_max = 1.0;
 > = 1;
 
+uniform float Two_dimensional_Y_Fine < __UNIFORM_DRAG_FLOAT1
+	ui_min = 0; ui_step=1; ui_max =99; ui_tooltip = "Set the 4th and 5th decimal points";
+> = 0;
+
 uniform int Decimals < __UNIFORM_SLIDER_INT1
-	ui_min = 1; ui_max =4;
-> = 4;
+	ui_min = 1; ui_max =5;
+> = 3;
 
 #include "ReShade.fxh"
 #include "xyY_funcs.fxh"
@@ -49,6 +53,7 @@ float bl;
 float half_bw=0.5*BUFFER_WIDTH;
 float4 res;
 float inv_Y_val;
+float Two_D_Y=Two_dimensional_Y+(Two_dimensional_Y_Fine*0.00001);
 
 [flatten]if(linr==1){
 	c0Lin=c0;
@@ -78,7 +83,7 @@ float2 tmp_xy2;
 		tmp_xy2.x= texcoord.x;
 			tmp_xy2.y= 1-texcoord.y;
 
-		float3 xy_XYZ=xyY2XYZ(float3(tmp_xy,Two_dimensional_Y));
+		float3 xy_XYZ=xyY2XYZ(float3(tmp_xy,Two_D_Y));
 
 		[branch]if(linr==0){
 			p0=saturate(XYZ2rgb(xy_XYZ,mode));
@@ -86,9 +91,9 @@ float2 tmp_xy2;
 			p0=saturate(XYZ2LinRGB(xy_XYZ,mode));
 		}
 		[branch]if(linr==0){
-			c1.rgb=xyY2rgb(float3(tmp_xy2.xy,Two_dimensional_Y), mode);
+			c1.rgb=xyY2rgb(float3(tmp_xy2.xy,Two_D_Y), mode);
 		}else{
-			c1.rgb=xyY2LinRGB(float3(tmp_xy2.xy,Two_dimensional_Y), mode);
+			c1.rgb=xyY2LinRGB(float3(tmp_xy2.xy,Two_D_Y), mode);
 		}
 		
 			res =float4(c1.rgb,0);
