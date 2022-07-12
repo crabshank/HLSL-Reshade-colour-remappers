@@ -16,7 +16,7 @@ uniform bool Two_dimensional_input <> = false;
 
 uniform float Two_dimensional_Y < __UNIFORM_DRAG_FLOAT1
 	ui_min = 0.0; ui_step=0.000001; ui_max = 1.0;
-> = 0.5;
+> = 1;
 
 uniform int Decimals < __UNIFORM_SLIDER_INT1
 	ui_min = 1; ui_max =4;
@@ -93,14 +93,14 @@ float2 tmp_xy2;
 		
 			res =float4(c1.rgb,0);
 		
-				    DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-15, 1), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, xy_XYZ.x, res,1); 
+				    DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-20, 2), textSize, 1), int2(8, 0), textSize, 1) , 
+						textSize, 1, texcoord,  Decimals, xy_XYZ.x, res,0); 
 						
-					DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-5, 1), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, xy_XYZ.y, res,1);			
+					DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-10, 2), textSize, 1), int2(8, 0), textSize, 1) , 
+						textSize, 1, texcoord,  Decimals, xy_XYZ.y, res,0);			
 
-						DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(5, 1), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, xy_XYZ.z, res,1);
+						DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(0, 2), textSize, 1), int2(8, 0), textSize, 1) , 
+						textSize, 1, texcoord,  Decimals, xy_XYZ.z, res,0);
 		
 }else{ 	
 	[branch]if(linr==0){
@@ -109,14 +109,14 @@ float2 tmp_xy2;
 			p0=saturate(XYZ2LinRGB(XYZ,mode));
 		}
 		res =float4(c1.rgb,0);
-		       DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-15, 1), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, XYZ.x, res,1); 
+		       DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-20, 2), textSize, 1), int2(8, 0), textSize, 1) , 
+						textSize, 1, texcoord,  Decimals, XYZ.x, res,0); 
 						
-					DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-5, 1), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, XYZ.y, res,1);			
+					DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-10, 2), textSize, 1), int2(8, 0), textSize, 1) , 
+						textSize, 1, texcoord,  Decimals, XYZ.y, res,0);			
 
-						DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(5, 1), textSize, 1), int2(8, 0), textSize, 1) , 
-						textSize, 1, texcoord,  Decimals, XYZ.z, res,1);
+						DrawText_Digit(DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(0,2), textSize, 1), int2(8, 0), textSize, 1) , 
+						textSize, 1, texcoord,  Decimals, XYZ.z, res,0);
 						res.rgb =p0.rgb;
 }
 	
@@ -160,18 +160,18 @@ p0_rnd=float3(round(p0.r*255),round(p0.g*255),round(p0.b*255));
 	}
 
 
-		DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-15, 0), textSize, 1), int2(8, 0), textSize, 1) , 
-			textSize, 1, texcoord,  -decR, rd, res,1);
+		DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-15, 1), textSize, 1), int2(8, 0), textSize, 1) , 
+			textSize, 1, texcoord,  -decR, rd, res,0);
 
-			DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-10, 0), textSize, 1), int2(8, 0), textSize, 1) , 
-			textSize, 1, texcoord,  -decG, gr, res,1);
+			DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-10, 1), textSize, 1), int2(8, 0), textSize, 1) , 
+			textSize, 1, texcoord,  -decG, gr, res,0);
 
-			DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-5, 0), textSize, 1), int2(8, 0), textSize, 1) , 
-			textSize, 1, texcoord,  -decB, bl, res,1);
+			DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-5, 1), textSize, 1), int2(8, 0), textSize, 1) , 
+			textSize, 1, texcoord,  -decB, bl, res,0);
 
 
 	c1.rgb=res.rgb;
-c1.rgb=(Two_dimensional_input==true && ((texcoord.x>=0.556 && texcoord.x<=0.616) && (texcoord.y<=0.023) ))?p0.rgb:c1.rgb;
+c1.rgb=(Two_dimensional_input==true && ((texcoord.x>=0.461 && texcoord.x<=0.545) && (texcoord.y<=0.023) ))?p0.rgb:c1.rgb;
 return c1;
 
 }
