@@ -8,7 +8,7 @@ uniform bool Linear <
 ui_tooltip = "Take linear RGB as input and output linear RGB";
 > = false;
 
-uniform float3 XYZ < __UNIFORM_INPUT_FLOAT3
+uniform float3 XYZ < __UNIFORM_DRAG_FLOAT3
 	ui_min = 0.0; ui_step=0.000001; ui_max = 3.0; ui_tooltip = "(0.95047,1,1.08883) is D65";
 > =float3(0.95047,1,1.08883); //D65;
 
@@ -42,7 +42,7 @@ float4 c1=c0;
 float4 c0Lin;
 int linr=(Linear==true)?1:0;
 float4 p0=float4(1,1,1,1);
-float4 p0_rnd=float4(255,255,255,255);
+float3 p0_rnd=float3(255,255,255);
 float textSize=25;
 int decR=Decimals;
 int decG=Decimals;
@@ -86,10 +86,20 @@ float2 tmp_xy2;
 		float3 xy_XYZ=xyY2XYZ(float3(tmp_xy,Two_D_Y));
 
 		[branch]if(linr==0){
-			p0=saturate(XYZ2rgb(xy_XYZ,mode));
+			p0.rgb=XYZ2rgb(xy_XYZ,mode);
 		}else{
-			p0=saturate(XYZ2LinRGB(xy_XYZ,mode));
+			p0.rgb=XYZ2LinRGB(xy_XYZ,mode);
 		}
+		
+		[branch]if( (p0.r<0 || p0.r>1) || (p0.g<0 || p0.g>1) || (p0.b<0 || p0.b>1) ){
+			p0.rgb=saturate(p0.rgb);
+			[branch]if(linr==0){
+				xy_XYZ= rgb2XYZ(p0.rgb, mode);
+			}else{
+				xy_XYZ= LinRGB2XYZ(p0.rgb, mode);
+			}
+		}
+		
 		[branch]if(linr==0){
 			c1.rgb=xyY2rgb(float3(tmp_xy2.xy,Two_D_Y), mode);
 		}else{
@@ -109,10 +119,11 @@ float2 tmp_xy2;
 		
 }else{ 	
 	[branch]if(linr==0){
-			p0=saturate(XYZ2rgb(XYZ,mode));
+			p0.rgb=XYZ2rgb(XYZ,mode);
 		}else{
-			p0=saturate(XYZ2LinRGB(XYZ,mode));
+			p0.rgb=XYZ2LinRGB(XYZ,mode);
 		}
+		p0.rgb=( (p0.r<0 || p0.r>1) || (p0.g<0 || p0.g>1) || (p0.b<0 || p0.b>1) )?0:p0.rgb;
 		res =float4(c1.rgb,0);
 		inv_Y_val=(XYZ.y<0.5)?1:0;
 		       DrawText_Digit(   DrawText_Shift(DrawText_Shift(float2(half_bw,0), int2(-20, 2), textSize, 1), int2(8, 0), textSize, 1) , 
