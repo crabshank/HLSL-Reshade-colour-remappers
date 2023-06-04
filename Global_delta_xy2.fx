@@ -1,4 +1,4 @@
-#include "ReShadeUI.fxh";
+#include "ReShadeUI.fxh"
 
 uniform int Mode < __UNIFORM_COMBO_INT1
     ui_items = "sRGB\0Rec 601 NTSC\0Rec. 601 PAL\0Rec. 709\0Rec.2020\0DCI-P3\0Display P3\0Orginal NTSC\0Rec. 601 D93\0Rec. 709 D93\0DCI-P3 (D60/ACES)\0Orignal NTSC D65\0";
