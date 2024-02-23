@@ -11,6 +11,7 @@
 #define rcpTxFourFive 10.0/4.5
 #define invTwoTwo 5.0/11.0
 #define invTwoSix 5.0/13.0
+#define third 1.0/3.0
 
 uniform int Gamma_type < __UNIFORM_COMBO_INT1
     ui_items = "None\0sRGB -> linear RGB\0linear RGB -> sRGB\0Rec.(2020/601/709) RGB -> linear RGB\0linear RGB -> Rec.(2020/601/709) RGB\0gamma=2.2 -> linear RGB\0linear RGB -> gamma=2.2\0gamma=2.6 -> linear RGB\0linear RGB -> gamma=2.6\0gamma=2.4 -> linear RGB\0linear RGB -> gamma=2.4\0";
@@ -163,8 +164,8 @@ return dither;
 float grey_dither(float color,float2 tex,float rnd,float sdv, float gamma){
 tex.x=min(tex.x,abs(0.5-tex.x*0.5));
 tex.y=max(tex.y,abs(0.5-tex.y*0.5));
-
-float rand=random(float2(0.5*(tex.x+color),0.5*(tex.y+color)));
+float2 cxy=float2((0.5*(tex.x+color)+max(tex.x,color))*0.5,(0.5*(tex.y+color)+max(tex.y,color))*0.5);
+float rand=random(cxy);
 float randm=rnd*-1*((rand*-4)+1); // averages to color + rnd
 
 color =(rnd!=0)?color+(randm/255):color;
@@ -186,7 +187,7 @@ float4 crusher(float4 color){
 float4 c0=color;
 float3 colorHSV=rgb2hsv(c0.rgb);
 
-float rgbAvg=dot(c0.rgb,pow(3,-1));
+float rgbAvg=dot(c0.rgb,third);
 
 float rgbMx=max(color.r,max(color.g,color.b));
 
