@@ -53,15 +53,6 @@ uniform float Dark_dither_pwr < __UNIFORM_DRAG_FLOAT1
 
 uniform bool Crushing_debug <> = false;
 
-uniform bool Split <> = false;
-
-uniform bool Flip_split <> = false;
-
-uniform float Split_position < __UNIFORM_SLIDER_FLOAT1
-	ui_min = 0; ui_max =1;
-	ui_tooltip = "0 is on the far left, 1 on the far right.";
-> = 0.5;
-
 #include "ReShade.fxh"
 
 	float3 rgb2hsv(float3 c)
@@ -247,15 +238,7 @@ c1.rgb=(Crushing_amnt==0)?c1.rgb:crusher(c1).rgb;
 
 c1.rgb=transferrer(c1.rgb, Gamma_type_2);
 
-float4 c2=(texcoord.x>=Split_position*Split)?c1:c0OG;
-float4 c3=(texcoord.x<=Split_position*Split)?c1:c0OG;
-
-float4 c4=(Flip_split==1 && Split==1)?c3:c2;
-
-float divLine = abs(texcoord.x - Split_position) < BUFFER_RCP_WIDTH;
-c4 =(Split==0)?c4: c4*(1.0 - divLine); //invert divline
-
-return c4;
+return c1;
 
 }
 
