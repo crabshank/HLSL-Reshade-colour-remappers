@@ -1,4 +1,3 @@
-// $MinimumShaderProfile: ps_3_0
 sampler s0 : register(s0); 
 
 float4 p0 : register(c0); 
