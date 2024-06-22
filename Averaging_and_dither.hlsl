@@ -87,8 +87,9 @@ float grey_dither(float color,float2 tex,float sdv, float lrp){
 
 ///////////////////EDIT HERE//////////////////////////////////////////////////
 
-#define std_dev 0.08 //Change standard deviation value of dither
-#define lerper 0.3
+#define std_dev 0 //Change standard deviation value of dither (value)
+#define lerper_v 0.659 //Value blur (0-1)
+#define lerper_s 1 //Saturation blur (0-1)
 #define dxy 3 //No. of adjacent pixels to include in the sample
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,30 +107,38 @@ int y=0;
 float dx = one_over_width;
 float dy = one_over_height;
 float std_dev1=std_dev;
-float lerper1=lerper;
+float lerperv=lerper_v;
+float lerpers=lerper_s;
 int dxy1 = dxy;
 
 float count=0;
-float accm=0;
+float accm_v=0;
+float accm_s=0;
 
 	for (x=-1*dxy1; x<=dxy1; x+=1){
 	for (y=-1*dxy1; y<=dxy1; y+=1){
 	
 		float4 current=tex2D( s0,float2(tex.x+float(x)*dx,tex.y+float(y)*dy));
-		float currMax=max(current.r,max(current.g, current.b));
-		accm+=currMax;
+		float mx=max(current.r,max(current.g, current.b));
+		float mn=min(current.r,min(current.g, current.b));
+		float sat=(mx==0)?0:(mx-mn)/mx;
+		accm_s+=sat;
+		accm_v+=mx;
 		count+=1.0;
 	}
 	}
 
-	float nw_v=accm/count;
-	float nw_lerp=lerper1;
+	float nw_s=accm_s/count;
+	float lrp_s=lerp(c0_hsv.y,nw_s,lerpers);
+	
+	float nw_v=accm_v/count;
+	float nw_lerp=lerperv;
 	[branch]if(std_dev1!=0){
-		nw_lerp+=grey_dither(nw_v,tex,std_dev1,lerper1);
+		nw_lerp+=grey_dither(nw_v,tex,std_dev1,lerperv);
 		nw_lerp=saturate(nw_lerp);
 	}
 	float lrp_v=lerp(c0_hsv.z,nw_v,nw_lerp);
-	float3 nw_hsv=float3(c0_hsv.xy,lrp_v);
+	float3 nw_hsv=float3(c0_hsv.x,lrp_s,lrp_v);
 	float3 nw_rgb=hsv2rgb(nw_hsv);
 	float4 c1=float4(nw_rgb,c0.w);
 	return c1;
