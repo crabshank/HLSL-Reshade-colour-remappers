@@ -90,7 +90,7 @@ float4 PS_Averaging_dither(float4 pos : SV_Position, float2 texcoord : TEXCOORD0
 	for (y=-1*dxy; y<=dxy; y+=1){
 	
 		float4 current=tex2Dlod(ReShade::BackBuffer, float4(texcoord.x+float(x)*BUFFER_RCP_WIDTH, texcoord.y+float(y)*BUFFER_RCP_HEIGHT, 0, 0));
-		float3 currMax=max(current.r,max(current.g, current.b));
+		float currMax=max(current.r,max(current.g, current.b));
 		accm+=currMax;
 		count+=1.0;
 	}
