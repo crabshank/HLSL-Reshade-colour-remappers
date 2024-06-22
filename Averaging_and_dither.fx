@@ -5,14 +5,20 @@ uniform int dxy < __UNIFORM_SLIDER_INT1
 	ui_tooltip = "No. of adjacent pixels to include in the sample.";
 > = 3;
 
-uniform float lerper  < __UNIFORM_SLIDER_FLOAT1
+uniform float lerper_v < __UNIFORM_SLIDER_FLOAT1
 	ui_min = 0; ui_max = 1;
-> = 0.3;
+	ui_tooltip = "Value averaging";
+> = 0.659;
+
+uniform float lerper_s  < __UNIFORM_SLIDER_FLOAT1
+	ui_min = 0; ui_max = 1;
+	ui_tooltip = "Saturation averaging";
+> = 1;
 
 uniform float std_dev < __UNIFORM_SLIDER_FLOAT1
 	ui_min = 0.0; ui_max =1.0;
-	ui_tooltip = "Change standard deviation value of dither";
-> = 0.08;
+	ui_tooltip = "Change standard deviation value of dither (applies to value only)";
+> = 0;
 
 #include "ReShade.fxh"
 #include "xyY_funcs.fxh"
@@ -84,33 +90,40 @@ float4 PS_Averaging_dither(float4 pos : SV_Position, float2 texcoord : TEXCOORD0
 	int x=0;
 	int y=0;
 	float count=0;
-	float accm=0;
+	float accm_s=0;
+	float accm_v=0;
 
 	for (x=-1*dxy; x<=dxy; x+=1){
 	for (y=-1*dxy; y<=dxy; y+=1){
 	
 		float4 current=tex2Dlod(ReShade::BackBuffer, float4(texcoord.x+float(x)*BUFFER_RCP_WIDTH, texcoord.y+float(y)*BUFFER_RCP_HEIGHT, 0, 0));
-		float currMax=max(current.r,max(current.g, current.b));
-		accm+=currMax;
+		float mx=max(current.r,max(current.g, current.b));
+		float mn=min(current.r,min(current.g, current.b));
+		float sat=(mx==0)?0:(mx-mn)/mx;
+		accm_s+=sat;
+		accm_v+=mx;
 		count+=1.0;
 	}
 	}
 	
-	float nw_v=accm/count;
-	float nw_lerp=lerper;
+	float nw_s=accm_s/count;
+	float lrp_s=lerp(c0_hsv.y,nw_s,lerper_s);
+	
+	float nw_v=accm_v/count;
+	float nw_lerp=lerper_v;
 	[branch]if(std_dev!=0){
-		nw_lerp+=grey_dither(nw_v,texcoord,std_dev,lerper);
+		nw_lerp+=grey_dither(nw_v,texcoord,std_dev,lerper_v);
 		nw_lerp=saturate(nw_lerp);
 	}
 	float lrp_v=lerp(c0_hsv.z,nw_v,nw_lerp);
-	float3 nw_hsv=float3(c0_hsv.xy,lrp_v);
+	float3 nw_hsv=float3(c0_hsv.x,lrp_s,lrp_v);
 	float3 nw_rgb=hsv2rgb(nw_hsv);
 	float4 c1=float4(nw_rgb,c0.w);
 	return c1;
 
 }
 
-technique Value_averaging_and_dither {
+technique Averaging_and_dither {
 	pass Averaging_dither {
 		VertexShader=PostProcessVS;
 		PixelShader=PS_Averaging_dither;
