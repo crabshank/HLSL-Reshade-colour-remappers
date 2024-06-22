@@ -116,7 +116,7 @@ float accm=0;
 	for (y=-1*dxy1; y<=dxy1; y+=1){
 	
 		float4 current=tex2D( s0,float2(tex.x+float(x)*dx,tex.y+float(y)*dy));
-		float3 currMax=max(current.r,max(current.g, current.b));
+		float currMax=max(current.r,max(current.g, current.b));
 		accm+=currMax;
 		count+=1.0;
 	}
