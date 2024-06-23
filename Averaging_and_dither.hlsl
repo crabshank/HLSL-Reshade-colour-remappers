@@ -88,9 +88,9 @@ float grey_dither(float color,float2 tex,float sdv, float lrp){
 ///////////////////EDIT HERE//////////////////////////////////////////////////
 
 #define std_dev 0 //Change standard deviation value of dither (value)
-#define lerper_v 0.659 //Value blur (0-1)
+#define lerper_v 0.88 //Value blur (0-1)
 #define lerper_s 1 //Saturation blur (0-1)
-#define dxy 3 //No. of adjacent pixels to include in the sample
+#define dxy 4 //No. of adjacent pixels to include in the sample
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -100,6 +100,7 @@ float4 main(float2 tex : TEXCOORD0) : COLOR
 float4 c0 = tex2D( s0, tex ); 
 
 float3 c0_hsv=rgb2hsv(c0.rgb);
+float mcs=min(c0_hsv.y,c0_hsv.z);
  
 int x=0;
 int y=0;
@@ -130,7 +131,8 @@ float accm_s=0;
 
 	float nw_s=accm_s/count;
 	float lrp_s=lerp(c0_hsv.y,nw_s,lerpers);
-	
+
+	lrp_s=lerp(c0_hsv.y,lrp_s,mcs);
 	float nw_v=accm_v/count;
 	float nw_lerp=lerperv;
 	[branch]if(std_dev1!=0){
@@ -138,6 +140,7 @@ float accm_s=0;
 		nw_lerp=saturate(nw_lerp);
 	}
 	float lrp_v=lerp(c0_hsv.z,nw_v,nw_lerp);
+	lrp_v=lerp(c0_hsv.z,lrp_v,mcs);
 	float3 nw_hsv=float3(c0_hsv.x,lrp_s,lrp_v);
 	float3 nw_rgb=hsv2rgb(nw_hsv);
 	float4 c1=float4(nw_rgb,c0.w);
