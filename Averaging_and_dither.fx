@@ -3,12 +3,12 @@
 uniform int dxy < __UNIFORM_SLIDER_INT1
 	ui_min = 1; ui_max = 10;
 	ui_tooltip = "No. of adjacent pixels to include in the sample.";
-> = 3;
+> = 4;
 
 uniform float lerper_v < __UNIFORM_SLIDER_FLOAT1
 	ui_min = 0; ui_max = 1;
 	ui_tooltip = "Value averaging";
-> = 0.659;
+> = 0.88;
 
 uniform float lerper_s  < __UNIFORM_SLIDER_FLOAT1
 	ui_min = 0; ui_max = 1;
@@ -86,7 +86,8 @@ float4 PS_Averaging_dither(float4 pos : SV_Position, float2 texcoord : TEXCOORD0
 
 	float4 c0=tex2D(ReShade::BackBuffer, texcoord);
 	float3 c0_hsv=rgb2hsv(c0.rgb);
-
+	float mcs=min(c0_hsv.y,c0_hsv.z);
+	
 	int x=0;
 	int y=0;
 	float count=0;
@@ -108,7 +109,7 @@ float4 PS_Averaging_dither(float4 pos : SV_Position, float2 texcoord : TEXCOORD0
 	
 	float nw_s=accm_s/count;
 	float lrp_s=lerp(c0_hsv.y,nw_s,lerper_s);
-	
+	lrp_s=lerp(c0_hsv.y,lrp_s,mcs);
 	float nw_v=accm_v/count;
 	float nw_lerp=lerper_v;
 	[branch]if(std_dev!=0){
@@ -116,6 +117,7 @@ float4 PS_Averaging_dither(float4 pos : SV_Position, float2 texcoord : TEXCOORD0
 		nw_lerp=saturate(nw_lerp);
 	}
 	float lrp_v=lerp(c0_hsv.z,nw_v,nw_lerp);
+	lrp_v=lerp(c0_hsv.z,lrp_v,mcs);
 	float3 nw_hsv=float3(c0_hsv.x,lrp_s,lrp_v);
 	float3 nw_rgb=hsv2rgb(nw_hsv);
 	float4 c1=float4(nw_rgb,c0.w);
