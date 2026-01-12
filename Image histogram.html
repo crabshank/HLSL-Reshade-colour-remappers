@@ -208,17 +208,20 @@ var sExt=[0];
 var v=[0];
 var vExt=[0];
 var Y=[0];
+var q=0;
+
 	  for (let p = 0, len=4* ctx.canvas.height*ctx.canvas.width ; p <len ;p+=4){
-   r[p/4]= frame_data0.data[p];
-     g[p/4]= frame_data0.data[p+1];
-     b[p/4] = frame_data0.data[p+2];
- a[p/4]=frame_data0.data[p+3];
- h[p/4]=Math.round(rgbToHsv( r[p/4],  g[p/4], b[p/4])[0]*360);
-  s[p/4]=Math.round(rgbToHsv( r[p/4],  g[p/4], b[p/4])[1]*100);  
-  sExt[p/4]=Math.round(rgbToHsv( r[p/4],  g[p/4], b[p/4])[1]*255);
-   v[p/4]=Math.round(rgbToHsv( r[p/4],  g[p/4], b[p/4])[2]*100);   
-   vExt[p/4]=Math.round(rgbToHsv( r[p/4],  g[p/4], b[p/4])[2]*255);
-   Y[p/4]=Math.round(rgbToY( r[p/4],  g[p/4], b[p/4])*100);
+    q=p/4;
+   r[q]= frame_data0.data[p];
+     g[q]= frame_data0.data[p+1];
+     b[q] = frame_data0.data[p+2];
+ a[q]=frame_data0.data[p+3];
+ h[q]=Math.round(rgbToHsv( r[q],  g[q], b[q])[0]*360);
+  s[q]=Math.round(rgbToHsv( r[q],  g[q], b[q])[1]*100);  
+  sExt[q]=Math.round(rgbToHsv( r[q],  g[q], b[q])[1]*255);
+   v[q]=Math.round(rgbToHsv( r[q],  g[q], b[q])[2]*100);   
+   vExt[q]=Math.round(rgbToHsv( r[q],  g[q], b[q])[2]*255);
+   Y[q]=Math.round(rgbToY( r[q],  g[q], b[q])*100);
 }
 
 		
